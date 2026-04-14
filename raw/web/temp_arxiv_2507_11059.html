@@ -1,0 +1,1616 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>[2507.11059] SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks</title><meta property="og:description" content="The rapid advancement of Large Language Models (LLMs) in software engineering has revealed critical limitations in existing benchmarks, particularly the widely used SWE-bench dataset. Recent studies have uncovered seve…">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks">
+<meta name="twitter:image:src" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta name="twitter:image:alt" content="ar5iv logo">
+<meta property="og:title" content="SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks">
+<meta property="og:site_name" content="ar5iv">
+<meta property="og:image" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://ar5iv.labs.arxiv.org/html/2507.11059">
+<link rel="canonical" target="_blank" href="https://ar5iv.labs.arxiv.org/html/2507.11059">
+
+<!--Generated on Tue Aug  5 14:40:21 2025 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link media="all" rel="stylesheet" href="/assets/ar5iv-fonts.0.8.4.css"><link media="all" rel="stylesheet" href="/assets/ar5iv.0.8.4.css"><link media="all" rel="stylesheet" href="/assets/ar5iv-site.0.2.2.css">
+</head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document">
+<h1 class="ltx_title ltx_title_document">SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">
+<span class="ltx_text ltx_font_bold">Pavel Adamenko<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Mikhail Ivanov<sup class="ltx_sup">2</sup></span>,
+<span class="ltx_text ltx_font_bold">Aidar Valeev<sup class="ltx_sup">1</sup></span>,
+<br class="ltx_break"><span class="ltx_text ltx_font_bold">Rodion Levichev<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Pavel Zadorozhny<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Ivan Lopatin<sup class="ltx_sup">1</sup></span>,
+<br class="ltx_break"><span class="ltx_text ltx_font_bold">Dmitry Babayev<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Alena Fenogenova<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Valentin Malykh<sup class="ltx_sup">3,2</sup></span>
+
+<br class="ltx_break">
+<br class="ltx_break"><sup class="ltx_sup">1</sup>SberAI,
+<sup class="ltx_sup">2</sup>ITMO University,
+<sup class="ltx_sup">3</sup>MWS AI
+
+<br class="ltx_break">
+<span class="ltx_text ltx_font_bold">Correspondence:</span> <a href="mailto:mera@a-ai.ru" title="" class="ltx_ref ltx_href">mera@a-ai.ru</a>
+</span></span>
+</div>
+
+<div class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract</h6>
+<p class="ltx_p">The rapid advancement of Large Language Models (LLMs) in software engineering has revealed critical limitations in existing benchmarks, particularly the widely used SWE-bench dataset. Recent studies have uncovered severe data contamination issues, e.g. SWE-bench <cite class="ltx_cite ltx_citemacro_cite">Jimenez et al. (<a href="#bib.bib5" title="" class="ltx_ref">2023</a>)</cite> reports 32.67% of successful patches involve direct solution leakage and 31.08% pass due to inadequate test cases. We introduce <span class="ltx_text ltx_font_bold">SWE-MERA</span>, a dynamic, continuously updated benchmark designed to address these fundamental challenges through an automated collection of real-world GitHub issues and rigorous quality validation. Our approach implements a reliable pipeline that ensures quality while minimizing contamination risks, resulting in approximately 10,000 potential tasks with 300 samples currently available. Evaluation using the Aider coding agent demonstrates strong discriminative power in state-of-the-art models. We report performance across a dozen recent LLMs evaluated on tasks collected between September 2024 and June 2025.</p>
+</div>
+<div id="p1" class="ltx_para ltx_noindent">
+<div class="ltx_block ltx_align_bottom">
+<p class="ltx_p ltx_align_center"><span class="ltx_text ltx_font_bold">SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks</span></p>
+<br class="ltx_break ltx_centering">
+<p class="ltx_p ltx_align_center" style="width:433.6pt;"><span class="ltx_text ltx_inline-block" style="width:0.0pt;">
+<span class="ltx_tabular ltx_align_top">
+<span class="ltx_tbody">
+<span class="ltx_tr">
+<span class="ltx_td ltx_align_center"><span class="ltx_text ltx_font_bold">
+Pavel Adamenko<sup class="ltx_sup">1</sup>,
+Mikhail Ivanov<sup class="ltx_sup">2</sup>,
+Aidar Valeev<sup class="ltx_sup">1</sup>,</span></span></span>
+<span class="ltx_tr">
+<span class="ltx_td ltx_align_center"><span class="ltx_text ltx_font_bold">Rodion Levichev<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Pavel Zadorozhny<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Ivan Lopatin<sup class="ltx_sup">1</sup></span>,</span></span>
+<span class="ltx_tr">
+<span class="ltx_td ltx_align_center"><span class="ltx_text ltx_font_bold">Dmitry Babayev<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Alena Fenogenova<sup class="ltx_sup">1</sup></span>,
+<span class="ltx_text ltx_font_bold">Valentin Malykh<sup class="ltx_sup">3,2</sup></span></span></span>
+<span class="ltx_tr">
+<span class="ltx_td ltx_align_center"><sup class="ltx_sup">1</sup>SberAI,
+<sup class="ltx_sup">2</sup>ITMO University,
+<sup class="ltx_sup">3</sup>MWS AI</span></span>
+<span class="ltx_tr">
+<span class="ltx_td ltx_align_center">
+<span class="ltx_text ltx_font_bold">Correspondence:</span> <a href="mailto:mera@a-ai.ru" title="" class="ltx_ref ltx_href">mera@a-ai.ru</a></span></span>
+</span>
+</span></span></p>
+<br class="ltx_break ltx_centering">
+</div>
+</div>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p class="ltx_p">The complexity of real-world software development processes goes beyond merely completing code. It encompasses coding agents and a range of text-to-code tasks. E.g. SWE-bench <cite class="ltx_cite ltx_citemacro_cite">Jimenez et al. (<a href="#bib.bib5" title="" class="ltx_ref">2023</a>)</cite> was created from a dataset comprising 2,294 GitHub issues and their corresponding pull requests (PRs). Each task in SWE-bench represents an authentic, real-world problem structured around: 1) The initial commit (code before changes),
+2) The fixing commit (solution to the problem), 3) The issue description (what needed to be fixed).
+A critical limitation of this benchmark is its <span class="ltx_text ltx_font_italic">static nature</span> — the tasks were collected only once and never updated. This leads to two major issues.
+<span class="ltx_text ltx_font_italic">Data leakage</span>: As models are repeatedly tested on the same fixed dataset, they may inadvertently memorize solutions or overfit to outdated examples. <span class="ltx_text ltx_font_italic">Benchmark saturation</span>: Over time, the benchmark loses its effectiveness as state-of-the-art models achieve near-perfect scores, making it harder to distinguish meaningful progress.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">SWE-MERA</span> addresses these shortcomings (typical for many code benchmarks) by introducing <span class="ltx_text ltx_font_italic">dynamic updates</span> to the test cases. Regularly refreshing the dataset with new, unseen issues ensures:
+1) <span class="ltx_text ltx_font_italic">real-world relevance</span> — tasks reflect the latest challenges in software development
+2) <span class="ltx_text ltx_font_italic">fair evaluation</span> — models are tested on fresh problems, minimizing the risk of data leakage
+3) <span class="ltx_text ltx_font_italic">continuous improvement</span> — the benchmark evolves in tandem with advancements in AI and software engineering practices.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p class="ltx_p">The contributions of the paper are as follows:</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<ol id="S1.I1" class="ltx_enumerate">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p class="ltx_p">The seven-stage pipeline effectively ensuring quality and minimizing contamination risks, able to collect approximately 10,000 potential tasks, with 300 samples currently available.</p>
+</div>
+</li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p class="ltx_p">An automated scoring system based on Aider coding agent<span id="footnote1" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">1</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">1</sup><span class="ltx_tag ltx_tag_note">1</span><a target="_blank" href="https://aider.chat" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://aider.chat</a></span></span></span> and a dynamic user leaderboard<span id="footnote2" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">2</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">2</sup><span class="ltx_tag ltx_tag_note">2</span>The video screencast of the user’s journey can be accessed through the <a target="_blank" href="https://youtu.be/1NoJh-e0uTk?si=FMmAIBgotKQOIzn4" title="" class="ltx_ref ltx_href">link</a> provided. You can access SWE-MERA leaderboard <a target="_blank" href="https://mera-evaluation.github.io/demo-swe-mera/" title="" class="ltx_ref ltx_href">here</a>.</span></span></span>.</p>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2 </span>Related Work</h2>
+
+<div id="S2.p1" class="ltx_para">
+<p class="ltx_p">SWE-bench introduced a semi-automatic pipeline for mining software engineering tasks from popular open-source Python repositories, resulting in a benchmark of 2,294 issues and corresponding pull requests. Although this enabled a large-scale evaluation, the dataset suffered from quality issues, including poorly specified tasks and weak test coverage, which compromised the reliability of model assessment. To improve data quality, SWE-bench Verified<span id="footnote3" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">3</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">3</sup><span class="ltx_tag ltx_tag_note">3</span><a target="_blank" href="https://openai.com/index/introducing-swe-bench-verified/" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://openai.com/index/introducing-swe-bench-verified/</a></span></span></span> released a human-validated subset of 500 tasks from SWE-bench, but this approach has limited scalability. Further work, such as SWE-Bench+ <cite class="ltx_cite ltx_citemacro_cite">Aleithan et al. (<a href="#bib.bib1" title="" class="ltx_ref">2024</a>)</cite>, revealed that a significant portion of the solutions in the original dataset could be “cheated” due to solution leakage in the issue or pull request descriptions, highlighting the risks of data contamination, since most issues predated significant LLM knowledge cutoffs. SWE-Bench+ addressed these issues by filtering for post-cutoff tasks and removing instances with leaked solutions, resulting in a more robust benchmark.</p>
+</div>
+<div id="S2.p2" class="ltx_para">
+<p class="ltx_p">To expand diversity and generalizability, Multi-SWE-bench <cite class="ltx_cite ltx_citemacro_cite">Zan et al. (<a href="#bib.bib11" title="" class="ltx_ref">2025</a>)</cite> extended coverage to multiple programming languages. Complementary approaches, such as SWE-Gym <cite class="ltx_cite ltx_citemacro_cite">Pan et al. (<a href="#bib.bib6" title="" class="ltx_ref">2024</a>)</cite> and SWE-smith <cite class="ltx_cite ltx_citemacro_cite">Yang et al. (<a href="#bib.bib10" title="" class="ltx_ref">2025b</a>)</cite>, focused on automatic task generation and scalable synthetic data creation, respectively, to further increase the size and diversity of a benchmark.</p>
+</div>
+<div id="S2.p3" class="ltx_para">
+<p class="ltx_p">While these repository-level benchmarks advance the field, they remain largely static or require substantial manual curation. In contrast, LiveCodeBench <cite class="ltx_cite ltx_citemacro_cite">Jain et al. (<a href="#bib.bib4" title="" class="ltx_ref">2024</a>)</cite> pioneered a dynamic, frequently updated evaluation framework to address contamination. However, it primarily targets algorithmic problems and does not capture the repository-level complexity essential for a realistic software engineering assessment.</p>
+</div>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3 </span>Methodology</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p class="ltx_p">The SWE-MERA task collection process systematically generates evaluation tasks based on real-world software engineering challenges. A comprehensive parsing of publicly available repositories was conducted to maximize coverage. For each selected repository state, identified tests that are introduced in subsequent development but do not yet pass in the current version.</p>
+</div>
+<div id="S3.p2" class="ltx_para">
+<p class="ltx_p">This framework enables objective assessment: after reverting the repository to the specified state and incorporating these future test cases, tests categorized as <span class="ltx_text ltx_font_typewriter">PASS_TO_PASS</span> are expected to <span class="ltx_text ltx_font_italic">succeed</span>, while those labeled <span class="ltx_text ltx_font_typewriter">FAIL_TO_PASS</span> are expected to <span class="ltx_text ltx_font_italic">fail</span>.</p>
+</div>
+<figure id="S3.T1" class="ltx_table">
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:270.1pt;vertical-align:-270.1pt;"><span class="ltx_transformed_inner" style="transform:translate(-48.9pt,0.0pt) scale(0.816097865623731,0.816097865623731) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_border_tt"><span class="ltx_text ltx_font_bold">Step</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span class="ltx_text ltx_font_bold">Total Repositories</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span class="ltx_text ltx_font_bold">Total Issues</span></th>
+<th class="ltx_td ltx_align_center ltx_th ltx_th_column ltx_border_tt"><span class="ltx_text ltx_font_bold">Time Estimation</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left ltx_border_t">GitHub</td>
+<td class="ltx_td ltx_border_t"></td>
+<td class="ltx_td ltx_border_t"></td>
+<td class="ltx_td ltx_border_t"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">all public</td>
+<td class="ltx_td ltx_align_center">255M</td>
+<td class="ltx_td ltx_align_center">522M</td>
+<td class="ltx_td ltx_align_center">1 ses.</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">         Python</td>
+<td class="ltx_td ltx_align_center">21M</td>
+<td class="ltx_td ltx_align_center">53M</td>
+<td class="ltx_td ltx_align_center">1 sec.</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">           10+start, 10+forks</td>
+<td class="ltx_td ltx_align_center">168K</td>
+<td class="ltx_td ltx_align_center">5.7M</td>
+<td class="ltx_td ltx_align_center">7 hours</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">             1+ closed issue</td>
+<td class="ltx_td ltx_align_center">97K</td>
+<td class="ltx_td ltx_align_center">5.7M (4.2M<sup class="ltx_sup">†</sup>)</td>
+<td class="ltx_td ltx_align_center">7 hours</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">Repository Selection</td>
+<td class="ltx_td"></td>
+<td class="ltx_td"></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">       Python, 10+start, 10+forks, repo updated at 2025</td>
+<td class="ltx_td ltx_align_center">110K</td>
+<td class="ltx_td ltx_align_center">5.5M</td>
+<td class="ltx_td ltx_align_center">7 hours</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">PR-Issue Mapping Construction</td>
+<td class="ltx_td"></td>
+<td class="ltx_td"></td>
+<td class="ltx_td"></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">       1+ updated issue at [2025-01-01, 2025-06-01]</td>
+<td class="ltx_td ltx_align_center">25K</td>
+<td class="ltx_td ltx_align_center">339K</td>
+<td class="ltx_td ltx_align_center">3 days</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">          issue is closed, closed merge request</td>
+<td class="ltx_td ltx_align_center">10K</td>
+<td class="ltx_td ltx_align_center">98K</td>
+<td class="ltx_td ltx_align_center">3 days</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">             one-to-one mapping beetween issse and pr</td>
+<td class="ltx_td ltx_align_center">8.4K</td>
+<td class="ltx_td ltx_align_center">55K</td>
+<td class="ltx_td ltx_align_center">2 min.</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">Metadata Extraction and Filtering</td>
+<td class="ltx_td ltx_align_center">8.2K</td>
+<td class="ltx_td ltx_align_center">51K</td>
+<td class="ltx_td ltx_align_center">11 hours</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">Patch Extraction and Validation</td>
+<td class="ltx_td ltx_align_center">6.7K</td>
+<td class="ltx_td ltx_align_center">30K</td>
+<td class="ltx_td ltx_align_center">12 hours</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">Repository Build Validation</td>
+<td class="ltx_td ltx_align_center">1.6K</td>
+<td class="ltx_td ltx_align_center">9K</td>
+<td class="ltx_td ltx_align_center">3 hours</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left">End-to-End Task Execution</td>
+<td class="ltx_td ltx_align_center">500</td>
+<td class="ltx_td ltx_align_center">1.5K</td>
+<td class="ltx_td ltx_align_center">2 days</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_left ltx_border_bb">LLM-based pipeline evaluation</td>
+<td class="ltx_td ltx_align_center ltx_border_bb">200</td>
+<td class="ltx_td ltx_align_center ltx_border_bb">300</td>
+<td class="ltx_td ltx_align_center ltx_border_bb">2 hours</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 1: </span>
+Summary of the task collection funnel for the period 2025-01-01 to 2025-06-01, calculated using the GitHub GraphQL API. For our experiments, Repository Build Validation was performed immediately before PR-Issue Mapping Construction to minimize total processing time; this table is provided for reference.
+<br class="ltx_break"><sup class="ltx_sup">†</sup> Only closed issues.
+</figcaption>
+</figure>
+<section id="S3.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.1 </span>Steps overview</h3>
+
+<div id="S3.SS1.p1" class="ltx_para">
+<p class="ltx_p">To ensure the transparency and reproducibility of the task generation process, we have designed a well-documented and accessible collection pipeline.</p>
+</div>
+<div id="S3.SS1.p2" class="ltx_para">
+<p class="ltx_p">This pipeline is executed on a monthly basis, enabling for the systematic and continuous collection of tasks over time. By adhering to this schedule, we facilitate the regular updating and expansion of our dataset, ensuring that it remains current and reflective of ongoing developments in the software engineering domain.</p>
+</div>
+<div id="S3.SS1.p3" class="ltx_para">
+<p class="ltx_p">The pipeline comprises the following steps:</p>
+<ol id="S3.I1" class="ltx_enumerate">
+<li id="S3.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S3.I1.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Repository Selection:</span> GitHub repositories are selected based on predefined criteria, including a minimum threshold of 10 stars and 10 forks, recent activity within the current year, Python as the primary programming language, and the presence of an open-source license.
+</p>
+</div>
+</li>
+<li id="S3.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S3.I1.i2.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">PR-Issue Mapping Construction:</span> Mappings between issues and pull requests are constructed according to the following criteria:</p>
+<ul id="S3.I1.i2.I1" class="ltx_itemize">
+<li id="S3.I1.i2.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i2.I1.i1.p1" class="ltx_para">
+<p class="ltx_p">Each pull request is associated with exactly one issue (either linked directly or via comments).</p>
+</div>
+</li>
+<li id="S3.I1.i2.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i2.I1.i2.p1" class="ltx_para">
+<p class="ltx_p">Each issue is associated with exactly one pull request.</p>
+</div>
+</li>
+<li id="S3.I1.i2.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i2.I1.i3.p1" class="ltx_para">
+<p class="ltx_p">The pull request is merged.</p>
+</div>
+</li>
+<li id="S3.I1.i2.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i2.I1.i4.p1" class="ltx_para">
+<p class="ltx_p">The associated issue is closed.</p>
+</div>
+</li>
+<li id="S3.I1.i2.I1.i5" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i2.I1.i5.p1" class="ltx_para">
+<p class="ltx_p">The pull request merge date is later than the first day of the previous month.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li id="S3.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S3.I1.i3.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Metadata Extraction and Filtering:</span> For each selected issue and its corresponding pull request, metadata (including title, text, and comments) is downloaded and parsed. The issue-PR pairs are then filtered out if the combined length of the issue title and the issue body is less than 25 characters.</p>
+</div>
+</li>
+<li id="S3.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S3.I1.i4.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Patch Extraction and Validation:</span> For each pull request, the corresponding <span class="ltx_text ltx_font_typewriter">git diff</span> is generated and validated. Only examples that modify both source code and test files are retained. Additionally, only pull requests that modify fewer than 15 source files are considered.</p>
+</div>
+</li>
+<li id="S3.I1.i5" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">5.</span> 
+<div id="S3.I1.i5.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Repository Build Validation:</span> For each task, we build an appropriate environment in a Docker container. Validation is considered successful if <span class="ltx_text ltx_font_typewriter">pytest</span> returns at least one passed test.</p>
+</div>
+</li>
+<li id="S3.I1.i6" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">6.</span> 
+<div id="S3.I1.i6.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">End-to-End Task Execution:</span> Each generated task is executed in a controlled environment within a Docker container to verify its reproducibility and correctness. A detailed description can be found in Appendix <a href="#A1" title="Appendix A Repository Build Validation Procedure ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">A</span></a>.
+</p>
+</div>
+</li>
+<li id="S3.I1.i7" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">7.</span> 
+<div id="S3.I1.i7.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">LLM-based Pipeline Evaluation:</span> 
+To assess the quality of each candidate task, we use the Qwen3-32B model <cite class="ltx_cite ltx_citemacro_cite">Yang et al. (<a href="#bib.bib8" title="" class="ltx_ref">2025a</a>)</cite> to evaluate the description, patch, and associated tests on four criteria: <span class="ltx_text ltx_font_typewriter">task correctness</span>, <span class="ltx_text ltx_font_typewriter">test correctness</span>, <span class="ltx_text ltx_font_typewriter">test completeness</span>, and <span class="ltx_text ltx_font_typewriter">complexity</span>. The model is prompted to return a structured JSON response with a score of 1 to 10, a confidence value (0.0–1.0), and a brief explanation for each criterion (see Appendix <a href="#A4" title="Appendix D Prompt for LLM-based Task Evaluation ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">D</span></a> for the prompt used).</p>
+</div>
+<div id="S3.I1.i7.p2" class="ltx_para">
+<p class="ltx_p">We filter out tasks that fall into the <span class="ltx_text ltx_font_italic">bottom quartile</span> (lower 25%) of the score distribution for any of the following dimensions:</p>
+<ul id="S3.I1.i7.I1" class="ltx_itemize">
+<li id="S3.I1.i7.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i7.I1.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_typewriter">task correctness</span></p>
+</div>
+</li>
+<li id="S3.I1.i7.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i7.I1.i2.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_typewriter">test correctness</span></p>
+</div>
+</li>
+<li id="S3.I1.i7.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S3.I1.i7.I1.i3.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_typewriter">test completeness</span></p>
+</div>
+</li>
+</ul>
+<p class="ltx_p">The <span class="ltx_text ltx_font_typewriter">complexity</span> score is not used for filtering, as we explicitly aim to retain both easy and difficult tasks. This filtering step ensures that retained tasks are well-formed, solvable, and adequately tested.</p>
+</div>
+</li>
+</ol>
+</div>
+<div id="S3.SS1.p4" class="ltx_para">
+<p class="ltx_p">The detailed results of each pipeline step are summarized in Tab. <a href="#S3.T1" title="Table 1 ‣ 3 Methodology ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>. The sample collected task can be found in Appendix <a href="#A5" title="Appendix E SWE-MERA Task Example ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">E</span></a>.</p>
+</div>
+</section>
+<section id="S3.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">3.2 </span>Availability</h3>
+
+<div id="S3.SS2.p1" class="ltx_para">
+<p class="ltx_p">The entire pipeline is implemented as a Python package<span id="footnote4" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">4</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">4</sup><span class="ltx_tag ltx_tag_note">4</span><a target="_blank" href="https://pypi.org/project/repositorytest" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://pypi.org/project/repositorytest</a>; source code for the package can be found <a target="_blank" href="https://github.com/MERA-Evaluation/repotest" title="" class="ltx_ref ltx_href">here</a>.</span></span></span> and can be executed for any GitHub repository, facilitating reproducibility and extensibility for future research.</p>
+</div>
+<div id="S3.SS2.p2" class="ltx_para">
+<p class="ltx_p">All tasks are typically executed within Docker containers using a standardized base image<span id="footnote5" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">5</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">5</sup><span class="ltx_tag ltx_tag_note">5</span><a target="_blank" href="https://hub.docker.com/layers/library/python/3.11/images/sha256-6743feec06fa92c015a54dcc0f05cb06bef866dfb3e440b0485b4b9b27b6e28a" title="" class="ltx_ref ltx_href">https://hub.docker.com/layers/library/python/3.11</a></span></span></span>.</p>
+</div>
+<div id="S3.SS2.p3" class="ltx_para">
+<p class="ltx_p">However, the same execution process can be replicated in a Conda environment without modification to the underlying code.</p>
+</div>
+</section>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4 </span>Evaluation</h2>
+
+<figure id="S4.F1" class="ltx_figure"><img src="/html/2507.11059/assets/figures/metrics.png" id="S4.F1.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="299" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Comparison of model pass@1/pass@6 metrics between two years. Error bars represent confidence intervals, computed using the binomial distribution (5% two-sided quantile).</figcaption>
+</figure>
+<div id="S4.p1" class="ltx_para">
+<p class="ltx_p">To apply LLMs in issue-solving scenarios, we employ a popular agentic framework Aider, which performs similarly to other state-of-the-art frameworks when applied to the same models. Aider gives six attempts (“tries”) to LLMs to fix a given issue, while every attempt allows up to four reflections to lint or test output. We slightly modify Aider <span id="footnote6" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">6</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">6</sup><span class="ltx_tag ltx_tag_note">6</span><a target="_blank" href="https://github.com/Aider-AI/aider/tree/4f4b10fd868680e0b87511d4bcf755f198089e8d" title="" class="ltx_ref ltx_href">github.com/Aider-AI/aider@4f4b10fd</a></span></span></span>
+and Aider-SWE-bench<span id="footnote7" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">7</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">7</sup><span class="ltx_tag ltx_tag_note">7</span><a target="_blank" href="https://github.com/Aider-AI/aider-swe-bench/tree/6e98cd6c3b2cbcba12976d6ae1b07f847480cb74" title="" class="ltx_ref ltx_href">github.com/Aider-AI/aider-swe-bench@6e98cd6</a></span></span></span> repositories due to backward compatibility issues. However, we aim to support several popular frameworks capable of solving issues in the near future.</p>
+</div>
+<div id="S4.p2" class="ltx_para">
+<p class="ltx_p">Aider gives <span class="ltx_text ltx_font_italic">six</span> consequent independent attempts to LLMs to fix issues, but if an LLM succeeds in early attempts, it moves to the next issue. Due to the experimental design, we report two metrics: pass@1, indicating whether the first attempt was successful, and pass@6, indicating whether any of the six attempts succeeded.</p>
+</div>
+<div id="S4.p3" class="ltx_para">
+<p class="ltx_p">To assess benchmark reliability, we selected several popular state-of-the-art LLMs for code, including Qwen, Devstral, DeepSeek-R1, and others (see the full list in the next section). We run these models on 8 NVIDIA H100 80 GB with exceptions for DeepSeek-R1 and 7B models run on 16 and 4 GPUs, respectively. The evaluation for a single model took, on average, 3<math id="S4.p3.m1" class="ltx_Math" alttext="\pm" display="inline"><semantics><mo>±</mo><annotation encoding="application/x-tex">\pm</annotation></semantics></math>1 hour for Aider runs and half an hour to test final patches. This experiment used 60-140M prompt tokens and 3-20M completion tokens, corresponding to 14-20K prompt and 1-4K completion tokens per request.</p>
+</div>
+<figure id="S4.T2" class="ltx_table">
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:165.6pt;vertical-align:-165.6pt;"><span class="ltx_transformed_inner" style="transform:translate(-75.1pt,0.0pt) scale(0.74272492616782,0.74272492616782) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_t"><span class="ltx_text ltx_font_bold">Model</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">pass@1</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">pass@6</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">localize files</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">generate patch</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">regression tests</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">token limit hit</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">DeepSeek-R1-0528</th>
+<td class="ltx_td ltx_align_right ltx_border_t"><span class="ltx_text ltx_font_bold">27.8%</span></td>
+<td class="ltx_td ltx_align_right ltx_border_t"><span class="ltx_text ltx_font_bold">40.2%</span></td>
+<td class="ltx_td ltx_align_right ltx_border_t">89.6%</td>
+<td class="ltx_td ltx_align_right ltx_border_t">98.1%</td>
+<td class="ltx_td ltx_align_right ltx_border_t">40.6%</td>
+<td class="ltx_td ltx_align_right ltx_border_t">0.2%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Devstral-Small-2505</th>
+<td class="ltx_td ltx_align_right">17.2%</td>
+<td class="ltx_td ltx_align_right">28.2%</td>
+<td class="ltx_td ltx_align_right">89.1%</td>
+<td class="ltx_td ltx_align_right">98.7%</td>
+<td class="ltx_td ltx_align_right">28.5%</td>
+<td class="ltx_td ltx_align_right">0.4%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Qwen3-32B</th>
+<td class="ltx_td ltx_align_right">12.3%</td>
+<td class="ltx_td ltx_align_right">26.1%</td>
+<td class="ltx_td ltx_align_right">91.8%</td>
+<td class="ltx_td ltx_align_right">98.9%</td>
+<td class="ltx_td ltx_align_right">26.1%</td>
+<td class="ltx_td ltx_align_right">1.1%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">DeepSeek-R1-Distill-Qwen-32B</th>
+<td class="ltx_td ltx_align_right">13.2%</td>
+<td class="ltx_td ltx_align_right">23.9%</td>
+<td class="ltx_td ltx_align_right">87.8%</td>
+<td class="ltx_td ltx_align_right">98.7%</td>
+<td class="ltx_td ltx_align_right">23.7%</td>
+<td class="ltx_td ltx_align_right">0.4%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">QwQ-32B</th>
+<td class="ltx_td ltx_align_right">11.6%</td>
+<td class="ltx_td ltx_align_right">23.7%</td>
+<td class="ltx_td ltx_align_right">79.6%</td>
+<td class="ltx_td ltx_align_right">96.6%</td>
+<td class="ltx_td ltx_align_right">22.9%</td>
+<td class="ltx_td ltx_align_right">0.6%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Qwen2.5-Coder-32B-Instruct</th>
+<td class="ltx_td ltx_align_right">12.9%</td>
+<td class="ltx_td ltx_align_right">22.0%</td>
+<td class="ltx_td ltx_align_right">86.3%</td>
+<td class="ltx_td ltx_align_right">96.3%</td>
+<td class="ltx_td ltx_align_right">22.0%</td>
+<td class="ltx_td ltx_align_right">4.6%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Qwen2.5-Coder-14B-Instruct</th>
+<td class="ltx_td ltx_align_right">7.8%</td>
+<td class="ltx_td ltx_align_right">16.9%</td>
+<td class="ltx_td ltx_align_right">86.0%</td>
+<td class="ltx_td ltx_align_right">93.7%</td>
+<td class="ltx_td ltx_align_right">16.8%</td>
+<td class="ltx_td ltx_align_right">1.9%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Llama-3.3-70B-Instruct</th>
+<td class="ltx_td ltx_align_right">8.7%</td>
+<td class="ltx_td ltx_align_right">14.8%</td>
+<td class="ltx_td ltx_align_right">77.0%</td>
+<td class="ltx_td ltx_align_right">70.9%</td>
+<td class="ltx_td ltx_align_right">14.8%</td>
+<td class="ltx_td ltx_align_right">0.0%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Codestral-22B-v0.1</th>
+<td class="ltx_td ltx_align_right">3.8%</td>
+<td class="ltx_td ltx_align_right">8.7%</td>
+<td class="ltx_td ltx_align_right">76.7%</td>
+<td class="ltx_td ltx_align_right">83.4%</td>
+<td class="ltx_td ltx_align_right">8.4%</td>
+<td class="ltx_td ltx_align_right">2.9%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_b">Qwen2.5-Coder-7B-Instruct</th>
+<td class="ltx_td ltx_align_right ltx_border_b">2.7%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">5.5%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">58.2%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">55.3%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">4.8%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">5.7%</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 2: </span>Evaluation results of models on SWE-MERA 2025. ‘localize files‘ is the percentage of attempts correctly identifying files to fix; ‘generate patch‘, those producing valid patches; ‘regression tests‘, those where patches pass original repository tests; and ‘token limit hit‘, those exceeding the 32k token context limit.</figcaption>
+</figure>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1 </span>Evaluated Models</h3>
+
+<div id="S4.SS1.p1" class="ltx_para">
+<p class="ltx_p">Codestral-22B-v0.1<span id="footnote8" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">8</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">8</sup><span class="ltx_tag ltx_tag_note">8</span><a target="_blank" href="https://mistral.ai/news/codestral" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://mistral.ai/news/codestral</a></span></span></span> is a model trained by Mistral AI on a diverse dataset of 80+ programming languages, including the most popular ones, such as Python, Java, C, C++, JavaScript, and Bash.</p>
+</div>
+<div id="S4.SS1.p2" class="ltx_para">
+<p class="ltx_p">Qwen2.5-Coder-7,14,32B-Instruct models <cite class="ltx_cite ltx_citemacro_cite">Hui et al. (<a href="#bib.bib3" title="" class="ltx_ref">2024</a>)</cite> are the latest Qwen LLMs designed for code, available in multiple parameter sizes, affording flexibility between resource usage and performance. Qwen2.5 Coder models significantly improve in code generation, code reasoning and code fixing, and have a more comprehensive foundation for real-world applications such as Code Agents.</p>
+</div>
+<div id="S4.SS1.p3" class="ltx_para">
+<p class="ltx_p">Llama-3.3-70B-Instruct<span id="footnote9" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">9</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">9</sup><span class="ltx_tag ltx_tag_note">9</span><a target="_blank" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_3/" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_3/</a></span></span></span> multilingual large language model (LLM) is an instruction tuned generative model. The Llama 3.3 instruction tuned text-only model is optimized for multilingual dialogue use cases. Note that it is a general purpose chat model, not specifically designed for code.</p>
+</div>
+<div id="S4.SS1.p4" class="ltx_para">
+<p class="ltx_p">DeepSeek-R1-0528 by DeepSeek AI <cite class="ltx_cite ltx_citemacro_cite">DeepSeek-AI (<a href="#bib.bib2" title="" class="ltx_ref">2025</a>)</cite> incorporates computational enhancements and novel post-training optimizations to significantly improve reasoning, inference, and problem-solving capabilities. The updated model achieves state-of-the-art benchmark performance with reduced hallucination rates while advancing code generation and function calling. As open-source software, it democratizes access to advanced reasoning capabilities.</p>
+</div>
+<div id="S4.SS1.p5" class="ltx_para">
+<p class="ltx_p">DeepSeek-R1-Distill-Qwen-32B is a Qwen2.5 32B model <cite class="ltx_cite ltx_citemacro_cite">Yang et al. (<a href="#bib.bib9" title="" class="ltx_ref">2024</a>)</cite> distilled on the reasoning data generated by DeepSeek-R1 <cite class="ltx_cite ltx_citemacro_cite">DeepSeek-AI (<a href="#bib.bib2" title="" class="ltx_ref">2025</a>)</cite>. The distilled models demonstrated exceptionally high performance on other benchmarks.</p>
+</div>
+<div id="S4.SS1.p6" class="ltx_para">
+<p class="ltx_p">QwQ-32B is a reasoning model by Qwen Team <cite class="ltx_cite ltx_citemacro_cite">Team (<a href="#bib.bib7" title="" class="ltx_ref">2025</a>)</cite>, which is capable of achieving competitive performance against state-of-the-art reasoning models.</p>
+</div>
+<div id="S4.SS1.p7" class="ltx_para">
+<p class="ltx_p">Qwen3-32B <cite class="ltx_cite ltx_citemacro_cite">Yang et al. (<a href="#bib.bib8" title="" class="ltx_ref">2025a</a>)</cite> supports 119 languages and features a unique dual-mode architecture enabling efficient switching between complex reasoning (“thinking mode”) and dialogue (“non-thinking mode”). This architecture delivers significant performance improvements in reasoning, code generation, and creative dialogue, surpassing prior Qwen models. Qwen3 also demonstrates leadership in agent integration and multilingual task performance.</p>
+</div>
+<div id="S4.SS1.p8" class="ltx_para">
+<p class="ltx_p">Devstral-Small-2505<span id="footnote10" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">10</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">10</sup><span class="ltx_tag ltx_tag_note">10</span><a target="_blank" href="https://mistral.ai/news/devstral" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://mistral.ai/news/devstral</a></span></span></span> is an open-source agentic language model for software engineering, developed by Mistral AI and All Hands AI, excelling at codebase exploration, multifile editing and software engineering tool usage.</p>
+</div>
+<div id="S4.SS1.p9" class="ltx_para">
+<p class="ltx_p">We provide more information on the baselines in Appendix <a href="#A2" title="Appendix B Baselines ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">B</span></a>.</p>
+</div>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5 </span>Results</h2>
+
+<div id="S5.p1" class="ltx_para">
+<p class="ltx_p">Tab. <a href="#S4.T2" title="Table 2 ‣ 4 Evaluation ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> presents the evaluation results for state-of-the-art LLMs on the 2025 subset of SWE-MERA using the Aider agent workflow. The results indicate that SWE-MERA accurately ranks the Qwen2.5-Coder models according to their size. In addition, Qwen3-32B <cite class="ltx_cite ltx_citemacro_cite">Yang et al. (<a href="#bib.bib8" title="" class="ltx_ref">2025a</a>)</cite> slightly outperforms QwQ-32B, which is consistent with the declared model specifications. In particular, Devstral-Small-2505 demonstrates superior performance as reported in its release notes<sup class="ltx_sup"><span class="ltx_text ltx_font_italic">10</span></sup>, despite its smaller size.</p>
+</div>
+<div id="S5.p2" class="ltx_para">
+<p class="ltx_p">We have found an interesting feature, while comparing results for evaluation of the baselines for 2024 and 2025 years. It seems that DeepSeek-R1, both the 0528 and Distill-Qwen-32B versions, performs better on 2024 tasks. The other investigated models do not show such a behaviour. The results are visualized in Fig. <a href="#S4.F1" title="Figure 1 ‣ 4 Evaluation ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>. More detailed results are presented in Appendix <a href="#A3" title="Appendix C Additional Results ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">C</span></a>.</p>
+</div>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">6 </span>Discussion</h2>
+
+<section id="S6.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Scaling</h4>
+
+<div id="S6.SS0.SSS0.Px1.p1" class="ltx_para">
+<p class="ltx_p">We observed that the GitHub API rate limits are sufficient to collect all relevant tasks from the past month using a single GitHub token in two days, which is surprisingly fast.</p>
+</div>
+<div id="S6.SS0.SSS0.Px1.p2" class="ltx_para">
+<p class="ltx_p">In the current state, we collected about 300 tasks. If we do not restrict our benchmark to the last 6 months, we estimate the number of collected tasks to be 10,000; however, achieving this scale will require additional effort, particularly for End-to-End execution tasks.</p>
+</div>
+</section>
+<section id="S6.SS0.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Malicious Software</h4>
+
+<div id="S6.SS0.SSS0.Px2.p1" class="ltx_para">
+<p class="ltx_p">In our security assessment, we scanned 518 repositories for known virus signatures and discovered two repositories that, while suitable for SWE benchmarking, also exhibited the signatures:</p>
+<ul id="S6.I1" class="ltx_itemize">
+<li id="S6.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S6.I1.i1.p1" class="ltx_para">
+<p class="ltx_p"><a target="_blank" href="https://github.com/DataDog/guarddog" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/DataDog/guarddog</a> An open-source security scanner designed to detect vulnerabilities and malicious dependencies in software supply chains.</p>
+</div>
+</li>
+<li id="S6.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S6.I1.i2.p1" class="ltx_para">
+<p class="ltx_p"><a target="_blank" href="https://github.com/fkie-cad/socbed" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/fkie-cad/socbed</a> A framework for simulating and evaluating security operations center (SOC) environments, supporting research in cyber defense and attack scenarios.</p>
+</div>
+</li>
+</ul>
+<p class="ltx_p">This finding highlights the necessity of integrating basic virus signature checking into our system to ensure the integrity and safety of the collected repositories.</p>
+</div>
+</section>
+<section id="S6.SS0.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Complexity</h4>
+
+<div id="S6.SS0.SSS0.Px3.p1" class="ltx_para">
+<p class="ltx_p">Our experiments demonstrate that the last step of our pipeline, namely the LLM-based evaluation, is crucial to maintain task quality. Automated collection methods may yield tasks that are either excessively complex due to insufficient information in the issue description or overly trivial when the solution is explicitly provided. The LLM-based assessment effectively filters such cases, ensuring that only tasks of appropriate complexity and relevance are retained.</p>
+</div>
+</section>
+</section>
+<section id="S7" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">7 </span>System Demonstration</h2>
+
+<div id="S7.p1" class="ltx_para">
+<p class="ltx_p">The SWE-MERA evaluation platform provides a reproducible and transparent environment to benchmark software engineering agents. The benchmark can be accessed at the <a target="_blank" href="https://mera-evaluation.github.io/demo-swe-mera/" title="" class="ltx_ref ltx_href">link</a>. The web interface features an interactive slider, enabling users to visualize evaluation metrics across different dates and to inspect potential contamination events in the dataset, as shown in Fig. <a href="#S7.F2" title="Figure 2 ‣ 7 System Demonstration ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>.</p>
+</div>
+<figure id="S7.F2" class="ltx_figure"><img src="/html/2507.11059/assets/figures/website_screenshot.png" id="S7.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="379" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>Screenshot of the SWE-MERA evaluation platform web interface.</figcaption>
+</figure>
+<section id="S7.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Submission Workflow</h4>
+
+<div id="S7.SS0.SSS0.Px1.p1" class="ltx_para">
+<p class="ltx_p">To participate in the evaluation and have your agent’s results displayed on the leaderboard, one should follow these steps:</p>
+</div>
+<div id="S7.SS0.SSS0.Px1.p2" class="ltx_para">
+<ol id="S7.I1" class="ltx_enumerate">
+<li id="S7.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S7.I1.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_italic">Dataset Acquisition:</span> Download the SWE-MERA dataset from the Hugging Face repository<span id="footnote11" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">11</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">11</sup><span class="ltx_tag ltx_tag_note">11</span><a target="_blank" href="https://huggingface.co/datasets/MERA-evaluation/SWE-MERA" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://huggingface.co/datasets/MERA-evaluation/SWE-MERA</a></span></span></span>.</p>
+</div>
+</li>
+<li id="S7.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S7.I1.i2.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_italic">Agent Execution:</span> Run a software engineering agent on the provided dataset.</p>
+</div>
+</li>
+<li id="S7.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S7.I1.i3.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_italic">Submission:</span> Submit the results by creating a pull request to the evaluation repository.</p>
+</div>
+</li>
+<li id="S7.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S7.I1.i4.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_italic">Validation and Leaderboard Update:</span> Submissions are reviewed and, within two working days, valid results are integrated into the public leaderboard.</p>
+</div>
+</li>
+</ol>
+</div>
+<div id="S7.SS0.SSS0.Px1.p3" class="ltx_para">
+<p class="ltx_p">A schematic overview of the submission process is provided in Fig. <a href="#S7.F2" title="Figure 2 ‣ 7 System Demonstration ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>.</p>
+</div>
+</section>
+<section id="S7.SS0.SSS0.Px2" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Dataset and Evaluation Updates</h4>
+
+<div id="S7.SS0.SSS0.Px2.p1" class="ltx_para">
+<p class="ltx_p">The SWE-MERA dataset is updated monthly and is available through the Hugging Face platform. Participants are encouraged to include links to their agent’s execution trajectories; otherwise, the system will default to displaying data from the corresponding GitHub pull request.</p>
+</div>
+</section>
+<section id="S7.SS0.SSS0.Px3" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Leaderboard and Data Visibility</h4>
+
+<div id="S7.SS0.SSS0.Px3.p1" class="ltx_para">
+<p class="ltx_p">The dashboard is automatically updated to reflect new submissions. If a model does not have sufficient data to compute evaluation metrics for a selected time period, it will not be displayed on the leaderboard for that interval.</p>
+</div>
+</section>
+<section id="S7.SS0.SSS0.Px4" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">Interface Features</h4>
+
+<div id="S7.SS0.SSS0.Px4.p1" class="ltx_para">
+<ul id="S7.I2" class="ltx_itemize">
+<li id="S7.I2.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S7.I2.i1.p1" class="ltx_para">
+<p class="ltx_p">The web interface includes a slider for temporal navigation of metrics.</p>
+</div>
+</li>
+<li id="S7.I2.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S7.I2.i2.p1" class="ltx_para">
+<p class="ltx_p">Users can inspect detailed evaluation results and identify potential overfitting or contamination issues.</p>
+</div>
+</li>
+<li id="S7.I2.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S7.I2.i3.p1" class="ltx_para">
+<p class="ltx_p">The system supports transparent and reproducible evaluation, with all data and code accessible via public repositories.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="S8" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">8 </span>Conclusion</h2>
+
+<div id="S8.p1" class="ltx_para">
+<p class="ltx_p">SWE-MERA introduces a new approach to evaluating software engineering tasks, effectively addressing key limitations through dynamic data collection, automated quality validation, and ongoing updates to the dataset. This method helps mitigate concerns about data contamination while improving both task quality and the reliability of evaluations.</p>
+</div>
+<div id="S8.p2" class="ltx_para">
+<p class="ltx_p">The benchmark demonstrates strong discriminative power across state-of-the-art models and establishes reliable performance baselines that are free from the contamination issues often found in traditional static benchmarks. With its extensible design and community-driven approach, SWE-MERA serves as a vital resource to advance AI research in software engineering.</p>
+</div>
+<div id="S8.p3" class="ltx_para">
+<p class="ltx_p">The framework’s adaptable design allows for expansion to programming languages such as Java, JavaScript, TypeScript, Go, and C++ by employing a standardized metadata approach. Future developments will focus on improving visualization capabilities, refining quality metrics, and integrating more closely with intelligent coding systems.</p>
+</div>
+</section>
+<section id="Sx1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Limitations</h2>
+
+<div id="Sx1.p1" class="ltx_para">
+<p class="ltx_p">While dynamic collection of coding problems in our benchmark framework presents distinct advantages, it also introduces several important limitations.</p>
+</div>
+<div id="Sx1.p2" class="ltx_para">
+<p class="ltx_p">First, dynamically collected tasks, while allowing for scalability and novelty, may lack the nuanced complexity and creativity found in carefully curated or human-authored problems. Automatically constructed problems may inadvertently result in unnaturally phrased prompts, incomplete specifications, or tasks that are either trivial or excessively convoluted, which can compromise the validity and diversity of the benchmark.</p>
+</div>
+<div id="Sx1.p3" class="ltx_para">
+<p class="ltx_p">Second, evaluating model performance on dynamically generated problems poses challenges for ground truth and grading quality. Automated reference solutions and test cases may not exhaustively capture all correct or optimal solutions, especially for open-ended or ambiguous problems. As a result, our metrics may underestimate model capabilities on creative or alternative approaches, and automated correctness checks may yield false negatives.</p>
+</div>
+<div id="Sx1.p4" class="ltx_para">
+<p class="ltx_p">Third, ensuring the quality and fairness of dynamically collected problems is inherently difficult. It is possible for the generation process to introduce biases, such as overrepresenting certain programming paradigms, languages, or styles while underrepresenting others. This may affect the generalizability of evaluation results and obscure weaknesses of LLMs in underrepresented domains.</p>
+</div>
+<div id="Sx1.p5" class="ltx_para">
+<p class="ltx_p">Fourth, although dynamic generation reduces risks of memorization and contamination from training data, it does not wholly eliminate them. For models trained on vast internet datasets, generated problems may still resemble well-known canonical challenges or textbook exercises, and thus performance may reflect prior exposure rather than true generalization abilities.</p>
+</div>
+<div id="Sx1.p6" class="ltx_para">
+<p class="ltx_p">Fifth, the infrastructure for dynamic problem generation and grading brings additional technical complexity and potential instability. Failures in problem construction, test case generation, or sandboxed code execution can introduce noise into evaluation results and limit the reproducibility of benchmarking runs.</p>
+</div>
+<div id="Sx1.p7" class="ltx_para">
+<p class="ltx_p">Finally, our current benchmark focuses primarily on programming correctness. Other crucial aspects of software engineering — such as code readability, maintainability, efficiency, security, and teamwork — are not evaluated in this framework and remain open challenges for future work.</p>
+</div>
+</section>
+<section id="Sx2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">Ethical Statement</h2>
+
+<div id="Sx2.p1" class="ltx_para">
+<p class="ltx_p">The introduction of a dynamically collected benchmark for evaluating LLM coding abilities raises several ethical considerations.</p>
+</div>
+<div id="Sx2.p2" class="ltx_para">
+<p class="ltx_p">First, all prompts, solutions, and test cases produced by the dynamic generation system have been constructed to avoid the unintentional inclusion of proprietary, copyrighted, or sensitive information. The generation process is based solely on open-source templates, algorithmic patterns, and public domain resources, minimizing the risk of intellectual property infringement.</p>
+</div>
+<div id="Sx2.p3" class="ltx_para">
+<p class="ltx_p">Second, although dynamically generated problems reduce the risks of data contamination and memorization in models, they do not fully mitigate the potential for LLMs to generate unsafe, insecure, or malicious code. We urge users to apply the benchmark ethically and to avoid using it—or the resulting models—for uses that may cause harm or violate responsible AI guidelines.</p>
+</div>
+<div id="Sx2.p4" class="ltx_para">
+<p class="ltx_p">Third, by making dynamic generation tools and evaluation infrastructure publicly available, we strive to foster transparency, reproducibility, and equitable access to research resources. However, we recognize the potential for technology misuse, including the generation of synthetic coding tests for automated cheating on educational platforms or biasing LLM performance reviews for commercial interests. We recommend responsible stewardship, encourage open discussion of these risks, and welcome feedback from the broader community.</p>
+</div>
+<div id="Sx2.p5" class="ltx_para">
+<p class="ltx_p">Fourth, while programmatically generated problems have clear scalability and adaptability benefits, there are potential risks of unintended bias in the selection or phrasing of tasks, which could disadvantage certain groups or languages. We commit to ongoing evaluation and refinement of the benchmark to ensure fairness, inclusivity, and diversity in the problems presented.</p>
+</div>
+<div id="Sx2.p6" class="ltx_para">
+<p class="ltx_p">Lastly, we note that the widespread adoption of automated coding benchmarks has implications for education, employment, and the wider software ecosystem. Benchmarks should augment, rather than replace, comprehensive, human-centric evaluation of programming skills and ethical development practices.</p>
+</div>
+<section id="Sx2.SS0.SSS0.Px1" class="ltx_paragraph">
+<h4 class="ltx_title ltx_title_paragraph">AI-assistants Help</h4>
+
+<div id="Sx2.SS0.SSS0.Px1.p1" class="ltx_para">
+<p class="ltx_p">We improve and proofread the text of this article using Writefull assistant integrated in Overleaf (Writefull’s/Open AI GPT models) and GPT-4o<span id="footnote12" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">12</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">12</sup><span class="ltx_tag ltx_tag_note">12</span><a target="_blank" href="https://chatgpt.com" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://chatgpt.com</a></span></span></span>, Grammarly<span id="footnote13" class="ltx_note ltx_role_footnote"><sup class="ltx_note_mark">13</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">13</sup><span class="ltx_tag ltx_tag_note">13</span><a target="_blank" href="https://app.grammarly.com/" title="" class="ltx_ref ltx_href">https://app.grammarly.com/</a></span></span></span> to correct grammatical, spelling, and style errors and paraphrase sentences. We underline that these tools are used strictly to enhance the quality of English writing, in full compliance with the ACL policies on responsible use of AI writing assistance.
+Nevertheless, some segments of our publication can be potentially detected as AI-generated, AI-edited, or human-AI-generated.</p>
+</div>
+</section>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+<li id="bib.bib1" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Aleithan et al. (2024)</span>
+<span class="ltx_bibblock">
+Reem Aleithan, Haoran Xue, Mohammad Mahdi Mohajer, Elijah Nnorom, Gias Uddin, and Song Wang. 2024.
+
+</span>
+<span class="ltx_bibblock">Swe-bench+: Enhanced coding benchmark for llms.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2410.06992</em>.
+
+</span>
+</li>
+<li id="bib.bib2" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">DeepSeek-AI (2025)</span>
+<span class="ltx_bibblock">
+DeepSeek-AI. 2025.
+
+</span>
+<span class="ltx_bibblock"><a target="_blank" href="https://arxiv.org/abs/2501.12948" title="" class="ltx_ref ltx_href">Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning</a>.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">Preprint</em>, arXiv:2501.12948.
+
+</span>
+</li>
+<li id="bib.bib3" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hui et al. (2024)</span>
+<span class="ltx_bibblock">
+Binyuan Hui, Jian Yang, Zeyu Cui, Jiaxi Yang, Dayiheng Liu, Lei Zhang, Tianyu Liu, Jiajun Zhang, Bowen Yu, Kai Dang, and 1 others. 2024.
+
+</span>
+<span class="ltx_bibblock">Qwen2. 5-coder technical report.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2409.12186</em>.
+
+</span>
+</li>
+<li id="bib.bib4" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Jain et al. (2024)</span>
+<span class="ltx_bibblock">
+Naman Jain, King Han, Alex Gu, Wen-Ding Li, Fanjia Yan, Tianjun Zhang, Sida Wang, Armando Solar-Lezama, Koushik Sen, and Ion Stoica. 2024.
+
+</span>
+<span class="ltx_bibblock">Livecodebench: Holistic and contamination free evaluation of large language models for code.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2403.07974</em>.
+
+</span>
+</li>
+<li id="bib.bib5" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Jimenez et al. (2023)</span>
+<span class="ltx_bibblock">
+Carlos E Jimenez, John Yang, Alexander Wettig, Shunyu Yao, Kexin Pei, Ofir Press, and Karthik Narasimhan. 2023.
+
+</span>
+<span class="ltx_bibblock">Swe-bench: Can language models resolve real-world github issues?
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2310.06770</em>.
+
+</span>
+</li>
+<li id="bib.bib6" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Pan et al. (2024)</span>
+<span class="ltx_bibblock">
+Jiayi Pan, Xingyao Wang, Graham Neubig, Navdeep Jaitly, Heng Ji, Alane Suhr, and Yizhe Zhang. 2024.
+
+</span>
+<span class="ltx_bibblock">Training software engineering agents and verifiers with swe-gym.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2412.21139</em>.
+
+</span>
+</li>
+<li id="bib.bib7" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Team (2025)</span>
+<span class="ltx_bibblock">
+Qwen Team. 2025.
+
+</span>
+<span class="ltx_bibblock"><a target="_blank" href="https://qwenlm.github.io/blog/qwq-32b/" title="" class="ltx_ref ltx_href">Qwq-32b: Embracing the power of reinforcement learning</a>.
+
+</span>
+</li>
+<li id="bib.bib8" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2025a)</span>
+<span class="ltx_bibblock">
+An Yang, Anfeng Li, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Gao, Chengen Huang, Chenxu Lv, and 1 others. 2025a.
+
+</span>
+<span class="ltx_bibblock">Qwen3 technical report.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2505.09388</em>.
+
+</span>
+</li>
+<li id="bib.bib9" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2024)</span>
+<span class="ltx_bibblock">
+An Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chengyuan Li, Dayiheng Liu, Fei Huang, Haoran Wei, Huan Lin, Jian Yang, Jianhong Tu, Jianwei Zhang, Jianxin Yang, Jiaxi Yang, Jingren Zhou, Junyang Lin, Kai Dang, and 22 others. 2024.
+
+</span>
+<span class="ltx_bibblock">Qwen2.5 technical report.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2412.15115</em>.
+
+</span>
+</li>
+<li id="bib.bib10" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2025b)</span>
+<span class="ltx_bibblock">
+John Yang, Kilian Leret, Carlos E Jimenez, Alexander Wettig, Kabir Khandpur, Yanzhe Zhang, Binyuan Hui, Ofir Press, Ludwig Schmidt, and Diyi Yang. 2025b.
+
+</span>
+<span class="ltx_bibblock">Swe-smith: Scaling data for software engineering agents.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2504.21798</em>.
+
+</span>
+</li>
+<li id="bib.bib11" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zan et al. (2025)</span>
+<span class="ltx_bibblock">
+Daoguang Zan, Zhirong Huang, Wei Liu, Hanwu Chen, Linhao Zhang, Shulin Xin, Lu Chen, Qi Liu, Xiaojian Zhong, Aoyan Li, and 1 others. 2025.
+
+</span>
+<span class="ltx_bibblock">Multi-swe-bench: A multilingual benchmark for issue resolving.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2504.02605</em>.
+
+</span>
+</li>
+</ul>
+</section>
+<section id="A1" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix A </span>Repository Build Validation Procedure</h2>
+
+<div id="A1.p1" class="ltx_para">
+<p class="ltx_p">The detailed validation process consists of the following steps:</p>
+</div>
+<div id="A1.p2" class="ltx_para">
+<ol id="A1.I1" class="ltx_enumerate">
+<li id="A1.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="A1.I1.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Environment setup:</span></p>
+<div class="ltx_listing ltx_lst_language_bash ltx_lstlisting ltx_listing">
+<div class="ltx_listing_data"><a href="data:text/plain;base64,cGlwIGluc3RhbGwgLiAmJiBcCnBpcCBpbnN0YWxsIHB5dGVzdCBweXRlc3QtanNvbi1yZXBvcnQ=" download="">⬇</a></div>
+<div id="lstnumberx1" class="ltx_listingline">
+<span class="ltx_text ltx_lst_identifier">pip</span><span class="ltx_text ltx_lst_space"> </span><span class="ltx_text ltx_lst_identifier">install</span><span class="ltx_text ltx_lst_space"> </span>.<span class="ltx_text ltx_lst_space"> </span>&amp;&amp;<span class="ltx_text ltx_lst_space"> </span>\
+</div>
+<div id="lstnumberx2" class="ltx_listingline">
+<span class="ltx_text ltx_lst_identifier">pip</span><span class="ltx_text ltx_lst_space"> </span><span class="ltx_text ltx_lst_identifier">install</span><span class="ltx_text ltx_lst_space"> </span><span class="ltx_text ltx_lst_identifier">pytest</span><span class="ltx_text ltx_lst_space"> </span><span class="ltx_text ltx_lst_identifier">pytest</span>-<span class="ltx_text ltx_lst_identifier">json</span>-<span class="ltx_text ltx_lst_identifier">report</span>
+</div>
+</div>
+</div>
+</li>
+<li id="A1.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="A1.I1.i2.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Test execution:</span></p>
+<div class="ltx_listing ltx_lst_language_bash ltx_lstlisting ltx_listing">
+<div class="ltx_listing_data"><a href="data:text/plain;base64,cHl0ZXN0IC0tanNvbi1yZXBvcnQgXAogLS1qc29uLXJlcG9ydC1maWxlPXJlcG9ydF9weXRlc3QuanNvbg==" download="">⬇</a></div>
+<div id="lstnumberx3" class="ltx_listingline">
+<span class="ltx_text ltx_lst_identifier">pytest</span><span class="ltx_text ltx_lst_space"> </span>–<span class="ltx_text ltx_lst_identifier">json</span>-<span class="ltx_text ltx_lst_identifier">report</span><span class="ltx_text ltx_lst_space"> </span>\
+</div>
+<div id="lstnumberx4" class="ltx_listingline">
+<span class="ltx_text ltx_lst_space"> </span>–<span class="ltx_text ltx_lst_identifier">json</span>-<span class="ltx_text ltx_lst_identifier">report</span>-<span class="ltx_text ltx_lst_identifier">file</span>=<span class="ltx_text ltx_lst_identifier">report_pytest</span>.<span class="ltx_text ltx_lst_identifier">json</span>
+</div>
+</div>
+</div>
+</li>
+<li id="A1.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="A1.I1.i3.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Success criteria:</span> Validation succeeds if:</p>
+<ul id="A1.I1.i3.I1" class="ltx_itemize">
+<li id="A1.I1.i3.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="A1.I1.i3.I1.i1.p1" class="ltx_para">
+<p class="ltx_p">The command completes without errors.</p>
+</div>
+</li>
+<li id="A1.I1.i3.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="A1.I1.i3.I1.i2.p1" class="ltx_para">
+<p class="ltx_p">The JSON report shows more than 0 passed tests.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li id="A1.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="A1.I1.i4.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Artifact preservation:</span> On success:</p>
+<ul id="A1.I1.i4.I1" class="ltx_itemize">
+<li id="A1.I1.i4.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="A1.I1.i4.I1.i1.p1" class="ltx_para">
+<p class="ltx_p">The Dockerfile is saved for future image rebuilding.</p>
+</div>
+</li>
+<li id="A1.I1.i4.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="A1.I1.i4.I1.i2.p1" class="ltx_para">
+<p class="ltx_p">Docker cache is optimized for fast container recreation.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+</section>
+<section id="A2" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix B </span>Baselines</h2>
+
+<div id="A2.p1" class="ltx_para">
+<p class="ltx_p">More details of the baselines used are provided in Tab. <a href="#A2.T3" title="Table 3 ‣ Appendix B Baselines ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>.</p>
+</div>
+<figure id="A2.T3" class="ltx_table">
+<div class="ltx_inline-block ltx_transformed_outer" style="width:433.6pt;height:17092.1pt;vertical-align:-8532.0pt;"><span class="ltx_transformed_inner" style="transform:translate(183.5pt,-3622.1pt) scale(6.50566189088658,6.50566189088658) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_t" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p"><span class="ltx_text ltx_font_bold">Model</span></span>
+</span>
+</th>
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_t" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right"><span class="ltx_text ltx_font_bold">Size</span></span>
+</span>
+</th>
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_t" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right"><span class="ltx_text ltx_font_bold">Release Date</span></span>
+</span>
+</th>
+<th class="ltx_td ltx_align_justify ltx_align_middle ltx_th ltx_th_column ltx_border_t" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right"><span class="ltx_text ltx_font_bold">Designed for code</span></span>
+</span>
+</th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_t" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p">Codestral-22B-v0.1</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_t" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">22B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_t" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">May 29, 2024</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_t" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">yes</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p">Qwen2.5-Coder-{7,14,32}B-Instruct</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">7B, 14B, 32B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">November 12, 2024</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">yes</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p">Llama-3.3-70B-Instruct</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">70B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">December 6, 2024</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">no</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p">DeepSeek-R1-Distill-Qwen-32B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">32B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">January 20, 2025</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">no</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p">QwQ-32B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">32B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">March 5, 2025</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">no</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p">Qwen3-32B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">32B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">April 28, 2025</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">no</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p">Devstral-Small-2505</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">24B</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">May 21, 2025</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">yes</span>
+</span>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_b" style="width:170.7pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p">DeepSeek-R1</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_b" style="width:85.4pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">671B (37B active)</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_b" style="width:99.6pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">May, 28, 2025</span>
+</span>
+</td>
+<td class="ltx_td ltx_align_justify ltx_align_middle ltx_border_b" style="width:56.9pt;padding-left:3.0pt;padding-right:3.0pt;">
+<span class="ltx_inline-block ltx_align_top">
+<span class="ltx_p ltx_align_right">no</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_table">Table 3: </span>Evaluated models specification.</figcaption>
+</figure>
+</section>
+<section id="A3" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix C </span>Additional Results</h2>
+
+<div id="A3.p1" class="ltx_para">
+<p class="ltx_p">Figs. <a href="#A3.F3" title="Figure 3 ‣ Appendix C Additional Results ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a>&amp;<a href="#A3.F4" title="Figure 4 ‣ Appendix C Additional Results ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> depict the results of the models compared to their respective sizes. The results here are the same as those in Tab. <a href="#S4.T2" title="Table 2 ‣ 4 Evaluation ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>.</p>
+</div>
+<figure id="A3.F3" class="ltx_figure"><img src="/html/2507.11059/assets/figures/pass1_vs_model_size.jpg" id="A3.F3.g1" class="ltx_graphics ltx_centering ltx_img_square" width="598" height="515" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span>Pass@1 results vs model size for all evaluated models.</figcaption>
+</figure>
+<figure id="A3.F4" class="ltx_figure"><img src="/html/2507.11059/assets/figures/pass6_vs_model_size.jpg" id="A3.F4.g1" class="ltx_graphics ltx_centering ltx_img_square" width="598" height="529" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>Pass@6 results vs model size for all evaluated models.</figcaption>
+</figure>
+<div id="A3.p2" class="ltx_para">
+<p class="ltx_p">Tab. <a href="#A3.T4" title="Table 4 ‣ Appendix C Additional Results ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> contains results of the evaluation on tasks dated 2024 year only. A year-over-year comparison (Tab. <a href="#S4.T2" title="Table 2 ‣ 4 Evaluation ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> and <a href="#A3.T4" title="Table 4 ‣ Appendix C Additional Results ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a>) shows that DeepSeek-R1 decreases from 50% to 40.2% which is larger than all other models on average.
+Devstral-Small-2505 from 34% to 28.2%, DeepSeek-R1-Distill-Qwen-32B from 31.5% to 23.9%, and Llama-3.3-70B-Instruct from 20% to 14.8%. Moreover, Qwen2.5-Coder-14B-Instruct achieves a 23% pass@6 rate on 2025 data, which is similar to the results obtained by 32B models, whereas its pass@1 rate remains notably lower than that of the larger models.</p>
+</div>
+<figure id="A3.T4" class="ltx_table">
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:165.6pt;vertical-align:-165.6pt;"><span class="ltx_transformed_inner" style="transform:translate(-75.1pt,0.0pt) scale(0.74272492616782,0.74272492616782) ;">
+<table class="ltx_tabular ltx_guessed_headers ltx_align_middle">
+<thead class="ltx_thead">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_column ltx_th_row ltx_border_t"><span class="ltx_text ltx_font_bold">Model</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">pass@1</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">pass@6</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">localize files</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">generate patch</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">regression tests</span></th>
+<th class="ltx_td ltx_align_right ltx_th ltx_th_column ltx_border_t"><span class="ltx_text ltx_font_bold">token limit hit</span></th>
+</tr>
+</thead>
+<tbody class="ltx_tbody">
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_t">DeepSeek-R1-0528</th>
+<td class="ltx_td ltx_align_right ltx_border_t"><span class="ltx_text ltx_font_bold">34.5%</span></td>
+<td class="ltx_td ltx_align_right ltx_border_t"><span class="ltx_text ltx_font_bold">50.0%</span></td>
+<td class="ltx_td ltx_align_right ltx_border_t">90.9%</td>
+<td class="ltx_td ltx_align_right ltx_border_t">98.0%</td>
+<td class="ltx_td ltx_align_right ltx_border_t">49.7%</td>
+<td class="ltx_td ltx_align_right ltx_border_t">0.0%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Devstral-Small-2505</th>
+<td class="ltx_td ltx_align_right">17.5%</td>
+<td class="ltx_td ltx_align_right">34.0%</td>
+<td class="ltx_td ltx_align_right">92.0%</td>
+<td class="ltx_td ltx_align_right">99.0%</td>
+<td class="ltx_td ltx_align_right">33.5%</td>
+<td class="ltx_td ltx_align_right">0.5%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">DeepSeek-R1-Distill-Qwen-32B</th>
+<td class="ltx_td ltx_align_right">18.0%</td>
+<td class="ltx_td ltx_align_right">31.5%</td>
+<td class="ltx_td ltx_align_right">89.4%</td>
+<td class="ltx_td ltx_align_right">98.5%</td>
+<td class="ltx_td ltx_align_right">32.7%</td>
+<td class="ltx_td ltx_align_right">0.0%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">QwQ-32B</th>
+<td class="ltx_td ltx_align_right">14.0%</td>
+<td class="ltx_td ltx_align_right">26.5%</td>
+<td class="ltx_td ltx_align_right">81.5%</td>
+<td class="ltx_td ltx_align_right">96.5%</td>
+<td class="ltx_td ltx_align_right">25.5%</td>
+<td class="ltx_td ltx_align_right">0.5%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Qwen2.5-Coder-32B-Instruct</th>
+<td class="ltx_td ltx_align_right">14.0%</td>
+<td class="ltx_td ltx_align_right">24.5%</td>
+<td class="ltx_td ltx_align_right">91.5%</td>
+<td class="ltx_td ltx_align_right">98.0%</td>
+<td class="ltx_td ltx_align_right">24.6%</td>
+<td class="ltx_td ltx_align_right">7.0%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Qwen3-32B</th>
+<td class="ltx_td ltx_align_right">14.5%</td>
+<td class="ltx_td ltx_align_right">23.5%</td>
+<td class="ltx_td ltx_align_right">94.5%</td>
+<td class="ltx_td ltx_align_right">96.5%</td>
+<td class="ltx_td ltx_align_right">25.1%</td>
+<td class="ltx_td ltx_align_right">1.0%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Qwen2.5-Coder-14B-Instruct</th>
+<td class="ltx_td ltx_align_right">9.0%</td>
+<td class="ltx_td ltx_align_right">23.0%</td>
+<td class="ltx_td ltx_align_right">85.0%</td>
+<td class="ltx_td ltx_align_right">95.0%</td>
+<td class="ltx_td ltx_align_right">22.5%</td>
+<td class="ltx_td ltx_align_right">3.0%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Llama-3.3-70B-Instruct</th>
+<td class="ltx_td ltx_align_right">11.5%</td>
+<td class="ltx_td ltx_align_right">20.0%</td>
+<td class="ltx_td ltx_align_right">84.4%</td>
+<td class="ltx_td ltx_align_right">79.9%</td>
+<td class="ltx_td ltx_align_right">19.6%</td>
+<td class="ltx_td ltx_align_right">0.0%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row">Codestral-22B-v0.1</th>
+<td class="ltx_td ltx_align_right">4.5%</td>
+<td class="ltx_td ltx_align_right">10.5%</td>
+<td class="ltx_td ltx_align_right">81.5%</td>
+<td class="ltx_td ltx_align_right">84.5%</td>
+<td class="ltx_td ltx_align_right">10.5%</td>
+<td class="ltx_td ltx_align_right">3.5%</td>
+</tr>
+<tr class="ltx_tr">
+<th class="ltx_td ltx_align_left ltx_th ltx_th_row ltx_border_b">Qwen2.5-Coder-7B-Instruct</th>
+<td class="ltx_td ltx_align_right ltx_border_b">2.0%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">4.5%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">68.8%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">57.8%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">4.0%</td>
+<td class="ltx_td ltx_align_right ltx_border_b">4.5%</td>
+</tr>
+</tbody>
+</table>
+</span></div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table">Table 4: </span>Evaluation results of models on SWE-MERA 2024. ‘localize files‘ is the percentage of attempts correctly identifying files to fix; ‘generate patch‘, those producing valid patches; ‘regression tests‘, those where patches pass original repository tests; and ‘token limit hit‘, those exceeding the 32k token context limit.</figcaption>
+</figure>
+<div id="A3.p3" class="ltx_para">
+<p class="ltx_p">Fig. <a href="#A3.F5" title="Figure 5 ‣ Appendix C Additional Results ‣ SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a> represents the additional evaluation of the baselines in more strict setup, where we take only top decile (top 10%) of all the tasks. Here the year-to-year differences in behavour of the models are more subtle, namely only DeepSeek-R1 shows statistically valid discrepancy measured in pass@6.</p>
+</div>
+<figure id="A3.F5" class="ltx_figure"><img src="/html/2507.11059/assets/figures/metric_filtered.png" id="A3.F5.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="299" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Comparison of model pass@1 and pass@5 metrics between two years. Error bars indicate confidence intervals, computed using the binomial distribution with a 5% two-sided quantile. To address the variability in task sets across years, we include only those tasks for which <math id="A3.F5.m2" class="ltx_Math" alttext="\min(\text{task\_correctness},\text{test\_correctness},\text{test\_completeness})\geq 9" display="inline"><semantics><mrow><mrow><mi>min</mi><mo>⁡</mo><mrow><mo stretchy="false">(</mo><mtext>task_correctness</mtext><mo>,</mo><mtext>test_correctness</mtext><mo>,</mo><mtext>test_completeness</mtext><mo stretchy="false">)</mo></mrow></mrow><mo>≥</mo><mn>9</mn></mrow><annotation encoding="application/x-tex">\min(\text{task\_correctness},\text{test\_correctness},\text{test\_completeness})\geq 9</annotation></semantics></math>.</figcaption>
+</figure>
+<div class="ltx_pagination ltx_role_newpage"></div>
+</section>
+<section id="A4" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix D </span>Prompt for LLM-based Task Evaluation</h2>
+
+<div id="A4.p1" class="ltx_para">
+<p class="ltx_p">We used the following prompt to evaluate the quality of candidate tasks using the Qwen3-32B model:</p>
+</div>
+<div id="A4.p2" class="ltx_para">
+<pre class="ltx_verbatim ltx_font_typewriter">
+Conduct a comprehensive evaluation of the programming task solution based on four criteria.
+
+TASK:
+{problem_statement}
+
+SOLUTION:
+{patch}
+
+TESTS:
+{test_patch}
+
+Evaluate based on the following criteria:
+
+1. TASK CORRECTNESS: Does the solution (patch) correctly solve the described problem?
+2. TEST CORRECTNESS: Do the tests cover the problem from the task description?
+3. COMPLEXITY: What is the complexity of solving this task?
+4. TEST COMPLETENESS: Do the tests cover corner cases from the problem description?
+
+Respond in JSON format:
+{
+    "task_correctness": {
+        "score": &lt;a score from 1 to 10&gt;,
+        "confidence": &lt;a confidence score from 0.0 to 1.0&gt;,
+        "reasoning": "&lt;explanation&gt;"
+    },
+    "test_correctness": {
+        "score": &lt;a score from 1 to 10&gt;,
+        "confidence": &lt;a confidence score from 0.0 to 1.0&gt;,
+        "reasoning": "&lt;explanation&gt;"
+    },
+    "complexity": {
+        "score": &lt;a score from 1 to 10&gt;,
+        "confidence": &lt;a confidence score from 0.0 to 1.0&gt;,
+        "reasoning": "&lt;explanation&gt;"
+    },
+    "test_completeness": {
+        "score": &lt;a score from 1 to 10&gt;,
+        "confidence": &lt;a confidence score from 0.0 to 1.0&gt;,
+        "reasoning": "&lt;explanation&gt;"
+    }
+}
+</pre>
+</div>
+</section>
+<section id="A5" class="ltx_appendix">
+<h2 class="ltx_title ltx_title_appendix">
+<span class="ltx_tag ltx_tag_appendix">Appendix E </span>SWE-MERA Task Example</h2>
+
+<div id="A5.p1" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Problem Statement</span> 
+<br class="ltx_break"><span class="ltx_rule" style="width:433.6pt;height:0.4pt;background:black;display:inline-block;"> </span></p>
+</div>
+<div id="A5.p2" class="ltx_para">
+<pre class="ltx_verbatim ltx_font_typewriter">
+Performance threshold goes to -inf when it should be zero.
+
+In attempting to create a performance test where zero is the correct value,
+I created the following reference (since a value of zero results in no reference
+check being performed; see https://github.com/reframe-hpc/reframe/issues/2857):
+
+    self.reference = {
+        ’*’: {
+            ’Gflops’: (None, None, None, ’Gflops’),
+            ’Exponent’: (None, None, None, ’10exp’),
+            ’Time’: (None, None, None, ’seconds’),
+            ’failed_tests’: (.1, -1.0, 0, ’tests’),
+            ’skipped_tests’: (.1, -1.0, 0, ’tests’)
+    }}
+
+I was thinking for the failed and skipped tests, this would create a lower bound
+of zero and upper bound of .1, allowing zero to pass, but integers larger than
+that would fail.
+...
+</pre>
+</div>
+<div id="A5.p3" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Test Patch (Diff)</span> 
+<br class="ltx_break"><span class="ltx_rule" style="width:433.6pt;height:0.4pt;background:black;display:inline-block;"> </span></p>
+</div>
+<div id="A5.p4" class="ltx_para">
+<pre class="ltx_verbatim ltx_font_typewriter">
+diff --git a/unittests/test_sanity_functions.py b/unittests/test_sanity_functions.py
+index 7e6368938..0e9367027 100644
+--- a/unittests/test_sanity_functions.py
++++ b/unittests/test_sanity_functions.py
+@@ -473,6 +473,18 @@ def test_assert_reference():
+                              r’\(l=-1\.2, u=-0\.9\)’):
+         sn.evaluate(sn.assert_reference(-0.8, -1, -0.2, 0.1))
+
++    # Check that bounds are correctly calculated in case that lower bound
++    # reaches zero (see also GH issue #3430)
++    with pytest.raises(SanityError,
++                       match=r’1 is beyond reference value 0\.1 ’
++                             r’\(l=0\.0, u=0\.1\)’):
++        assert sn.assert_reference(1, 0.1, -1.0, 0)
+
++    with pytest.raises(SanityError,
++                       match=r’-1 is beyond reference value -0\.1 ’
++                             r’\(l=-0\.1, u=-0\.0\)’):
++        assert sn.assert_reference(-1, -0.1, 0, 1.0)
+
+     # Check invalid thresholds
+     with pytest.raises(SanityError,
+                        match=r’invalid high threshold value: -0\.1’):
+</pre>
+</div>
+<div id="A5.p5" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Gold Patch (Diff)</span> 
+<br class="ltx_break"><span class="ltx_rule" style="width:433.6pt;height:0.4pt;background:black;display:inline-block;"> </span></p>
+</div>
+<div id="A5.p6" class="ltx_para">
+<pre class="ltx_verbatim ltx_font_typewriter">
+diff --git a/reframe/utility/sanity.py b/reframe/utility/sanity.py
+index a4f57a301..1228586ff 100644
+--- a/reframe/utility/sanity.py
++++ b/reframe/utility/sanity.py
+@@ -8,6 +8,7 @@
+ import contextlib
+ import glob as pyglob
+ import itertools
++import math
+ import os
+ import re
+ import sys
+@@ -576,8 +577,14 @@ def calc_bound(thres):
+
+         return ref*(1 + thres)
+
+-    lower = calc_bound(lower_thres) or float(’-inf’)
+-    upper = calc_bound(upper_thres) or float(’inf’)
++    lower = calc_bound(lower_thres)
++    if lower is None:
++        lower = -math.inf
+
++    upper = calc_bound(upper_thres)
++    if upper is None:
++        upper = math.inf
+...
+</pre>
+</div>
+</section>
+</article>
+</div>
+<div class="ar5iv-footer"><a href="/html/2507.11058" class="ar5iv-nav-button ar5iv-nav-button-prev">◄</a>
+    <a class="ar5iv-home-button" href="/"><img height="40" alt="ar5iv homepage" src="/assets/ar5iv.png"></a>
+    <a href="/feeling_lucky" class="ar5iv-text-button">Feeling<br>lucky?</a>
+    <a href="/land_of_honey_and_milk" rel="nofollow" aria-hidden="true" tabindex="-1"></a>
+    <a href="/log/2507.11059" class="ar5iv-text-button ar5iv-severity-warning">Conversion<br>report</a>
+    <a class="ar5iv-text-button" target="_blank" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&title=Improve+article+2507.11059">Report<br>an issue</a>
+    <a href="https://arxiv.org/abs/2507.11059" class="ar5iv-text-button arxiv-ui-theme">View&nbsp;original<br>on&nbsp;arXiv</a><a href="/html/2507.11060" class="ar5iv-nav-button ar5iv-nav-button-next">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Copyright</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Privacy Policy</a>
+
+<div class="ltx_page_logo">Generated  on Tue Aug  5 14:40:21 2025 by <a target="_blank" href="http://dlmf.nist.gov/LaTeXML/" class="ltx_LaTeXML_logo"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==" alt="Mascot Sammy"></a>
+</div></footer>
+</div>
+
+    <script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+    <script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+    </body>
+</html>

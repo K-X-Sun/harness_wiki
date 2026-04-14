@@ -1,0 +1,29 @@
+# Working directories (local only)
+wiki_init/
+wiki_ingest/
+wiki_query/
+wiki_lint/
+web_discovery/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

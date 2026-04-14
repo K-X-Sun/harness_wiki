@@ -1,0 +1,2584 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>[2504.06939] FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks</title><meta property="og:description" content="Code repair is a fundamental task in software development, facilitating efficient bug resolution and software maintenance. Although large language models (LLMs) have demonstrated considerable potential in automated cod…">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks">
+<meta name="twitter:image:src" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta name="twitter:image:alt" content="ar5iv logo">
+<meta property="og:title" content="FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks">
+<meta property="og:site_name" content="ar5iv">
+<meta property="og:image" content="https://ar5iv.labs.arxiv.org/assets/ar5iv_card.png">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://ar5iv.labs.arxiv.org/html/2504.06939">
+<link rel="canonical" target="_blank" href="https://ar5iv.labs.arxiv.org/html/2504.06939">
+
+<!--Generated on Mon May  5 16:56:13 2025 by LaTeXML (version 0.8.8) http://dlmf.nist.gov/LaTeXML/.-->
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="keywords" lang="en" content="Feedback-driven Code Repair,  Large Language Models,  Benchmark">
+
+<script>
+  function detectColorScheme(){
+    var theme="light";
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if(current_theme){
+      if(current_theme == "dark"){
+        theme = "dark";
+      } }
+    else if(!window.matchMedia) { return false; }
+    else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark"; }
+    if (theme=="dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.setAttribute("data-theme", "light"); } }
+
+  detectColorScheme();
+
+  function toggleColorScheme(){
+    var current_theme = localStorage.getItem("ar5iv_theme");
+    if (current_theme) {
+      if (current_theme == "light") {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+      else {
+        localStorage.setItem("ar5iv_theme", "light"); } }
+    else {
+        localStorage.setItem("ar5iv_theme", "dark"); }
+    detectColorScheme(); }
+</script>
+<link media="all" rel="stylesheet" href="/assets/ar5iv-fonts.0.8.4.css"><link media="all" rel="stylesheet" href="/assets/ar5iv.0.8.4.css"><link media="all" rel="stylesheet" href="/assets/ar5iv-site.0.2.2.css">
+</head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document ltx_authors_1line ltx_leqno">
+<div id="p1" class="ltx_para">
+<span class="ltx_ERROR undefined">\pdfcolInitStack</span>
+<p class="ltx_p">tcb@breakable
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+</div>
+<h1 class="ltx_title ltx_title_document">FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks</h1>
+<div class="ltx_authors">
+<span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Dekun Dai
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_text ltx_affiliation_institution">School of Software Engineering
+<br class="ltx_break">Sun Yat-sen University</span><span class="ltx_text ltx_affiliation_city">Zhuhai</span><span class="ltx_text ltx_affiliation_country">China</span>
+</span>
+<span class="ltx_contact ltx_role_email"><a href="mailto:daidk@mail2.sysu.edu.cn">daidk@mail2.sysu.edu.cn</a>
+</span></span></span>
+<span class="ltx_author_before">, </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">MingWei Liu<sup class="ltx_sup"><span class="ltx_text ltx_font_italic">∗</span></sup>
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_text ltx_affiliation_institution">School of Software Engineering
+<br class="ltx_break">Sun Yat-sen University</span><span class="ltx_text ltx_affiliation_city">Zhuhai</span><span class="ltx_text ltx_affiliation_country">China</span>
+</span>
+<span class="ltx_contact ltx_role_email"><a href="mailto:liumw26@mail.sysu.edu.cn">liumw26@mail.sysu.edu.cn</a>
+</span></span></span>
+<span class="ltx_author_before">, </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Anji Li
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_text ltx_affiliation_institution">School of Software Engineering
+<br class="ltx_break">Sun Yat-sen University</span><span class="ltx_text ltx_affiliation_city">Zhuhai</span><span class="ltx_text ltx_affiliation_country">China</span>
+</span>
+<span class="ltx_contact ltx_role_email"><a href="mailto:lianj8@mail2.sysu.edu.cn">lianj8@mail2.sysu.edu.cn</a>
+</span></span></span>
+<span class="ltx_author_before">, </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Jialun Cao
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_text ltx_affiliation_institution">The Hong Kong University of
+Science and Technology</span><span class="ltx_text ltx_affiliation_city">Hong Kong</span><span class="ltx_text ltx_affiliation_country">China</span>
+</span>
+<span class="ltx_contact ltx_role_email"><a href="mailto:jcaoap@cse.ust.hk">jcaoap@cse.ust.hk</a>
+</span></span></span>
+<span class="ltx_author_before">, </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Yanlin Wang
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_text ltx_affiliation_institution">School of Software Engineering
+<br class="ltx_break">Sun Yat-sen University</span><span class="ltx_text ltx_affiliation_city">Zhuhai</span><span class="ltx_text ltx_affiliation_country">China</span>
+</span>
+<span class="ltx_contact ltx_role_email"><a href="mailto:wangylin36@mail.sysu.edu.cn">wangylin36@mail.sysu.edu.cn</a>
+</span></span></span>
+<span class="ltx_author_before">, </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Chong Wang
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_text ltx_affiliation_institution">School of Computer Science and Engineering
+<br class="ltx_break">Nanyang Technological University</span><span class="ltx_text ltx_affiliation_country">Singapore</span>
+</span>
+<span class="ltx_contact ltx_role_email"><a href="mailto:chong.wang@ntu.edu.sg">chong.wang@ntu.edu.sg</a>
+</span></span></span>
+<span class="ltx_author_before">, </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Xin Peng
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_text ltx_affiliation_institution">School of Computer Science
+<br class="ltx_break">Fudan University</span><span class="ltx_text ltx_affiliation_city">Shanghai</span><span class="ltx_text ltx_affiliation_country">China</span>
+</span>
+<span class="ltx_contact ltx_role_email"><a href="mailto:pengxin@fudan.edu.cn">pengxin@fudan.edu.cn</a>
+</span></span></span>
+<span class="ltx_author_before"> and </span><span class="ltx_creator ltx_role_author">
+<span class="ltx_personname">Zibin Zheng
+</span><span class="ltx_author_notes">
+<span class="ltx_contact ltx_role_affiliation"><span class="ltx_text ltx_affiliation_institution">School of Software Engineering
+<br class="ltx_break">Sun Yat-sen University</span><span class="ltx_text ltx_affiliation_city">Zhuhai</span><span class="ltx_text ltx_affiliation_country">China</span>
+</span>
+<span class="ltx_contact ltx_role_email"><a href="mailto:zhzibin@mail.sysu.edu.cn">zhzibin@mail.sysu.edu.cn</a>
+</span></span></span>
+</div>
+<div class="ltx_dates">(2024)</div>
+
+<div class="ltx_abstract">
+<h6 class="ltx_title ltx_title_abstract">Abstract.</h6>
+<p class="ltx_p">Code repair is a fundamental task in software development, facilitating efficient bug resolution and software maintenance. Although large language models (LLMs) have demonstrated considerable potential in automated code repair, their ability to comprehend and effectively leverage diverse types of feedback remains insufficiently understood.</p>
+<p class="ltx_p">To bridge this gap, we introduce FeedbackEval, a systematic benchmark for evaluating LLMs’ feedback comprehension and performance in code repair tasks. We conduct a comprehensive empirical study on five state-of-the-art LLMs, including GPT-4o, Claude-3.5, Gemini-1.5, GLM-4, and Qwen2.5, to evaluate their behavior under both single-iteration and iterative code repair settings. Our results show that structured feedback, particularly in the form of test feedback, leads to the highest repair success rates, while unstructured feedback proves significantly less effective. Iterative feedback further enhances repair performance, though the marginal benefit diminishes after two or three rounds. Moreover, prompt structure is shown to be critical: incorporating docstrings, contextual information, and explicit guidelines substantially improves outcomes, whereas persona-based, chain-of-thought, and few-shot prompting strategies offer limited benefits in single-iteration scenarios. This work introduces a robust benchmark and delivers practical insights to advance the understanding and development of feedback-driven code repair using LLMs. All code and data are available at https://github.com/SYSUSELab/FeedbackEval.</p>
+</div>
+<div class="ltx_keywords">Feedback-driven Code Repair, Large Language Models, Benchmark
+</div>
+<span class="ltx_note ltx_note_frontmatter ltx_role_copyright"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup><span class="ltx_note_type">copyright: </span>acmlicensed</span></span></span><span class="ltx_note ltx_note_frontmatter ltx_role_journalyear"><sup class="ltx_note_mark">†</sup><span class="ltx_note_outer"><span class="ltx_note_content"><sup class="ltx_note_mark">†</sup><span class="ltx_note_type">journalyear: </span>2024</span></span></span>
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1. </span>Introduction</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p class="ltx_p">Code repair is a fundamental task in software development, enabling developers to efficiently identify and resolve errors <cite class="ltx_cite ltx_citemacro_citep">(Fu et al., <a href="#bib.bib19" title="" class="ltx_ref">2022</a>; Jin et al., <a href="#bib.bib26" title="" class="ltx_ref">2023</a>; Xia and Zhang, <a href="#bib.bib60" title="" class="ltx_ref">2022</a>)</cite>. With the rise of large language models (LLMs), there is increasing interest in leveraging their capabilities for automated code repair—not only for fixing human-written code but also for improving LLM-generated code by incorporating test feedback and compiler diagnostics <cite class="ltx_cite ltx_citemacro_citep">(Madaan et al., <a href="#bib.bib39" title="" class="ltx_ref">2023</a>; Ridnik et al., <a href="#bib.bib42" title="" class="ltx_ref">2024</a>)</cite>. While LLMs have demonstrated promising performance in code generation <cite class="ltx_cite ltx_citemacro_citep">(Yuan et al., <a href="#bib.bib66" title="" class="ltx_ref">2023</a>; Sun et al., <a href="#bib.bib49" title="" class="ltx_ref">2024</a>; Ugare et al., <a href="#bib.bib53" title="" class="ltx_ref">2024</a>; Zhuo et al., <a href="#bib.bib75" title="" class="ltx_ref">2024</a>)</cite> and correction <cite class="ltx_cite ltx_citemacro_citep">(Xia and Zhang, <a href="#bib.bib60" title="" class="ltx_ref">2022</a>; Jin et al., <a href="#bib.bib26" title="" class="ltx_ref">2023</a>; Fu et al., <a href="#bib.bib19" title="" class="ltx_ref">2022</a>)</cite>, their ability to interpret and effectively utilize feedback remains insufficiently explored, particularly in complex repair scenarios.</p>
+</div>
+<div id="S1.p2" class="ltx_para">
+<p class="ltx_p">In practical software development, feedback-driven repair <cite class="ltx_cite ltx_citemacro_citep">(Tian et al., <a href="#bib.bib51" title="" class="ltx_ref">2024</a>; Fernandes et al., <a href="#bib.bib18" title="" class="ltx_ref">2023</a>; Saunders et al., <a href="#bib.bib44" title="" class="ltx_ref">2022</a>; Zhao et al., <a href="#bib.bib69" title="" class="ltx_ref">2024</a>)</cite> is essential. Developers iteratively refine their code based on test failures, compiler messages, and human reviews, relying on feedback to guide improvements. Understanding how LLMs process and act on such feedback is critical for improving their reliability in real-world development workflows. Moreover, enhancing LLMs’ feedback comprehension is foundational for advancing autonomous multi-agent systems that support end-to-end software development <cite class="ltx_cite ltx_citemacro_citep">(Wang et al., <a href="#bib.bib55" title="" class="ltx_ref">2024b</a>, <a href="#bib.bib56" title="" class="ltx_ref">2023b</a>)</cite>.</p>
+</div>
+<div id="S1.p3" class="ltx_para">
+<p class="ltx_p">Existing research on LLM-based code repair primarily focused on evaluating repair accuracy or assessing LLMs under specific feedback conditions, such as test failures or compiler errors <cite class="ltx_cite ltx_citemacro_citep">(Bi et al., <a href="#bib.bib6" title="" class="ltx_ref">2024</a>; Dou et al., <a href="#bib.bib15" title="" class="ltx_ref">2024</a>; Yang et al., <a href="#bib.bib64" title="" class="ltx_ref">2023</a>)</cite>. While some studies explore feedback-driven generation, they often limit their scope to single-iteration corrections and lack systematic comparisons across different feedback types <cite class="ltx_cite ltx_citemacro_citep">(Chen et al., <a href="#bib.bib10" title="" class="ltx_ref">2023</a>; Wang et al., <a href="#bib.bib57" title="" class="ltx_ref">2023c</a>; Zheng et al., <a href="#bib.bib70" title="" class="ltx_ref">2024</a>; Olausson et al., <a href="#bib.bib40" title="" class="ltx_ref">2023</a>)</cite>. Additionally, although prompt engineering has been shown to improve LLM performance in various tasks, its role in enhancing feedback comprehension during code repair remains underexamined <cite class="ltx_cite ltx_citemacro_citep">(Khojah et al., <a href="#bib.bib28" title="" class="ltx_ref">2024</a>; Li et al., <a href="#bib.bib31" title="" class="ltx_ref">2025</a>, <a href="#bib.bib33" title="" class="ltx_ref">2024</a>)</cite>. A significant gap exists in systematically benchmarking LLMs’ ability to (1) process structured vs. unstructured feedback, (2) adapt to iterative feedback, and (3) optimize repair success through different prompting strategies.</p>
+</div>
+<div id="S1.p4" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">FeedbackEval.</span> To bridge this gap, we introduce FeedbackEval, a benchmark designed to systematically evaluate LLMs’ feedback comprehension and repair effectiveness across diverse conditions. Our benchmark consists of erroneous code segments derived from rule-based mutations, LLM-generated errors, and incorrect LLM-produced solutions, ensuring a broad representation of real-world failure cases. It encompasses multiple feedback scenarios, including structured (e.g., test and compiler feedback) and unstructured (e.g., human feedback), enabling a comprehensive assessment of LLMs’ repair capabilities.</p>
+</div>
+<div id="S1.p5" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Empirical Study.</span>
+Using FeedbackEval, we conduct an empirical study of five state-of-the-art (SOTA) LLMs (GPT-4o <cite class="ltx_cite ltx_citemacro_citep">(Achiam et al., <a href="#bib.bib3" title="" class="ltx_ref">2023</a>)</cite>, Claude-3.5 <cite class="ltx_cite ltx_citemacro_citep">(Anthropic, <a href="#bib.bib5" title="" class="ltx_ref">2024</a>)</cite>, Gemini-1.5 <cite class="ltx_cite ltx_citemacro_citep">(DeepMind, <a href="#bib.bib13" title="" class="ltx_ref">2024</a>)</cite>, GLM-4 <cite class="ltx_cite ltx_citemacro_citep">(zhipuAI, <a href="#bib.bib73" title="" class="ltx_ref">2024</a>)</cite>, and Qwen2.5 <cite class="ltx_cite ltx_citemacro_citep">(Cloud, <a href="#bib.bib12" title="" class="ltx_ref">2024</a>)</cite>) to
+understand how these LLMs process and utilize feedback in code repair. Specifically, we address the following research questions:</p>
+</div>
+<div id="S1.p6" class="ltx_para">
+<ul id="S1.I1" class="ltx_itemize">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">RQ1: How do different LLMs perform in single-iteration repair tasks utilizing feedback?</span> This question establishes a baseline for evaluating how well LLMs can resolve errors with a single feedback.</p>
+</div>
+</li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">RQ2: How do different types of feedback affect LLMs’ performance in code repairs?</span> We analyze the effectiveness of different feedback types (<span class="ltx_text ltx_font_italic">e.g.</span>, compiler error message, human review comments) and their influence on LLM repair.</p>
+</div>
+</li>
+<li id="S1.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i3.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">RQ3: How does the effectiveness of feedback evolve over multiple repair iterations for different LLMs?</span> This question investigates the iterative refinement capabilities of LLMs, emphasizing their adaptability across multiple iterations of feedback.</p>
+</div>
+</li>
+<li id="S1.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I1.i4.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">RQ4: To what extent do different prompting techniques impact the performance of LLMs in code repairs using feedback?</span> We explore how prompt engineering strategies affect feedback comprehension and repair success, evaluating techniques such as chain-of-thought reasoning, few-shot learning, and the inclusion of contextual information.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S1.p7" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Main Findings.</span> Based on our results, we summarize the following main findings:  <span class="ltx_inline-block"><svg id="S1.p7.pic1" class="ltx_picture" height="14.95" overflow="visible" style="vertical-align:-3.01px" version="1.1" viewBox="0 0 14.95 14.95" width="14.95"><g transform="translate(0,14.95) matrix(1 0 0 -1 0 0) translate(7.47,0) translate(0,7.47)" fill="#000000" stroke="#000000" stroke-width="0.4pt"><g fill="#000000"><path d="M 7.2 0 C 7.2 3.97 3.97 7.2 0 7.2 C -3.97 7.2 -7.2 3.97 -7.2 0 C -7.2 -3.97 -3.97 -7.2 0 -7.2 C 3.97 -7.2 7.2 -3.97 7.2 0 Z M 0 0"></path></g><g transform="matrix(1.0 0.0 0.0 1.0 -3.46 -4.46)" fill="#FFFFFF" stroke="#FFFFFF"><foreignObject width="6.92" height="8.92" transform="matrix(1 0 0 -1 0 16.6)" overflow="visible" color="#FFFFFF">1</foreignObject></g></g></svg></span> We observe that different LLMs exhibit significant performance gaps in feedback-driven code repair, with Claude-3.5 achieving an average repair accuracy of 60.8% and GPT-4o reaching 56.4%, outperforming Gemini-1.5 (55.6%), Qwen2.5 (54.8%), and GLM-4 (52.7%).  <span class="ltx_inline-block"><svg id="S1.p7.pic2" class="ltx_picture" height="14.95" overflow="visible" style="vertical-align:-3.01px" version="1.1" viewBox="0 0 14.95 14.95" width="14.95"><g transform="translate(0,14.95) matrix(1 0 0 -1 0 0) translate(7.47,0) translate(0,7.47)" fill="#000000" stroke="#000000" stroke-width="0.4pt"><g fill="#000000"><path d="M 7.2 0 C 7.2 3.97 3.97 7.2 0 7.2 C -3.97 7.2 -7.2 3.97 -7.2 0 C -7.2 -3.97 -3.97 -7.2 0 -7.2 C 3.97 -7.2 7.2 -3.97 7.2 0 Z M 0 0"></path></g><g transform="matrix(1.0 0.0 0.0 1.0 -3.46 -4.46)" fill="#FFFFFF" stroke="#FFFFFF"><foreignObject width="6.92" height="8.92" transform="matrix(1 0 0 -1 0 16.6)" overflow="visible" color="#FFFFFF">2</foreignObject></g></g></svg></span> Structured feedback types, particularly test feedback, yield superior results. Test feedback achieves the highest average success rate of 61.0%, suggesting that LLMs benefit more from clear, targeted guidance compared to unstructured feedback. Surprisingly, simple feedback, such as “The code is wrong. Please fix it.” ranks second, suggesting LLMs can infer necessary corrections even without detailed error descriptions.  <span class="ltx_inline-block"><svg id="S1.p7.pic3" class="ltx_picture" height="14.95" overflow="visible" style="vertical-align:-3.01px" version="1.1" viewBox="0 0 14.95 14.95" width="14.95"><g transform="translate(0,14.95) matrix(1 0 0 -1 0 0) translate(7.47,0) translate(0,7.47)" fill="#000000" stroke="#000000" stroke-width="0.4pt"><g fill="#000000"><path d="M 7.2 0 C 7.2 3.97 3.97 7.2 0 7.2 C -3.97 7.2 -7.2 3.97 -7.2 0 C -7.2 -3.97 -3.97 -7.2 0 -7.2 C 3.97 -7.2 7.2 -3.97 7.2 0 Z M 0 0"></path></g><g transform="matrix(1.0 0.0 0.0 1.0 -3.46 -4.46)" fill="#FFFFFF" stroke="#FFFFFF"><foreignObject width="6.92" height="8.92" transform="matrix(1 0 0 -1 0 16.6)" overflow="visible" color="#FFFFFF">3</foreignObject></g></g></svg></span> Iterative feedback improves LLM performance, with test and human feedback demonstrating the most significant gains. However, performance improvements diminish over successive iterations, typically stabilizing after two to three repair cycles, indicating that extended iterations yield diminishing returns.  <span class="ltx_inline-block"><svg id="S1.p7.pic4" class="ltx_picture" height="14.95" overflow="visible" style="vertical-align:-3.01px" version="1.1" viewBox="0 0 14.95 14.95" width="14.95"><g transform="translate(0,14.95) matrix(1 0 0 -1 0 0) translate(7.47,0) translate(0,7.47)" fill="#000000" stroke="#000000" stroke-width="0.4pt"><g fill="#000000"><path d="M 7.2 0 C 7.2 3.97 3.97 7.2 0 7.2 C -3.97 7.2 -7.2 3.97 -7.2 0 C -7.2 -3.97 -3.97 -7.2 0 -7.2 C 3.97 -7.2 7.2 -3.97 7.2 0 Z M 0 0"></path></g><g transform="matrix(1.0 0.0 0.0 1.0 -3.46 -4.46)" fill="#FFFFFF" stroke="#FFFFFF"><foreignObject width="6.92" height="8.92" transform="matrix(1 0 0 -1 0 16.6)" overflow="visible" color="#FFFFFF">4</foreignObject></g></g></svg></span> Prompt structure significantly affects repair performance. Persona, chain-of-thought, and few-shot prompting exhibit minimal impact on single-iteration repair tasks. In contrast, docstrings, context, and guidelines yield substantial performance improvements, underscoring the importance of structured, context-rich input in enhancing LLM effectiveness for code repair tasks.</p>
+</div>
+<div id="S1.p8" class="ltx_para">
+<p class="ltx_p">In summary, this paper makes the following contributions:</p>
+<ul id="S1.I2" class="ltx_itemize">
+<li id="S1.I2.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I2.i1.p1" class="ltx_para">
+<p class="ltx_p">A comprehensive benchmark for evaluating LLMs in feedback-driven code repair, covering diverse error types and feedback scenarios.</p>
+</div>
+</li>
+<li id="S1.I2.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I2.i2.p1" class="ltx_para">
+<p class="ltx_p">A systematic empirical evaluation of state-of-the-art LLMs, providing insights into their strengths, limitations, and adaptability in iterative repair tasks.</p>
+</div>
+</li>
+<li id="S1.I2.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I2.i3.p1" class="ltx_para">
+<p class="ltx_p">Actionable recommendations for improving LLMs’ feedback comprehension and repair effectiveness, highlighting the role of structured feedback and optimized prompting techniques.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S1.p9" class="ltx_para">
+<p class="ltx_p">All data/code used in this study is provided in the package <cite class="ltx_cite ltx_citemacro_citep">(ano, <a href="#bib.bib2" title="" class="ltx_ref">2025</a>)</cite>.</p>
+</div>
+</section>
+<section id="S2" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">2. </span>Benchmark Construction</h2>
+
+<div id="S2.p1" class="ltx_para">
+<p class="ltx_p">In this section, we introduce our new benchmark FeedbackEval for feedback-driven code repair. We present the benchmark format (Section 2.1), the construction procedure (Section 2.2), and the resulting benchmark (Section 2.3).</p>
+</div>
+<section id="S2.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.1. </span>Benchmark Format</h3>
+
+<figure id="S2.F1" class="ltx_figure"><img src="/html/2504.06939/assets/images/benchmark-format.png" id="S2.F1.g1" class="ltx_graphics ltx_centering ltx_img_square" width="598" height="516" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 1</span>. </span><span class="ltx_text" style="font-size:90%;">An example of code repair task in FeedbackEval </span></figcaption>
+</figure>
+<div id="S2.SS1.p1" class="ltx_para">
+<p class="ltx_p">Each task in the benchmark consists of an erroneous code segment, a descriptive docstring, contextual information, and multiple forms of feedback, simulating realistic software development scenarios where developers receive guidance from diverse sources. The key components of the benchmark are defined as follows:</p>
+</div>
+<div id="S2.SS1.p2" class="ltx_para">
+<ul id="S2.I1" class="ltx_itemize">
+<li id="S2.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Erroneous Code:</span> A faulty function or code snippet requiring correction serves as the initial state for the repair task.</p>
+</div>
+</li>
+<li id="S2.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i2.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Docstring:</span> A high-level description of the code’s intended functionality, providing a semantic reference to help the LLM understand the goal of the code.</p>
+</div>
+</li>
+<li id="S2.I1.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i3.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Context:</span> Supplementary information about the project or surrounding code environment, such as related APIs, class definitions, or global variables. This offers a broader understanding of the code’s role within a larger system.</p>
+</div>
+</li>
+<li id="S2.I1.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i4.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Test Feedback:</span> Derived from pytest <cite class="ltx_cite ltx_citemacro_citep">(Krekel et al., <a href="#bib.bib30" title="" class="ltx_ref">2023</a>)</cite> test cases, this feedback explicitly identifies failing tests and expected outcomes, providing clear, actionable guidance for code correction. This emulates real-world debugging, where developers rely on test results to diagnose issues.</p>
+</div>
+</li>
+<li id="S2.I1.i5" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i5.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Compiler Feedback:</span> Generated using pylint <cite class="ltx_cite ltx_citemacro_citep">(Logilab and contributors, <a href="#bib.bib37" title="" class="ltx_ref">2023</a>)</cite> static analysis, this feedback highlights syntax errors, code style violations, and potential bugs, offering technical insights into structural flaws in the code.</p>
+</div>
+</li>
+<li id="S2.I1.i6" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i6.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Human Feedback:</span> Simulated through GPT-4o-mini, this feedback mimics developer-generated suggestions in natural language, pointing out potential logic flaws and recommending best practices to improve code reliability and robustness.</p>
+</div>
+</li>
+<li id="S2.I1.i7" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I1.i7.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Simple Feedback:</span> A minimalistic, generic form of feedback (e.g., “The code is wrong. Please fix it.”). It evaluates whether the LLM can initiate repairs with only vague or insufficient guidance.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="S2.SS1.p3" class="ltx_para">
+<p class="ltx_p">By incorporating multiple types of feedback, our benchmark challenges LLMs to demonstrate not only their code generation abilities but also their understanding of different feedback sources — from structured error outputs to nuanced human suggestions — reflecting the diverse forms of feedback encountered in real-world development.</p>
+</div>
+</section>
+<section id="S2.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.2. </span>Benchmark Construction</h3>
+
+<div id="S2.SS2.p1" class="ltx_para">
+<p class="ltx_p">We follow three main steps to create FeedbackEval: (i) selecting code generation tasks, (ii) collecting erroneous code segments and (iii) generating diverse feedback types for each error instance.</p>
+</div>
+<section id="S2.SS2.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">2.2.1. </span>Code Generation Task Selection</h4>
+
+<div id="S2.SS2.SSS1.p1" class="ltx_para">
+<p class="ltx_p">We select <span class="ltx_text ltx_font_bold">HumanEval</span> <cite class="ltx_cite ltx_citemacro_citep">(Chen et al., <a href="#bib.bib9" title="" class="ltx_ref">2021</a>)</cite> and <span class="ltx_text ltx_font_bold">CoderEval</span> <cite class="ltx_cite ltx_citemacro_citep">(Yu et al., <a href="#bib.bib65" title="" class="ltx_ref">2024</a>)</cite> as the sources for constructing FeedbackEval. <span class="ltx_text ltx_font_bold">HumanEval</span> consists of 164 manually curated programming problems, each providing a function signature, a docstring, and corresponding unit tests, designed to evaluate the code generation capabilities of LLMs. The strength of this dataset lies in its high quality and diversity, covering a wide range of programming tasks, which helps assess LLMs’ ability to generate code across different contexts.</p>
+</div>
+<div id="S2.SS2.SSS1.p2" class="ltx_para">
+<p class="ltx_p">However, recent studies indicate that existing LLM-based code generation methods struggle with generating code snippets that depend on project-specific contexts, such as private APIs, classes, data structures, or type constraints. <span class="ltx_text ltx_font_bold">CoderEval</span> aims to address the limitations of <span class="ltx_text ltx_font_bold">HumanEval</span> in evaluating code generation in real-world development scenarios. It selects code generation tasks from real open-source projects, covering multiple domains and considering common software development challenges such as complex data types, custom types, third-party libraries, and cross-procedural calls. Additionally, <span class="ltx_text ltx_font_bold">CoderEval</span> categorizes tasks into six levels based on their dependency on external contexts and provides comprehensive test cases to assess LLMs’ performance across various contextual settings.</p>
+</div>
+<div id="S2.SS2.SSS1.p3" class="ltx_para">
+<p class="ltx_p">In this study, we focus on the Python tasks of these two datasets, as the Python language is widely popular in both academia and industry. This approach not only aligns with the mainstream practices in current research on LLMs but also enhances the comparability of our findings with existing literature. Consequently, it provides a reliable foundation for the comprehensive evaluation of LLMs’ performance.</p>
+</div>
+</section>
+<section id="S2.SS2.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">2.2.2. </span>Erroneous Code Segments Collection</h4>
+
+<div id="S2.SS2.SSS2.p1" class="ltx_para">
+<p class="ltx_p">We employed three distinct methods to collect erroneous code segments, ensuring coverage of a wide range of error types and realistic coding challenges.</p>
+</div>
+<div id="S2.SS2.SSS2.p2" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Rule-Based Error Injection.</span> Building on previous mutation testing research <cite class="ltx_cite ltx_citemacro_citep">(Ouyang et al., <a href="#bib.bib41" title="" class="ltx_ref">2024</a>; Khanfir et al., <a href="#bib.bib27" title="" class="ltx_ref">2023</a>; Li and Shin, <a href="#bib.bib34" title="" class="ltx_ref">2024</a>)</cite>, We introduce controlled errors into correct code implementations using predefined mutation operators. These operators systematically introduce common programming mistakes by modifying code elements such as arithmetic and logical operators, loop conditions, and function calls. By applying these rule-based transformations, we generate a structured set of erroneous code samples with well-defined error patterns, enabling precise error classification and controlled experimentation.</p>
+</div>
+<div id="S2.SS2.SSS2.p3" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">LLM-Driven Error Injection.</span> We follow previous studies on LLM-Driven Error Injection <cite class="ltx_cite ltx_citemacro_citep">(Tip et al., <a href="#bib.bib52" title="" class="ltx_ref">2024</a>; Wang et al., <a href="#bib.bib54" title="" class="ltx_ref">2024a</a>)</cite> and utilize a specialized prompt to guide <span class="ltx_text ltx_font_bold">GPT-4o-mini</span> in generating subtle and meaningful code mutations. The prompt, shown in figure <a href="#S2.F2" title="Figure 2 ‣ 2.2.2. Erroneous Code Segments Collection ‣ 2.2. Benchmark Construction ‣ 2. Benchmark Construction ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a>, is designed to ensure that the generated mutants introduce single, impactful alterations to the logic, structure, or syntax of the original code while maintaining its overall intent.</p>
+</div>
+<figure id="S2.F2" class="ltx_figure"><img src="/html/2504.06939/assets/images/llm-injection.png" id="S2.F2.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="451" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 2</span>. </span><span class="ltx_text" style="font-size:90%;">Prompt for LLM-driven error injection</span></figcaption>
+</figure>
+<div id="S2.SS2.SSS2.p4" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">LLM-Generated Incorrect Code.</span> We extract erroneous code directly from LLM-generated outputs by running GPT-4o-mini on benchmark datasets (e.g., <span class="ltx_text ltx_font_bold">HumanEval</span> and <span class="ltx_text ltx_font_bold">CoderEval</span>) under a pass@10 evaluation setting. From these results, we filter out incorrect code segments that failed to pass the test cases or meet functional requirements. This approach captures naturally occurring errors generated by LLMs, providing insights into their typical failure modes and limitations in code generation tasks.</p>
+</div>
+<div id="S2.SS2.SSS2.p5" class="ltx_para">
+<p class="ltx_p">By integrating these three approaches, our benchmark captures a diverse range of coding errors, from syntactic and semantic mistakes to higher-level logical flaws.</p>
+</div>
+</section>
+<section id="S2.SS2.SSS3" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">2.2.3. </span>Generating Diverse Feedback Information</h4>
+
+<div id="S2.SS2.SSS3.p1" class="ltx_para">
+<p class="ltx_p">For each erroneous code instance, we generate four types of feedback to simulate real-world debugging scenarios:</p>
+</div>
+<div id="S2.SS2.SSS3.p2" class="ltx_para">
+<ul id="S2.I2" class="ltx_itemize">
+<li id="S2.I2.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I2.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Test Feedback:</span> Extracted from pytest test cases, this feedback explicitly identifies failing tests and expected outcomes, providing clear and actionable guidance for code correction.</p>
+</div>
+</li>
+<li id="S2.I2.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I2.i2.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Compiler Feedback:</span> Generated using pylint static analysis, this feedback highlights syntax errors, code style violations, and potential bugs, offering technical and specific insights.</p>
+</div>
+</li>
+<li id="S2.I2.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I2.i3.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Human Feedback:</span> Simulated by GPT-4o-mini, this feedback mimics natural language input from a human reviewer, often containing unstructured and contextually rich suggestions <cite class="ltx_cite ltx_citemacro_citep">(Zheng et al., <a href="#bib.bib70" title="" class="ltx_ref">2024</a>; Wang et al., <a href="#bib.bib57" title="" class="ltx_ref">2023c</a>)</cite>. Figure <a href="#S2.F3" title="Figure 3 ‣ 2.2.3. Generating Diverse Feedback Information ‣ 2.2. Benchmark Construction ‣ 2. Benchmark Construction ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> illustrates the prompt for simulating human feedback.</p>
+</div>
+</li>
+<li id="S2.I2.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S2.I2.i4.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Simple Feedback:</span> A minimalistic form of feedback consisting of a single sentence: “The code is wrong. Please fix it.” This feedback provides no specific guidance, evaluating the LLMs’ ability to infer necessary repairs from minimal input.</p>
+</div>
+</li>
+</ul>
+</div>
+<figure id="S2.F3" class="ltx_figure"><img src="/html/2504.06939/assets/images/simulate-prompt.png" id="S2.F3.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="470" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 3</span>. </span><span class="ltx_text" style="font-size:90%;">Prompt for simulating human feedback</span></figcaption>
+</figure>
+<div id="S2.SS2.SSS3.p3" class="ltx_para">
+<p class="ltx_p">Each erroneous code segment is paired with feedback from all four categories. By systematically analyzing how LLMs interpret and act upon different feedback types, the benchmark offers insights into their feedback comprehension, adaptability, and repair strategies across varying levels of complexity.</p>
+</div>
+</section>
+</section>
+<section id="S2.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">2.3. </span>Resulting Benchmark</h3>
+
+<div id="S2.SS3.p1" class="ltx_para">
+<p class="ltx_p">Following this methodology, we construct a new benchmark, FeedbackEval, to systematically evaluate LLMs’ ability to interpret and utilize various feedback types in code repair. The benchmark is characterized by the following key features.</p>
+</div>
+<div id="S2.SS3.p2" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Scale.</span> FeedbackEval consists of 394 coding tasks covering a diverse range of programming scenarios. In total, it includes 3,736 erroneous code instances, each paired with four distinct types of feedback.</p>
+</div>
+<div id="S2.SS3.p3" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Feedback Diversity.</span> FeedbackEval systematically integrates multiple feedback types, distinguishing it from prior benchmarks that predominantly focus on compiler diagnostics or test-based verification. By encompassing both structured (compiler messages, test failures) and unstructured (human reviews, simplified feedback) guidance, FeedbackEval enables a comprehensive analysis of how different LLMs interpret and utilize feedback. This makes it a valuable resource for studying iterative code refinement and enhancing feedback-driven LLM improvements.</p>
+</div>
+<figure id="S2.F4" class="ltx_figure"><img src="/html/2504.06939/assets/images/errors_distribution.png" id="S2.F4.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="449" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 4</span>. </span><span class="ltx_text" style="font-size:90%;">Distribution of Error Types in FeedbackEval </span></figcaption>
+</figure>
+<div id="S2.SS3.p4" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Bug Diversity.</span> Figure <a href="#S2.F4" title="Figure 4 ‣ 2.3. Resulting Benchmark ‣ 2. Benchmark Construction ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">4</span></a> illustrates the distribution of error types in FeedbackEval, categorized based on the exceptions encountered during execution or compilation. AssertionError is the most prevalent (2,213 instances), reflecting test failures caused by functional correctness issues, followed by TypeError (715 instances) and NameError (323 instances). The benchmark also includes a range of other error types, from AttributeError (203 instances) to rare cases such as ModuleNotFoundError (3 instances) and FileNotFoundError (1 instance). This diverse error distribution ensures that FeedbackEval provides a comprehensive evaluation of LLMs’ ability to repair a wide spectrum of programming issues across different feedback modalities.</p>
+</div>
+<div id="S2.SS3.p5" class="ltx_para">
+<p class="ltx_p">Overall, FeedbackEval features feedback diversity, incorporating both structured and unstructured feedback to simulate real-world debugging scenarios. Bug diversity ensures a broad representation of errors, enabling a thorough assessment of LLMs’ performance across varied fault patterns. As FeedbackEval evolves, it can be expanded with more error types and complex repair tasks, further enhancing its ability to reflect realistic, large-scale debugging challenges.</p>
+</div>
+</section>
+</section>
+<section id="S3" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">3. </span>Experimental Setup</h2>
+
+<div id="S3.p1" class="ltx_para">
+<p class="ltx_p">To answer the RQs, we conduct a study based on FeedbackEval. This section details the experimental setup, including LLM selection and implementation procedures.</p>
+</div>
+<div id="S3.p2" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">LLM Selection.</span>
+We select five mainstream LLMs with strong performance in code-related tasks, including both open-source and closed-source LLMs: GPT-4o (GPT-4o-2024-11-20) <cite class="ltx_cite ltx_citemacro_citep">(Achiam et al., <a href="#bib.bib3" title="" class="ltx_ref">2023</a>)</cite>, Claude-3.5 (Claude-3-5-Sonnet-20241022) <cite class="ltx_cite ltx_citemacro_citep">(Anthropic, <a href="#bib.bib5" title="" class="ltx_ref">2024</a>)</cite>, Gemini-1.5 (Gemini-1.5-pro, released at 2024-9-24) <cite class="ltx_cite ltx_citemacro_citep">(DeepMind, <a href="#bib.bib13" title="" class="ltx_ref">2024</a>)</cite>, GLM-4 (GLM-4-Plus, released at 2024-8-29) <cite class="ltx_cite ltx_citemacro_citep">(zhipuAI, <a href="#bib.bib73" title="" class="ltx_ref">2024</a>)</cite>, and Qwen2.5 (Qwen2.5-72B-Instruct, released at 2024-9-19) <cite class="ltx_cite ltx_citemacro_citep">(Cloud, <a href="#bib.bib12" title="" class="ltx_ref">2024</a>)</cite>. These LLMs are chosen for their advanced capabilities in code understanding, generation, and feedback adaptation, which are critical aspects of our study on feedback comprehension and evaluation.</p>
+</div>
+<div id="S3.p3" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Implementation Procedure.</span>
+For the experiments, we utilized a subset of FeedbackEval due to computational constraints and the need for focused analysis within a feasible runtime. We randomly selected one erroneous code instance per task, resulting a subset of 394 erroneous code instances, each paired with four distinct feedback types.</p>
+</div>
+<div id="S3.p4" class="ltx_para">
+<p class="ltx_p">To ensure consistency and fairness in our evaluation, we apply the same experimental settings and evaluation metrics across all LLMs. Each LLM was evaluated using the same random sampling strategy with a temperature parameter set to 0.3, and all LLMs were accessed via their respective APIs. To measure performance, we introduced a new metric, <span class="ltx_text ltx_font_bold">Repair@k</span>, which evaluates the pass rate of code after <span class="ltx_text ltx_font_bold">k</span> rounds of iterative repair. This metric assesses the LLMs’ ability to refine code based on feedback over multiple iterations, providing insights into their adaptability and robustness in feedback-driven scenarios.</p>
+</div>
+</section>
+<section id="S4" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">4. </span>RQ1: Single-Iteration Code Repair</h2>
+
+<div id="S4.p1" class="ltx_para">
+<p class="ltx_p">To understand how different LLMs handle code repair based on feedback, we evaluate their performance in single-iteration repair tasks.</p>
+</div>
+<section id="S4.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.1. </span>Design</h3>
+
+<div id="S4.SS1.p1" class="ltx_para">
+<p class="ltx_p">We design an experiment to evaluate the performance of five selected LLMs in single-iteration code repair tasks using feedback. For each of the 394 tasks in FeedbackEval, we randomly select an erroneous code segment and task the LLMs with repairing it in a single iteration based on one of four feedback types. To ensure a fair comparison, the same prompt templates are used across all LLMs and feedback types, as illustrated in Figure <a href="#S4.F5" title="Figure 5 ‣ 4.1. Design ‣ 4. RQ1: Single-Iteration Code Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>, adapted from prior studies <cite class="ltx_cite ltx_citemacro_citep">(Zheng et al., <a href="#bib.bib70" title="" class="ltx_ref">2024</a>)</cite>. The repair prompt in Figure <a href="#S4.F5" title="Figure 5 ‣ 4.1. Design ‣ 4. RQ1: Single-Iteration Code Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a> instructs the LLM to fix the given erroneous code based on specific feedback (e.g., compiler feedback, test feedback). Also, supplementary information, such as docstrings and contextual details, is provided to help the LLM better understand the task and the broader context of the code.</p>
+</div>
+<div id="S4.SS1.p2" class="ltx_para">
+<p class="ltx_p">Performance is measured using the <span class="ltx_text ltx_font_bold">Repair@1</span> metric, which quantifies the pass rate of repaired code after one feedback iteration. To mitigate randomness and enhance result reliability, each experiment is conducted twice under identical conditions, with the average performance reported as the final result. This setup systematically evaluates LLMs’ ability to leverage feedback for code repair.</p>
+</div>
+<figure id="S4.F5" class="ltx_figure"><img src="/html/2504.06939/assets/images/rq1_prompt.png" id="S4.F5.g1" class="ltx_graphics ltx_centering ltx_img_square" width="598" height="583" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 5</span>. </span><span class="ltx_text" style="font-size:90%;">Prompt for Single-Iteration Code Repair Using Feedback</span></figcaption>
+</figure>
+</section>
+<section id="S4.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">4.2. </span>Results</h3>
+
+<figure id="S4.T1" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering" style="font-size:80%;"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:113%;">Table 1</span>. </span><span class="ltx_text" style="font-size:113%;">Average Repair@1 on FeedbackEval for Selected LLMs</span></figcaption>
+<div class="ltx_inline-block ltx_align_center ltx_transformed_outer" style="width:433.6pt;height:151.7pt;vertical-align:-0.0pt;"><span class="ltx_transformed_inner" style="transform:translate(62.4pt,-21.8pt) scale(1.40445992824028,1.40445992824028) ;">
+<table class="ltx_tabular ltx_align_middle">
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><span class="ltx_text ltx_font_bold" style="font-size:80%;">Feedback</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><span class="ltx_text ltx_font_bold" style="font-size:80%;">GPT-4o</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><span class="ltx_text ltx_font_bold" style="font-size:80%;">Claude-3.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><span class="ltx_text ltx_font_bold" style="font-size:80%;">Gemini-1.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><span class="ltx_text ltx_font_bold" style="font-size:80%;">GLM-4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt"><span class="ltx_text ltx_font_bold" style="font-size:80%;">Qwen2.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_tt"><span class="ltx_text ltx_font_bold" style="font-size:80%;">Average</span></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">Test</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">61.7</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text ltx_font_bold" style="font-size:80%;">65.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">60.4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">57.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">60.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:80%;">61.0</span></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">Compiler</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">55.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text ltx_font_bold" style="font-size:80%;">58.9</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">56.0</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">53.3</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">55.3</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:80%;">55.8</span></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">Human</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">50.1</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text ltx_font_bold" style="font-size:80%;">55.8</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">51.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">46.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">48.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:80%;">50.5</span></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">Simple</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">58.2</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text ltx_font_bold" style="font-size:80%;">63.4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">54.4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">53.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">54.9</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t"><span class="ltx_text" style="font-size:80%;">56.9</span></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t"><span class="ltx_text ltx_font_bold" style="font-size:80%;">Average</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">56.4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t"><span class="ltx_text ltx_font_bold" style="font-size:80%;">60.8</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">55.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">52.7</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t"><span class="ltx_text" style="font-size:80%;">54.8</span></td>
+<td class="ltx_td ltx_border_bb ltx_border_t"></td>
+</tr>
+</table>
+</span></div>
+</figure>
+<figure id="S4.F6" class="ltx_figure"><img src="/html/2504.06939/assets/x1.png" id="S4.F6.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="829" height="594" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 6</span>. </span><span class="ltx_text" style="font-size:90%;">Repair@1 Results of Different LLMs across Two Datasets</span></figcaption>
+</figure>
+<div id="S4.SS2.p1" class="ltx_para">
+<p class="ltx_p">Table <a href="#S4.T1" title="Table 1 ‣ 4.2. Results ‣ 4. RQ1: Single-Iteration Code Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> presents the average performance of different LLMs in feedback-driven single-iteration code repair on FeedbackEval.</p>
+</div>
+<div id="S4.SS2.p2" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Overall Performance.</span>
+Table <a href="#S4.T1" title="Table 1 ‣ 4.2. Results ‣ 4. RQ1: Single-Iteration Code Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a> presents the average performance of different LLMs in single-iteration code repair across various feedback types. Claude-3.5 achieves the highest overall score (60.8%) and outperforms all LLMs across every feedback type, demonstrating its superior ability to leverage feedback for code repair. GPT-4o follows with a score of 56.4%, showing decent repair capability but performing noticeably worse than Claude-3.5, especially in handling human and simple feedback. Qwen2.5 (54.8%) and Gemini-1.5 (55.6%) perform comparably, exhibiting moderate feedback utilization, while GLM-4 (52.7%) consistently ranks the lowest across all feedback types.</p>
+</div>
+<div id="S4.SS2.p3" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Performance Comparison Across HumanEval and CoderEval.</span> Figure <a href="#S4.F6" title="Figure 6 ‣ 4.2. Results ‣ 4. RQ1: Single-Iteration Code Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">6</span></a> presents the Repair@1 comparison of different LLMs across HumanEval and CoderEval, highlighting how task complexity affects LLM performance.</p>
+</div>
+<div id="S4.SS2.p4" class="ltx_para">
+<p class="ltx_p">For HumanEval, which consists of relatively simple function-level code generation tasks such as data structure operations and numerical computations, all LLMs achieve higher performance. Claude-3.5 leads with an average score of 83.2%, followed by GPT-4o (80.2%), Gemini-1.5 (78.3%), and Qwen2.5 (78.2%), while GLM-4 lags behind (76.8%).</p>
+</div>
+<div id="S4.SS2.p5" class="ltx_para">
+<p class="ltx_p">In contrast, CoderEval introduces greater complexity, featuring repository-level tasks that require understanding broader code contexts and domain-specific logic. Challenges such as hallucinated method calls and incorrect API usage make repair tasks significantly harder. As a result, all LLMs experience a sharp performance drop (by 28.7% to 38.4%) compared to HumanEval, though their relative rankings remain largely unchanged. Claude-3.5 again achieves the highest score (38.4%), demonstrating the strongest adaptability to complex repairs, though still far from perfect. The other LLMs follow in the order of Gemini-1.5, GPT-4o, Qwen2.5, and GLM-4, with scores ranging from 32.9% to 28.7%.</p>
+</div>
+<div id="S4.SS2.p6" class="ltx_para">
+<p class="ltx_p">The substantial performance gap between HumanEval and CoderEval underscores the increased difficulty of real-world software repair tasks. While LLMs perform well on function-level problems with limited scope, their effectiveness diminishes when handling complex, context-dependent errors. These results highlight the necessity of FeedbackEval in systematically evaluating LLMs under varying levels of complexity, providing a more comprehensive assessment of their real-world repair capabilities.</p>
+</div>
+<div id="S4.SS2.p7" class="ltx_para">
+<span class="ltx_inline-block ltx_framed ltx_framed_rectangle" style="border-color: #000000;">
+<span class="ltx_p"><span class="ltx_text ltx_font_bold">Finding 1:</span> Claude-3.5 achieves the best performance in feedback-driven code repair, but all LLMs experience significant drops in repair success rates on tasks from CoderEval (28.7%-38.4%) compared to HumanEval, highlighting the challenges of complex, context-dependent errors in task-specific code repair and the need for improvement in real-world scenarios.</span>
+</span>
+</div>
+</section>
+</section>
+<section id="S5" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">5. </span>RQ2: Impact of Feedback Types</h2>
+
+<div id="S5.p1" class="ltx_para">
+<p class="ltx_p">To evaluate the impact of different feedback types on LLM-based code repair, we analyze their effect on LLM performance and identify which type provides the most effective guidance for improving repair accuracy.</p>
+</div>
+<section id="S5.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.1. </span>Design</h3>
+
+<div id="S5.SS1.p1" class="ltx_para">
+<p class="ltx_p">We extend our analysis from RQ1 by assessing how different feedback types influence LLM repair performance. Specifically, we measure repair@1 across various LLMs and feedback categories to determine their relative effectiveness. Additionally, we examine the relationship between task complexity and feedback utility, exploring whether more complex errors benefit from specific feedback types.</p>
+</div>
+</section>
+<section id="S5.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">5.2. </span>Results</h3>
+
+<figure id="S5.T2" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:90%;">Table 2</span>. </span><span class="ltx_text" style="font-size:90%;">Repair@1 Results of Different LLMs on Code Repair Tasks with Various Feedback</span></figcaption>
+<table class="ltx_tabular ltx_centering ltx_align_middle">
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:2.5pt 2.0pt;" rowspan="2"><span class="ltx_text ltx_font_bold">Feedback</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:2.5pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">GPT-4o</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:2.5pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">Claude-3.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:2.5pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">Gemini-1.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:2.5pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">GLM-4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_tt" style="padding:2.5pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">Qwen2.5</span></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">CoderEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">CoderEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">CoderEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">CoderEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">CoderEval</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">Test</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">85.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">37.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">84.1</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">45.9</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">80.4</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">40.4</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">83.5</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">31.6</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">84.1</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">37.0</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">Compiler</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">82.7</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">28.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">84.1</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">33.7</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">82.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">29.4</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">80.7</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">25.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">80.8</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">29.8</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">Human</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">71.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">28.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">79.1</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">32.4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">72.9</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">30.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">67.7</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">25.6</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">70.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">26.2</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">Simple</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">81.0</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">35.4</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">85.3</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">41.6</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">77.4</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">31.4</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">75.3</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">31.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">77.1</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:2.5pt 2.0pt;">32.7</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">Average</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" style="padding:2.5pt 2.0pt;">80.2</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">32.6</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">83.2</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;"><span class="ltx_text ltx_font_bold">38.4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" style="padding:2.5pt 2.0pt;">78.3</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">32.9</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" style="padding:2.5pt 2.0pt;">76.8</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" style="padding:2.5pt 2.0pt;">28.7</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" style="padding:2.5pt 2.0pt;">78.2</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_t" style="padding:2.5pt 2.0pt;">31.4</td>
+</tr>
+</table>
+</figure>
+<figure id="S5.F7" class="ltx_figure"><img src="/html/2504.06939/assets/images/rq2-example.png" id="S5.F7.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="598" height="335" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 7</span>. </span><span class="ltx_text" style="font-size:90%;">Example of Code Repair Task with Different Feedback</span></figcaption>
+</figure>
+<div id="S5.SS2.p1" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Overall Impact.</span> As shown in Table <a href="#S4.T1" title="Table 1 ‣ 4.2. Results ‣ 4. RQ1: Single-Iteration Code Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">1</span></a>, test feedback achieves the highest repair success rate (61.0%), followed by simple feedback (56.9%), compiler (55.8%), and human feedback (50.5%). Test feedback is the most effective for all LLMs, likely due to its explicit and structured nature, which directly pinpoints errors.</p>
+</div>
+<div id="S5.SS2.p2" class="ltx_para">
+<p class="ltx_p">Surprisingly, simple feedback, such as “The code is wrong. Please fix it” ranks second, suggesting LLMs can infer necessary corrections even without detailed error descriptions. Compiler feedback performs slightly worse, possibly because, while precise, it requires correct interpretation of technical details. Human feedback is the least effective, likely due to its unstructured and ambiguous nature</p>
+</div>
+<div id="S5.SS2.p3" class="ltx_para">
+<p class="ltx_p">Figure <a href="#S5.F7" title="Figure 7 ‣ 5.2. Results ‣ 5. RQ2: Impact of Feedback Types ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">7</span></a> shows an example of a code repair task with different feedback. The initial erroneous code fails due to excessive arguments in the <span class="ltx_text ltx_font_typewriter">_create_signature_hash</span> function. Each feedback type yields a distinct repair outcome. Test feedback provides a traceback identifying the argument mismatch, effectively guiding the LLM to remove the redundant argument, resulting in a successful fix. Compiler feedback detects unused arguments but lacks deeper reasoning, leading to a partial correction that retains the original argument error, ultimately failing the test suite. Human feedback offers detailed, structured suggestions, addressing multiple aspects such as <span class="ltx_text ltx_font_typewriter">RSA.importKey()</span> usage and hash compatibility. However, LLMs misinterpret parts of the feedback, producing an overly complex revision that introduces exception handling but fails to resolve the core argument issue, leading to an unsuccessful repair. In contrast, simple feedback offers only a vague directive, resulting in a superficial modification that fails due to the unresolved argument error.</p>
+</div>
+<div id="S5.SS2.p4" class="ltx_para">
+<p class="ltx_p">Overall, structured feedback proves most helpful, while simple feedback highlights LLMs’ strong inferential abilities, and human feedback remains the most challenging.</p>
+</div>
+<div id="S5.SS2.p5" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Performance on HumanEval Vs. CoderEval</span>
+Table <a href="#S5.T2" title="Table 2 ‣ 5.2. Results ‣ 5. RQ2: Impact of Feedback Types ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">2</span></a> compares the effectiveness of different feedback types on repair tasks from HumanEval and CoderEval. Across both datasets, Claude-3.5 consistently outperforms other LLMs, except when test feedback is used for HumanEval tasks.</p>
+</div>
+<div id="S5.SS2.p6" class="ltx_para">
+<p class="ltx_p">For HumanEval, test feedback leads to the highest repair success rates for most LLMs (except Gemini-1.5), with GPT-4o at 85.6% and Claude-3.5 at 84.1%. This indicates that structured, test-based guidance is the most interpretable for LLMs. Compiler feedback is also effective, as seen in Claude-3.5 ’s 84.1%, demonstrating the value of error-specific feedback for accurate code repairs. In contrast, human feedback challenges all LLMs, resulting in lower performance (GPT-4o at 71.6%, GLM-4 at 67.7%) due to its unstructured nature and implicit reasoning demands. Simple feedback, while minimal, is beneficial, with Claude-3.5 scoring 85.3%, highlighting the LLM’s strong inferential abilities.</p>
+</div>
+<div id="S5.SS2.p7" class="ltx_para">
+<p class="ltx_p">A similar trend is observed in CoderEval, where test feedback remains the most effective, with Claude-3.5 scoring the highest (45.9%) followed by Gemini-1.5 (40.4%). Compiler and simple feedback show moderate effectiveness, while human feedback is again the most challenging, particularly for GLM-4, which scores only 25.6%.</p>
+</div>
+<div id="S5.SS2.p8" class="ltx_para">
+<span class="ltx_inline-block ltx_framed ltx_framed_rectangle" style="border-color: #000000;">
+<span class="ltx_p"><span class="ltx_text ltx_font_bold">Finding 2:</span> Test feedback consistently leads to the highest repair success rates across LLMs, with Claude-3.5 performing the best in both HumanEval and CoderEval. While compiler and simple feedback show moderate effectiveness, human feedback remains the most challenging due to its unstructured nature, and task complexity further impacts the utilization of different feedback types.</span>
+</span>
+</div>
+</section>
+</section>
+<section id="S6" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">6. </span>RQ3: Mutiple-Iteration Repair</h2>
+
+<div id="S6.p1" class="ltx_para">
+<p class="ltx_p">In this RQ, we investigate the effectiveness of feedback-driven code repair with iterative feedback, evaluating how LLMs adapt and improve their performance across multiple iterations of feedback.</p>
+</div>
+<section id="S6.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">6.1. </span>Design</h3>
+
+<div id="S6.SS1.p1" class="ltx_para">
+<p class="ltx_p">From our benchmark, we selected a subset of tasks for multi-iteration repair experiments, considering the higher time and computational costs, especially for repair tasks from CoderEval. Ultimately, we used all 164 HumanEval problems and randomly sampled 100 from the original 230 CoderEval problems. For each task, an erroneous code segment was selected, ensuring diversity in error types and repair challenges. To maintain consistency, all LLMs were evaluated on the same erroneous code set, with each task paired with one of four feedback types: test feedback, compiler feedback, human feedback, or simple feedback.</p>
+</div>
+<div id="S6.SS1.p2" class="ltx_para">
+<p class="ltx_p">For each task, the LLMs were provided with the initial erroneous code and corresponding feedback, after which they performed a repair iteration. The repaired code was subsequently re-evaluated, and new feedback (of the same type) was generated based on any remaining errors or issues. This iterative repair process continued for three iterations, allowing the LLMs to progressively refine the code based on feedback. To assess performance, we introduced the <span class="ltx_text ltx_font_bold">Repair@k</span> metric, which measures the pass rate of the code after <math id="S6.SS1.p2.m1" class="ltx_Math" alttext="k" display="inline"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math> repair iterations (where <math id="S6.SS1.p2.m2" class="ltx_Math" alttext="k" display="inline"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>=3 in this study).</p>
+</div>
+</section>
+<section id="S6.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">6.2. </span>Results</h3>
+
+<figure id="S6.T3" class="ltx_table">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_table"><span class="ltx_text" style="font-size:90%;">Table 3</span>. </span><span class="ltx_text" style="font-size:90%;">Repair@3 results of different LLMs on code repair tasks using various feedback.</span></figcaption>
+<table class="ltx_tabular ltx_centering ltx_align_middle">
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:1pt 2.0pt;" rowspan="2"><span class="ltx_text ltx_font_bold">Feedback</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:1pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">GPT-4o</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:1pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">Claude-3.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:1pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">Gemini-1.5</span></td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_tt" style="padding:1pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">GLM-4</span></td>
+<td class="ltx_td ltx_align_center ltx_border_tt" style="padding:1pt 2.0pt;" colspan="2"><span class="ltx_text ltx_font_bold">Qwen2.5</span></td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">CoderEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">CoderEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">CoderEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">CoderEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">HumanEval</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">CoderEval</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;" rowspan="3"><span class="ltx_text ltx_font_bold">Test</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">86.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">42.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">82.3</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">52.1</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">81.0</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">46.4</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">82.3</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">42.2</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">82.9</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">39.2</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">92.1 <math id="S6.T3.m1" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">45.8 <math id="S6.T3.m2" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">86.6 <math id="S6.T3.m3" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">58.3 <math id="S6.T3.m4" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">85.3 <math id="S6.T3.m5" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">48.5 <math id="S6.T3.m6" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">87.8 <math id="S6.T3.m7" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">45.3 <math id="S6.T3.m8" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">87.2 <math id="S6.T3.m9" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">45.4 <math id="S6.T3.m10" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">93.9 <math id="S6.T3.m11" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">46.9 <math id="S6.T3.m12" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">88.4 <math id="S6.T3.m13" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">58.3</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">87.1 <math id="S6.T3.m14" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">48.5</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">88.1 <math id="S6.T3.m15" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">46.4 <math id="S6.T3.m16" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">88.2 <math id="S6.T3.m17" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">46.4 <math id="S6.T3.m18" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;" rowspan="3"><span class="ltx_text ltx_font_bold">Compiler</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">79.4</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">32.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">83.1</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">37.5</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">79.3</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">34.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">74.4</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">34.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">78.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">32.0</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">80.0 <math id="S6.T3.m19" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">36.1 <math id="S6.T3.m20" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">85.6 <math id="S6.T3.m21" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">40.6 <math id="S6.T3.m22" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">79.9 <math id="S6.T3.m23" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">37.1 <math id="S6.T3.m24" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">76.8 <math id="S6.T3.m25" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">37.1 <math id="S6.T3.m26" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">81.1 <math id="S6.T3.m27" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">36.1 <math id="S6.T3.m28" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">80.6 <math id="S6.T3.m29" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">37.1 <math id="S6.T3.m30" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">85.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">40.6</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">79.9</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">37.1</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">78.1 <math id="S6.T3.m31" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">38.1 <math id="S6.T3.m32" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">82.3 <math id="S6.T3.m33" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">37.1 <math id="S6.T3.m34" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;" rowspan="3"><span class="ltx_text ltx_font_bold">Human</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">73.2</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">34.7</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">81.5</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">39.2</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">72.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">32.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">64.6</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">32.0</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">71.3</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">34.0</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">76.2 <math id="S6.T3.m35" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">37.9 <math id="S6.T3.m36" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">82.8 <math id="S6.T3.m37" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">42.3 <math id="S6.T3.m38" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">77.4 <math id="S6.T3.m39" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">34.0 <math id="S6.T3.m40" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">68.9 <math id="S6.T3.m41" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">36.1 <math id="S6.T3.m42" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">72.6 <math id="S6.T3.m43" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">37.1 <math id="S6.T3.m44" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">76.2</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">39.0 <math id="S6.T3.m45" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">82.8</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">42.3</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">77.4</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">35.1 <math id="S6.T3.m46" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">72.0 <math id="S6.T3.m47" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">37.1 <math id="S6.T3.m48" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">75.0 <math id="S6.T3.m49" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">38.1 <math id="S6.T3.m50" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;" rowspan="3"><span class="ltx_text ltx_font_bold">Simple</span></td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">84.0</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">40.6</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">85.9</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">44.2</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">78.7</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">39.2</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">73.2</td>
+<td class="ltx_td ltx_align_center ltx_border_r ltx_border_t" style="padding:1pt 2.0pt;">37.1</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">79.9</td>
+<td class="ltx_td ltx_align_center ltx_border_t" style="padding:1pt 2.0pt;">35.1</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">85.2 <math id="S6.T3.m51" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">41.7 <math id="S6.T3.m52" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">88.5 <math id="S6.T3.m53" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">46.3 <math id="S6.T3.m54" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">83.4 <math id="S6.T3.m55" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">41.2 <math id="S6.T3.m56" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">76.2 <math id="S6.T3.m57" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_r" style="padding:1pt 2.0pt;">38.1 <math id="S6.T3.m58" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">82.3 <math id="S6.T3.m59" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center" style="padding:1pt 2.0pt;">36.1 <math id="S6.T3.m60" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+</tr>
+<tr class="ltx_tr">
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding:1pt 2.0pt;">85.2</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r" style="padding:1pt 2.0pt;">42.7 <math id="S6.T3.m61" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding:1pt 2.0pt;">89.1 <math id="S6.T3.m62" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r" style="padding:1pt 2.0pt;">47.4 <math id="S6.T3.m63" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding:1pt 2.0pt;">83.4</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r" style="padding:1pt 2.0pt;">41.2</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding:1pt 2.0pt;">76.2</td>
+<td class="ltx_td ltx_align_center ltx_border_bb ltx_border_r" style="padding:1pt 2.0pt;">38.1</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding:1pt 2.0pt;">82.3</td>
+<td class="ltx_td ltx_align_center ltx_border_bb" style="padding:1pt 2.0pt;">37.1 <math id="S6.T3.m64" class="ltx_Math" alttext="\uparrow" display="inline"><semantics><mo stretchy="false">↑</mo><annotation encoding="application/x-tex">\uparrow</annotation></semantics></math>
+</td>
+</tr>
+</table>
+</figure>
+<figure id="S6.F8" class="ltx_figure">
+<div class="ltx_block">
+<figure id="S6.F8.sf1" class="ltx_figure ltx_align_center"><img src="/html/2504.06939/assets/x2.png" id="S6.F8.sf1.g1" class="ltx_graphics ltx_img_landscape" width="830" height="550" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(a)</span> </span><span class="ltx_text" style="font-size:90%;">HumanEval</span></figcaption>
+</figure>
+<figure id="S6.F8.sf2" class="ltx_figure ltx_align_center"><img src="/html/2504.06939/assets/x3.png" id="S6.F8.sf2.g1" class="ltx_graphics ltx_img_landscape" width="830" height="550" alt="Refer to caption">
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">(b)</span> </span><span class="ltx_text" style="font-size:90%;">CoderEval</span></figcaption>
+</figure>
+</div>
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 8</span>. </span><span class="ltx_text" style="font-size:90%;">Performance changes across repair iterations</span></figcaption>
+</figure>
+<div id="S6.SS2.p1" class="ltx_para">
+<p class="ltx_p">Table <a href="#S6.T3" title="Table 3 ‣ 6.2. Results ‣ 6. RQ3: Mutiple-Iteration Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">3</span></a> presents a comprehensive analysis of how different LLMs respond to various types of feedback over multiple repair iterations.</p>
+</div>
+<div id="S6.SS2.p2" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Cross-LLM Performance Comparison.</span>
+GPT-4o leads on HumanEval, especially with test feedback, achieving 93.9% at repair@3. This suggests strong adaptability to structured problem-solving tasks. Claude-3.5 demonstrates balanced performance across datasets and feedback types. It performs competitively under test and simple feedback (e.g., 89.1% on HumanEval), reflecting versatility in handling both datasets’ characteristics. Gemini-1.5 achieves solid improvements on HumanEval with test feedback but lags on CoderEval, particularly under compiler and human feedback. This indicates a potential sensitivity to CoderEval’s more complex code contexts. GLM-4 and Qwen2.5 generally underperform on both datasets, particularly with compiler and human feedback. However, Qwen2.5 shows late-stage recovery on CoderEval under human feedback (38.1%), indicating adaptation potential in later repair stages.</p>
+</div>
+<div id="S6.SS2.p3" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Comparative Effectiveness of Feedback Types.</span>
+Test feedback remains the most effective and consistent, driving the highest performance gains for all LLMs across both datasets. Its structured, pass/fail nature appears well-suited to guiding LLMs toward correct outputs. Compiler feedback lags behind, showing only marginal improvements. This suggests that syntax-level feedback lacks sufficient information to guide higher-level code corrections effectively. Human feedback demonstrates dataset-dependent behavior. It plateaus early on HumanEval but shows late-stage gains on CoderEval, implying that human instructions may excel in complex, diverse tasks where LLM understanding needs deeper refinement. Simple feedback provides modest but stable improvements. While less effective than test feedback, its consistent performance across LLMs and datasets highlights its potential as a lightweight, general-purpose feedback mechanism.</p>
+</div>
+<div id="S6.SS2.p4" class="ltx_para ltx_noindent">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Performance Evolution Across Iterations.</span>
+As illustrated in figure <a href="#S6.F8" title="Figure 8 ‣ 6.2. Results ‣ 6. RQ3: Mutiple-Iteration Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">8</span></a>, the performance trajectory over iterations reveals two key trends:
+ <span class="ltx_inline-block"><svg id="S6.SS2.p4.pic1" class="ltx_picture" height="14.95" overflow="visible" style="vertical-align:-3.01px" version="1.1" viewBox="0 0 14.95 14.95" width="14.95"><g transform="translate(0,14.95) matrix(1 0 0 -1 0 0) translate(7.47,0) translate(0,7.47)" fill="#000000" stroke="#000000" stroke-width="0.4pt"><g fill="#000000"><path d="M 7.2 0 C 7.2 3.97 3.97 7.2 0 7.2 C -3.97 7.2 -7.2 3.97 -7.2 0 C -7.2 -3.97 -3.97 -7.2 0 -7.2 C 3.97 -7.2 7.2 -3.97 7.2 0 Z M 0 0"></path></g><g transform="matrix(1.0 0.0 0.0 1.0 -3.46 -4.46)" fill="#FFFFFF" stroke="#FFFFFF"><foreignObject width="6.92" height="8.92" transform="matrix(1 0 0 -1 0 16.6)" overflow="visible" color="#FFFFFF">1</foreignObject></g></g></svg></span> Most LLMs, particularly GPT-4o and Claude-3.5, exhibit sharp performance gains between repair@1 and repair@2, driven predominantly by test feedback.  <span class="ltx_inline-block"><svg id="S6.SS2.p4.pic2" class="ltx_picture" height="14.95" overflow="visible" style="vertical-align:-3.01px" version="1.1" viewBox="0 0 14.95 14.95" width="14.95"><g transform="translate(0,14.95) matrix(1 0 0 -1 0 0) translate(7.47,0) translate(0,7.47)" fill="#000000" stroke="#000000" stroke-width="0.4pt"><g fill="#000000"><path d="M 7.2 0 C 7.2 3.97 3.97 7.2 0 7.2 C -3.97 7.2 -7.2 3.97 -7.2 0 C -7.2 -3.97 -3.97 -7.2 0 -7.2 C 3.97 -7.2 7.2 -3.97 7.2 0 Z M 0 0"></path></g><g transform="matrix(1.0 0.0 0.0 1.0 -3.46 -4.46)" fill="#FFFFFF" stroke="#FFFFFF"><foreignObject width="6.92" height="8.92" transform="matrix(1 0 0 -1 0 16.6)" overflow="visible" color="#FFFFFF">2</foreignObject></g></g></svg></span> By repair@3, gains tend to plateau, especially for compiler and simple feedback types. This suggests diminishing returns from repetitive feedback when key semantic misunderstandings remain unaddressed.</p>
+</div>
+<div id="S6.SS2.p5" class="ltx_para">
+<span class="ltx_inline-block ltx_framed ltx_framed_rectangle" style="border-color: #000000;">
+<span class="ltx_p"><span class="ltx_text ltx_font_bold">Finding 3:</span> Iterative feedback enhances LLM code repair, with test and human feedback yielding the highest gains. However, performance gains diminish over iterations, typically stabilizing after two to three iterations of repair.</span>
+</span>
+</div>
+</section>
+</section>
+<section id="S7" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">7. </span>RQ4: Prompting Techniques Impact</h2>
+
+<div id="S7.p1" class="ltx_para">
+<p class="ltx_p">To investigate the impact of different prompting techniques on feedback-driven code repair, we evaluate how various prompting strategies affect LLMs’ ability to interpret and apply feedback effectively during the code repair process.</p>
+</div>
+<section id="S7.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">7.1. </span>Design</h3>
+
+<figure id="S7.F9" class="ltx_figure"><img src="/html/2504.06939/assets/images/rq4-prompt.png" id="S7.F9.g1" class="ltx_graphics ltx_centering ltx_img_square" width="598" height="497" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 9</span>. </span><span class="ltx_text" style="font-size:90%;">Example of chain-of-thought and few-shot</span></figcaption>
+</figure>
+<div id="S7.SS1.p1" class="ltx_para">
+<p class="ltx_p">In this section, we explore the impact of various prompting techniques on feedback-driven code repair. Specifically, we investigate three key techniques: chain-of-thought reasoning <cite class="ltx_cite ltx_citemacro_citep">(Zhang et al., <a href="#bib.bib68" title="" class="ltx_ref">2022</a>)</cite>, few-shot learning <cite class="ltx_cite ltx_citemacro_citep">(Brown et al., <a href="#bib.bib7" title="" class="ltx_ref">2020</a>)</cite>, and the inclusion of additional context information. As shown in Figure <a href="#S7.F9" title="Figure 9 ‣ 7.1. Design ‣ 7. RQ4: Prompting Techniques Impact ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">9</span></a>, we enhance the baseline prompt used in RQ1 by incorporating a chain-of-thought step for the chain-of-thought reasoning technique and adding a repair example for the few-shot learning approach. Furthermore, we examine the effect of providing extra context, such as docstrings, project-level context, and guidelines, by modifying the baseline prompt to remove these elements. Due to space constraints, the full details of the prompt are not included in the paper but are available in our release package <cite class="ltx_cite ltx_citemacro_citep">(ano, <a href="#bib.bib2" title="" class="ltx_ref">2025</a>)</cite>.</p>
+</div>
+<div id="S7.SS1.p2" class="ltx_para">
+<p class="ltx_p">For our experiments, we select the Claude-3.5 as the base LLM due to its strong performance in previous RQs. We evaluate the impact of different prompting techniques on its performance in a single-iteration code repair task. All experiments are conducted using the CoderEval dataset, with 100 randomly sampled erroneous code segments. Each experimental condition is systematically tested to assess how variations in prompting affect the LLM’s ability to interpret and apply feedback. The baseline prompt, as described in RQ1 (Figure <a href="#S4.F5" title="Figure 5 ‣ 4.1. Design ‣ 4. RQ1: Single-Iteration Code Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>), serves as the starting point, with specific modifications introduced for each experimental condition.</p>
+</div>
+</section>
+<section id="S7.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">7.2. </span>Results</h3>
+
+<figure id="S7.F10" class="ltx_figure"><img src="/html/2504.06939/assets/x4.png" id="S7.F10.g1" class="ltx_graphics ltx_centering ltx_img_landscape" width="829" height="552" alt="Refer to caption">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure"><span class="ltx_text" style="font-size:90%;">Figure 10</span>. </span><span class="ltx_text" style="font-size:90%;">Performances of different prompt techniques.</span></figcaption>
+</figure>
+<div id="S7.SS2.p1" class="ltx_para">
+<p class="ltx_p">Figure <a href="#S7.F10" title="Figure 10 ‣ 7.2. Results ‣ 7. RQ4: Prompting Techniques Impact ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">10</span></a> illustrates the impact of different prompting techniques on the performance of Claude-3.5 in single-iteration code repair tasks. Under the baseline setting depicted in figure <a href="#S4.F5" title="Figure 5 ‣ 4.1. Design ‣ 4. RQ1: Single-Iteration Code Repair ‣ FeedbackEval: A Benchmark for Evaluating Large Language Models in Feedback-Driven Code Repair Tasks" class="ltx_ref"><span class="ltx_text ltx_ref_tag">5</span></a>, Claude-3.5 achieves a performance score of 52.6%. Notably, integrating chain-of-thought reasoning does not yield measurable improvements, as performance remains unchanged at 52.6%. This suggests that in single-iteration code repair using test feedback, explicitly guiding the LLM through reasoning steps may be redundant, as the feedback itself already provides a structured source of reasoning. The few-shot setup, which provides example repairs before the main task, results in a performance score of 50.5%. This suggests that, unlike in other tasks where few-shot examples typically improve performance, the LLM in this code repair scenario may already extract sufficient understanding from the provided feedback and task description, reducing the necessity for additional demonstrations.</p>
+</div>
+<div id="S7.SS2.p2" class="ltx_para">
+<p class="ltx_p">The ablation study further examines the effects of removing individual prompt components. Excluding the persona prompt results in a slight performance decline to 50.5%, indicating that while persona-based instructions may influence response formulation, their absence does not substantially impact repair accuracy. One possible explanation is that persona-based instructions primarily introduce stylistic preferences or redundant information that do not significantly enhance the LLM’s understanding of the repair task.</p>
+</div>
+<div id="S7.SS2.p3" class="ltx_para">
+<p class="ltx_p">In contrast, the removal of docstrings, context, and guidelines leads to more pronounced performance degradation. The absence of guidelines and contextual information reduces the score to 48.5, highlighting the importance of structured task instructions and surrounding code context in LLM comprehension. The most substantial decline occurs when docstrings are removed, lowering performance to 47.4%. This underscores the critical role of docstrings in project-level code repair, as they provide high-level semantic descriptions that help the LLM infer function behavior and intended functionality. Without docstrings, the LLM may struggle to determine the expected output and apply appropriate corrections based solely on local code structure and test feedback.</p>
+</div>
+<div id="S7.SS2.p4" class="ltx_para">
+<span class="ltx_inline-block ltx_framed ltx_framed_rectangle" style="border-color: #000000;">
+<span class="ltx_p"><span class="ltx_text ltx_font_bold">Finding 4:</span> Persona, chain-of-thought, and few-shot learning exhibit minimal effect, suggesting they are less essential for single-iteration repair tasks. In contrast, docstrings, context, and guidelines demonstrate substantial performance improvements, underscoring the critical role of structured, context-rich input in enhancing the LLM’s ability to perform effective code repairs.</span>
+</span>
+</div>
+</section>
+</section>
+<section id="S8" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">8. </span>Threats to validity</h2>
+
+<div id="S8.p1" class="ltx_para">
+<p class="ltx_p">We have identified the following threats to our study.</p>
+</div>
+<div id="S8.p2" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Threats in Benchmark Construction.</span>
+One potential threat lies in the limited size and scope of our benchmark, which currently focuses on Python and a subset of tasks from <span class="ltx_text ltx_font_bold">HumanEval</span> and <span class="ltx_text ltx_font_bold">CoderEval</span>. This may limit the generalizability of our findings to other programming languages or more diverse coding scenarios. To address this, we plan to extend the benchmark in the future to include more tasks, languages, and error types.</p>
+</div>
+<div id="S8.p3" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Threats in Erroneous Code.</span>
+The quality of the erroneous code segments used in our benchmark is another potential threat. To ensure that the introduced errors are realistic and representative of common coding mistakes, we employ three distinct methods for generating erroneous code. This approach ensures the errors reflect common programming mistakes and support robust performance analysis.</p>
+</div>
+<div id="S8.p4" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Threats in Feedback Types.</span>
+The diversity and representativeness of the feedback types used in this study present another potential threat to validity. While we incorporate four distinct feedback types, there may be additional forms of feedback not covered in our analysis. Future research could explore a broader range of feedback mechanisms to further assess the generalizability of our findings.</p>
+</div>
+<div id="S8.p5" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Threats in Empirical Study.</span>
+A potential threat to validity arises from the inherent randomness in LLM responses. Due to computational and time constraints, multi-iteration repair experiments were conducted only once. While this approach allowed us to explore iterative repair scenarios, the absence of repeated trials introduces a potential risk of result variability. Future work could address this limitation by performing multiple runs of multi-iteration experiments to further validate the consistency of the findings.</p>
+</div>
+</section>
+<section id="S9" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">9. </span>Related Work</h2>
+
+<div id="S9.p1" class="ltx_para">
+<p class="ltx_p">In this section, we mainly introduce related work on LLM-based code generation, LLM-based code repair and code benchmark.</p>
+</div>
+<section id="S9.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">9.1. </span>LLM-based Code Generation</h3>
+
+<div id="S9.SS1.p1" class="ltx_para">
+<p class="ltx_p">Recent advances in LLMs have significantly improved code generation capabilities.
+Code LLMs are designed specifically for code-centric tasks. For instance, models such as StarCoder <cite class="ltx_cite ltx_citemacro_citep">(Li et al., <a href="#bib.bib32" title="" class="ltx_ref">2023</a>)</cite>, CodeLlama <cite class="ltx_cite ltx_citemacro_citep">(Roziere et al., <a href="#bib.bib43" title="" class="ltx_ref">2023</a>)</cite>, and DeepSeek-Coder <cite class="ltx_cite ltx_citemacro_citep">(Guo et al., <a href="#bib.bib20" title="" class="ltx_ref">2024</a>)</cite> benefit from extensive code-specific corpora and specialized training instructions <cite class="ltx_cite ltx_citemacro_citep">(Zheng et al., <a href="#bib.bib72" title="" class="ltx_ref">2023b</a>, <a href="#bib.bib71" title="" class="ltx_ref">a</a>)</cite>.
+Recent studies have explored various applications of Code LLMs.
+These applications include vulnerability detection <cite class="ltx_cite ltx_citemacro_citep">(Cheshkov et al., <a href="#bib.bib11" title="" class="ltx_ref">2023</a>; Wang et al., <a href="#bib.bib59" title="" class="ltx_ref">2024c</a>; Tamberg and Bahsi, <a href="#bib.bib50" title="" class="ltx_ref">2024</a>)</cite> unit test generation <cite class="ltx_cite ltx_citemacro_citep">(Siddiq et al., <a href="#bib.bib46" title="" class="ltx_ref">2023</a>; Xie et al., <a href="#bib.bib62" title="" class="ltx_ref">2023</a>; Schäfer et al., <a href="#bib.bib45" title="" class="ltx_ref">2023</a>)</cite>, code search <cite class="ltx_cite ltx_citemacro_citep">(Kondo et al., <a href="#bib.bib29" title="" class="ltx_ref">2024</a>; Wang et al., <a href="#bib.bib58" title="" class="ltx_ref">2023a</a>; Hu et al., <a href="#bib.bib23" title="" class="ltx_ref">2024b</a>)</cite>, code summarization <cite class="ltx_cite ltx_citemacro_citep">(Sun et al., <a href="#bib.bib48" title="" class="ltx_ref">2023</a>; Ahmed et al., <a href="#bib.bib4" title="" class="ltx_ref">2024</a>; Su and McMillan, <a href="#bib.bib47" title="" class="ltx_ref">2024</a>)</cite>, and code generation <cite class="ltx_cite ltx_citemacro_citep">(Liu et al., <a href="#bib.bib36" title="" class="ltx_ref">2023</a>, <a href="#bib.bib35" title="" class="ltx_ref">2024</a>; Huang et al., <a href="#bib.bib25" title="" class="ltx_ref">2024</a>)</cite>.</p>
+</div>
+</section>
+<section id="S9.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">9.2. </span>LLM-based Code Repair</h3>
+
+<div id="S9.SS2.p1" class="ltx_para">
+<p class="ltx_p">Recent research explores LLMs for Automated Program Repair (APR). AlphaRepair <cite class="ltx_cite ltx_citemacro_citep">(Xia and Zhang, <a href="#bib.bib60" title="" class="ltx_ref">2022</a>)</cite> pioneers a cloze-style approach, replacing buggy lines with masked tokens for LLMs to fill in. Alternative approaches typically focus on locating the fault and supplying the model with the buggy code along with its context, enabling it to generate suitable patches. For example, InferFix <cite class="ltx_cite ltx_citemacro_citep">(Jin et al., <a href="#bib.bib26" title="" class="ltx_ref">2023</a>)</cite> combines static analysis with retrieval-augmented LLMs, using historical bug-fix pairs for patch generation. VulRepair <cite class="ltx_cite ltx_citemacro_citep">(Fu et al., <a href="#bib.bib19" title="" class="ltx_ref">2022</a>)</cite> integrates CodeT5 with BPE tokenization and a T5 architecture, improving vulnerability repair accuracy. Further advancements include NTR <cite class="ltx_cite ltx_citemacro_citep">(Huang et al., <a href="#bib.bib24" title="" class="ltx_ref">2025</a>)</cite>, a two-stage template-guided framework enhancing LLM fine-tuning, and ChatRepair <cite class="ltx_cite ltx_citemacro_citep">(Xia and Zhang, <a href="#bib.bib61" title="" class="ltx_ref">2024</a>)</cite>, a conversation-driven approach that iteratively refines patches, resolving 162 of 337 bugs cost-effectively.</p>
+</div>
+</section>
+<section id="S9.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">9.3. </span>Code Benchmark for LLMs</h3>
+
+<div id="S9.SS3.p1" class="ltx_para">
+<p class="ltx_p">Researchers have introduced several high-quality code benchmarks to evaluate the performance of Code LLMs on code-related tasks.
+These benchmarks cover a wide range of tasks, including code generation <cite class="ltx_cite ltx_citemacro_citep">(Hendrycks et al., <a href="#bib.bib21" title="" class="ltx_ref">2021</a>; Cao et al., <a href="#bib.bib8" title="" class="ltx_ref">2024</a>; Du et al., <a href="#bib.bib16" title="" class="ltx_ref">2023</a>)</cite>, program translation <cite class="ltx_cite ltx_citemacro_citep">(Zhu et al., <a href="#bib.bib74" title="" class="ltx_ref">2022</a>; Yan et al., <a href="#bib.bib63" title="" class="ltx_ref">2024</a>)</cite>, code summarization <cite class="ltx_cite ltx_citemacro_citep">(Hu et al., <a href="#bib.bib22" title="" class="ltx_ref">2024a</a>; Lu et al., <a href="#bib.bib38" title="" class="ltx_ref">2021</a>)</cite>, code completion <cite class="ltx_cite ltx_citemacro_citep">(Feng et al., <a href="#bib.bib17" title="" class="ltx_ref">2024</a>; Li et al., <a href="#bib.bib33" title="" class="ltx_ref">2024</a>; Ding et al., <a href="#bib.bib14" title="" class="ltx_ref">2024</a>)</cite>, etc.
+Some benchmarks focus on the code repair task, such as CoderUJB <cite class="ltx_cite ltx_citemacro_citep">(Zeng et al., <a href="#bib.bib67" title="" class="ltx_ref">2024</a>)</cite> constructed Zeng et al. which evaluate LLMs across diverse Java programming tasks, including test generation and defect detection.
+Ouyang et al. presented <cite class="ltx_cite ltx_citemacro_citep">(Ouyang et al., <a href="#bib.bib41" title="" class="ltx_ref">2024</a>)</cite> MuBench. This dataset includes 1,700 artificial bugs generated by various mutators to evaluate the capability of automated program repair (APR) for LLMs.
+Existing benchmarks mainly focus on single-iteration repairs with limited feedback types, overlooking the iterative, multi-feedback nature of real-world code repair. To address this, FeedbackEval introduces diverse error types, supports four feedback modalities, and evaluates iterative repair performance, enabling a more comprehensive assessment of LLMs’ feedback comprehension and adaptability.</p>
+</div>
+</section>
+</section>
+<section id="S10" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">10. </span>Conclusion</h2>
+
+<div id="S10.p1" class="ltx_para">
+<p class="ltx_p">In this paper, we construct a comprehensive benchmark, FeedbackEval, to systematically evaluate LLMs’ performance in feedback-driven code repair task.
+Our study highlights the strengths and limitations of LLMs in processing structured and unstructured feedback, adapting to iterative refinement, and leveraging prompting techniques.
+We find that structured feedback, particularly test feedback, yields the highest repair success rates by providing clear, actionable error localization. Surprisingly, simple feedback ranks as the second most effective type. Despite its lack of detail, it encourages LLMs to rely on their internal understanding of code and errors, leading to more generalized fixes. In contrast, compiler feedback offers technical insights but struggles with logic errors, while human feedback, despite its contextual richness, often leads to over-complicated or misinterpreted solutions. Iterative feedback improves performance, though gains plateau after two to three iterations. Additionally, prompt structure plays a critical role: docstrings, context, and guidelines significantly enhance repair accuracy, whereas persona, chain-of-thought, and few-shot prompting provide minimal improvement in single-iteration repairs.
+FeedbackEval advances the field by integrating diverse error types and feedback modalities, providing actionable insights for optimizing feedback utilization.
+In future work, we plan to explore hybrid feedback strategies and extend the benchmark to other programming languages and broader error categories.</p>
+</div>
+<div class="ltx_acknowledgements">
+<h6 class="ltx_title ltx_title_acknowledgements">Acknowledgements.</h6>
+
+</div>
+</section>
+<section id="bib" class="ltx_bibliography">
+<h2 class="ltx_title ltx_title_bibliography">References</h2>
+
+<ul class="ltx_biblist">
+<li id="bib.bib1" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">(1)</span>
+<span class="ltx_bibblock">        
+
+
+
+
+</span>
+</li>
+<li id="bib.bib2" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">ano (2025)</span>
+<span class="ltx_bibblock">
+2025.
+
+</span>
+<span class="ltx_bibblock">FeedbackEval.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://github.com/SYSUSELab/FeedbackEval" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/SYSUSELab/FeedbackEval</a>
+
+</span>
+</li>
+<li id="bib.bib3" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Achiam et al. (2023)</span>
+<span class="ltx_bibblock">
+Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Gpt-4 technical report.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2303.08774</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib4" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ahmed et al. (2024)</span>
+<span class="ltx_bibblock">
+Toufique Ahmed, Kunal Suresh Pai, Premkumar Devanbu, and Earl T Barr. 2024.
+
+</span>
+<span class="ltx_bibblock">Automatic semantic augmentation of language model prompts (for code summarization). In <em class="ltx_emph ltx_font_italic">2024 IEEE/ACM 46th International Conference on Software Engineering (ICSE)</em>. IEEE Computer Society, 1004–1004.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib5" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Anthropic (2024)</span>
+<span class="ltx_bibblock">
+Anthropic. 2024.
+
+</span>
+<span class="ltx_bibblock">Claude-3.5-Sonnet.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://www.anthropic.com/news/claude-3-5-sonnet" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://www.anthropic.com/news/claude-3-5-sonnet</a>
+
+</span>
+</li>
+<li id="bib.bib6" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Bi et al. (2024)</span>
+<span class="ltx_bibblock">
+Zhangqian Bi, Yao Wan, Zheng Wang, Hongyu Zhang, Batu Guan, Fangxin Lu, Zili Zhang, Yulei Sui, Hai Jin, and Xuanhua Shi. 2024.
+
+</span>
+<span class="ltx_bibblock">Iterative refinement of project-level code context for precise code generation with compiler feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2403.16792</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib7" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Brown et al. (2020)</span>
+<span class="ltx_bibblock">
+Tom Brown, Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared D Kaplan, Prafulla Dhariwal, Arvind Neelakantan, Pranav Shyam, Girish Sastry, Amanda Askell, et al. 2020.
+
+</span>
+<span class="ltx_bibblock">Language models are few-shot learners.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">Advances in neural information processing systems</em> 33 (2020), 1877–1901.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib8" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Cao et al. (2024)</span>
+<span class="ltx_bibblock">
+Jialun Cao, Zhiyong Chen, Jiarong Wu, Shing-Chi Cheung, and Chang Xu. 2024.
+
+</span>
+<span class="ltx_bibblock">JavaBench: A Benchmark of Object-Oriented Code Generation for Evaluating Large Language Models. In <em class="ltx_emph ltx_font_italic">Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering</em> <em class="ltx_emph ltx_font_italic">(ASE ’24)</em>. Association for Computing Machinery, 870–882.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3691620.3695470" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3691620.3695470</a>
+
+</span>
+</li>
+<li id="bib.bib9" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Chen et al. (2021)</span>
+<span class="ltx_bibblock">
+Mark Chen, Jerry Tworek, Heewoo Jun, Qiming Yuan, Henrique Ponde de Oliveira Pinto, Jared Kaplan, Harri Edwards, Yuri Burda, Nicholas Joseph, Greg Brockman, et al. 2021.
+
+</span>
+<span class="ltx_bibblock">Evaluating large language models trained on code.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2107.03374</em> (2021).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib10" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Chen et al. (2023)</span>
+<span class="ltx_bibblock">
+Xinyun Chen, Maxwell Lin, Nathanael Schärli, and Denny Zhou. 2023.
+
+</span>
+<span class="ltx_bibblock">Teaching large language models to self-debug.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2304.05128</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib11" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Cheshkov et al. (2023)</span>
+<span class="ltx_bibblock">
+Anton Cheshkov, Pavel Zadorozhny, and Rodion Levichev. 2023.
+
+</span>
+<span class="ltx_bibblock">Evaluation of chatgpt model for vulnerability detection.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2304.07232</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib12" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Cloud (2024)</span>
+<span class="ltx_bibblock">
+Alibaba Cloud. 2024.
+
+</span>
+<span class="ltx_bibblock">Qwen 2.5.
+
+</span>
+<span class="ltx_bibblock"><a target="_blank" href="https://github.com/QwenLM/Qwen" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/QwenLM/Qwen</a>.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib13" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">DeepMind (2024)</span>
+<span class="ltx_bibblock">
+Google DeepMind. 2024.
+
+</span>
+<span class="ltx_bibblock">Gemini-1.5-Pro.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://deepmind.google/technologies/gemini/" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://deepmind.google/technologies/gemini/</a>
+
+</span>
+</li>
+<li id="bib.bib14" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ding et al. (2024)</span>
+<span class="ltx_bibblock">
+Yangruibo Ding, Zijian Wang, Wasi Ahmad, Hantian Ding, Ming Tan, Nihal Jain, Murali Krishna Ramanathan, Ramesh Nallapati, Parminder Bhatia, Dan Roth, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Crosscodeeval: A diverse and multilingual benchmark for cross-file code completion.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">Advances in Neural Information Processing Systems</em> 36 (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib15" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Dou et al. (2024)</span>
+<span class="ltx_bibblock">
+Shihan Dou, Yan Liu, Haoxiang Jia, Limao Xiong, Enyu Zhou, Wei Shen, Junjie Shan, Caishuang Huang, Xiao Wang, Xiaoran Fan, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Stepcoder: Improve code generation with reinforcement learning from compiler feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2402.01391</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib16" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Du et al. (2023)</span>
+<span class="ltx_bibblock">
+Xueying Du, Mingwei Liu, Kaixin Wang, Hanlin Wang, Junwei Liu, Yixuan Chen, Jiayi Feng, Chaofeng Sha, Xin Peng, and Yiling Lou. 2023.
+
+</span>
+<span class="ltx_bibblock">Classeval: A manually-crafted benchmark for evaluating llms on class-level code generation.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2308.01861</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib17" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Feng et al. (2024)</span>
+<span class="ltx_bibblock">
+Jia Feng, Jiachen Liu, Cuiyun Gao, Chun Yong Chong, Chaozheng Wang, Shan Gao, and Xin Xia. 2024.
+
+</span>
+<span class="ltx_bibblock">ComplexCodeEval: A Benchmark for Evaluating Large Code Models on More Complex Code. In <em class="ltx_emph ltx_font_italic">Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering</em> <em class="ltx_emph ltx_font_italic">(ASE ’24)</em>. Association for Computing Machinery, 1895–1906.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3691620.3695552" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3691620.3695552</a>
+
+</span>
+</li>
+<li id="bib.bib18" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Fernandes et al. (2023)</span>
+<span class="ltx_bibblock">
+Patrick Fernandes, Aman Madaan, Emmy Liu, António Farinhas, Pedro Henrique Martins, Amanda Bertsch, José GC de Souza, Shuyan Zhou, Tongshuang Wu, Graham Neubig, et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Bridging the gap: A survey on integrating (human) feedback for natural language generation.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">Transactions of the Association for Computational Linguistics</em> 11 (2023), 1643–1668.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib19" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Fu et al. (2022)</span>
+<span class="ltx_bibblock">
+Michael Fu, Chakkrit Tantithamthavorn, Trung Le, Van Nguyen, and Dinh Phung. 2022.
+
+</span>
+<span class="ltx_bibblock">VulRepair: a T5-based automated software vulnerability repair. In <em class="ltx_emph ltx_font_italic">Proceedings of the 30th ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering</em> <em class="ltx_emph ltx_font_italic">(ESEC/FSE 2022)</em>. Association for Computing Machinery, 935–947.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3540250.3549098" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3540250.3549098</a>
+
+</span>
+</li>
+<li id="bib.bib20" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Guo et al. (2024)</span>
+<span class="ltx_bibblock">
+Daya Guo, Qihao Zhu, Dejian Yang, Zhenda Xie, Kai Dong, Wentao Zhang, Guanting Chen, Xiao Bi, Y Wu, YK Li, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">DeepSeek-Coder: When the Large Language Model Meets Programming–The Rise of Code Intelligence.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2401.14196</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib21" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hendrycks et al. (2021)</span>
+<span class="ltx_bibblock">
+Dan Hendrycks, Steven Basart, Saurav Kadavath, Mantas Mazeika, Akul Arora, Ethan Guo, Collin Burns, Samir Puranik, Horace He, Dawn Song, and Jacob Steinhardt. 2021.
+
+</span>
+<span class="ltx_bibblock">Measuring Coding Challenge Competence With APPS. In <em class="ltx_emph ltx_font_italic">Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks 1, NeurIPS Datasets and Benchmarks 2021, December 2021, virtual</em>.
+
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://datasets-benchmarks-proceedings.neurips.cc/paper/2021/hash/c24cd76e1ce41366a4bbe8a49b02a028-Abstract-round2.html" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://datasets-benchmarks-proceedings.neurips.cc/paper/2021/hash/c24cd76e1ce41366a4bbe8a49b02a028-Abstract-round2.html</a>
+
+</span>
+</li>
+<li id="bib.bib22" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hu et al. (2024a)</span>
+<span class="ltx_bibblock">
+Chao Hu, Yitian Chai, Hao Zhou, Fandong Meng, Jie Zhou, and Xiaodong Gu. 2024a.
+
+</span>
+<span class="ltx_bibblock">How Effectively Do Code Language Models Understand Poor-Readability Code?. In <em class="ltx_emph ltx_font_italic">Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering</em> <em class="ltx_emph ltx_font_italic">(ASE ’24)</em>. Association for Computing Machinery, 795–806.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3691620.3695072" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3691620.3695072</a>
+
+</span>
+</li>
+<li id="bib.bib23" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Hu et al. (2024b)</span>
+<span class="ltx_bibblock">
+Fan Hu, Yanlin Wang, Lun Du, Hongyu Zhang, Dongmei Zhang, and Xirong Li. 2024b.
+
+</span>
+<span class="ltx_bibblock">Tackling Long Code Search with Splitting, Encoding, and Aggregating. In <em class="ltx_emph ltx_font_italic">Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (LREC-COLING 2024)</em>. 15500–15510.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib24" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Huang et al. (2025)</span>
+<span class="ltx_bibblock">
+Kai Huang, Jian Zhang, Xiangxin Meng, and Yang Liu. 2025.
+
+</span>
+<span class="ltx_bibblock">Template-Guided Program Repair in the Era of Large Language Models. In <em class="ltx_emph ltx_font_italic">2025 IEEE/ACM 47th International Conference on Software Engineering (ICSE)</em>. IEEE Computer Society, 367–379.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1109/ICSE55347.2025.00030" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1109/ICSE55347.2025.00030</a>
+
+</span>
+</li>
+<li id="bib.bib25" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Huang et al. (2024)</span>
+<span class="ltx_bibblock">
+Tao Huang, Zhihong Sun, Zhi Jin, Ge Li, and Chen Lyu. 2024.
+
+</span>
+<span class="ltx_bibblock">KareCoder: A New Knowledge-Enriched Code Generation System. In <em class="ltx_emph ltx_font_italic">Proceedings of the 2024 IEEE/ACM 46th International Conference on Software Engineering: Companion Proceedings</em>. 270–271.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib26" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Jin et al. (2023)</span>
+<span class="ltx_bibblock">
+Matthew Jin, Syed Shahriar, Michele Tufano, Xin Shi, Shuai Lu, Neel Sundaresan, and Alexey Svyatkovskiy. 2023.
+
+</span>
+<span class="ltx_bibblock">InferFix: End-to-End Program Repair with LLMs. In <em class="ltx_emph ltx_font_italic">Proceedings of the 31st ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering</em> <em class="ltx_emph ltx_font_italic">(ESEC/FSE 2023)</em>. Association for Computing Machinery, 1646–1656.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3611643.3613892" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3611643.3613892</a>
+
+</span>
+</li>
+<li id="bib.bib27" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Khanfir et al. (2023)</span>
+<span class="ltx_bibblock">
+Ahmed Khanfir, Anil Koyuncu, Mike Papadakis, Maxime Cordy, Tegawendé F Bissyandé, Jacques Klein, and Yves Le Traon. 2023.
+
+</span>
+<span class="ltx_bibblock">IBiR: Bug-report-driven fault injection.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">ACM Transactions on Software Engineering and Methodology</em> 32, 2 (2023), 1–31.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib28" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Khojah et al. (2024)</span>
+<span class="ltx_bibblock">
+Ranim Khojah, Francisco Gomes de Oliveira Neto, Mazen Mohamad, and Philipp Leitner. 2024.
+
+</span>
+<span class="ltx_bibblock">The Impact of Prompt Programming on Function-Level Code Generation.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2412.20545</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib29" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Kondo et al. (2024)</span>
+<span class="ltx_bibblock">
+Mizuki Kondo, Daisuke Kawahara, and Toshiyuki Kurabayashi. 2024.
+
+</span>
+<span class="ltx_bibblock">Improving Repository-level Code Search with Text Conversion. In <em class="ltx_emph ltx_font_italic">Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 4: Student Research Workshop)</em>. 130–137.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib30" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Krekel et al. (2023)</span>
+<span class="ltx_bibblock">
+Holger Krekel et al. 2023.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">pytest</em>.
+
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://github.com/pytest-dev/pytest" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/pytest-dev/pytest</a>
+
+</span>
+</li>
+<li id="bib.bib31" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2025)</span>
+<span class="ltx_bibblock">
+Jia Li, Ge Li, Yongmin Li, and Zhi Jin. 2025.
+
+</span>
+<span class="ltx_bibblock">Structured chain-of-thought prompting for code generation.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">ACM Transactions on Software Engineering and Methodology</em> 34, 2 (2025), 1–23.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib32" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2023)</span>
+<span class="ltx_bibblock">
+Raymond Li, Loubna Ben Allal, Yangtian Zi, Niklas Muennighoff, Denis Kocetkov, Chenghao Mou, Marc Marone, Christopher Akiki, Jia Li, Jenny Chim, et al. 2023.
+
+</span>
+<span class="ltx_bibblock">StarCoder: may the source be with you!
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2305.06161</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib33" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li et al. (2024)</span>
+<span class="ltx_bibblock">
+Xueyang Li, Guozhu Meng, Shangqing Liu, Lu Xiang, Kun Sun, Kai Chen, Xiapu Luo, and Yang Liu. 2024.
+
+</span>
+<span class="ltx_bibblock">Attribution-guided Adversarial Code Prompt Generation for Code Completion Models. In <em class="ltx_emph ltx_font_italic">Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering</em> <em class="ltx_emph ltx_font_italic">(ASE ’24)</em>. Association for Computing Machinery, 1460–1471.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3691620.3695517" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3691620.3695517</a>
+
+</span>
+</li>
+<li id="bib.bib34" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Li and Shin (2024)</span>
+<span class="ltx_bibblock">
+Ziyu Li and Donghwan Shin. 2024.
+
+</span>
+<span class="ltx_bibblock">Mutation-based consistency testing for evaluating the code understanding capability of llms. In <em class="ltx_emph ltx_font_italic">Proceedings of the IEEE/ACM 3rd International Conference on AI Engineering-Software Engineering for AI</em>. 150–159.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib35" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Liu et al. (2024)</span>
+<span class="ltx_bibblock">
+Junwei Liu, Yixuan Chen, Mingwei Liu, Xin Peng, and Yiling Lou. 2024.
+
+</span>
+<span class="ltx_bibblock">STALL+: Boosting LLM-based Repository-level Code Completion with Static Analysis.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2406.10018</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib36" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Liu et al. (2023)</span>
+<span class="ltx_bibblock">
+Mingwei Liu, Tianyong Yang, Yiling Lou, Xueying Du, Ying Wang, and Xin Peng. 2023.
+
+</span>
+<span class="ltx_bibblock">CodeGen4Libs: A Two-Stage Approach for Library-Oriented Code Generation. In <em class="ltx_emph ltx_font_italic">38th IEEE/ACM International Conference on Automated Software Engineering, ASE 2023, Luxembourg, September 11-15, 2023</em>. IEEE, 434–445.
+
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://doi.org/10.1109/ASE56229.2023.00159" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1109/ASE56229.2023.00159</a>
+
+</span>
+</li>
+<li id="bib.bib37" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Logilab and contributors (2023)</span>
+<span class="ltx_bibblock">
+Logilab and PyCQA contributors. 2023.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">Pylint</em>.
+
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://github.com/PyCQA/pylint" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://github.com/PyCQA/pylint</a>
+
+</span>
+</li>
+<li id="bib.bib38" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Lu et al. (2021)</span>
+<span class="ltx_bibblock">
+Shuai Lu, Daya Guo, Shuo Ren, Junjie Huang, Alexey Svyatkovskiy, Ambrosio Blanco, Colin Clement, Dawn Drain, Daxin Jiang, Duyu Tang, Ge Li, Lidong Zhou, Linjun Shou, Long Zhou, Michele Tufano, Ming Gong, Ming Zhou, Nan Duan, Neel Sundaresan, Shao Kun Deng, Shengyu Fu, and Shujie Liu. 2021.
+
+</span>
+<span class="ltx_bibblock">CodeXGLUE: A Machine Learning Benchmark Dataset for Code Understanding and Generation. In <em class="ltx_emph ltx_font_italic">Proceedings of the Neural Information Processing Systems Track on Datasets and Benchmarks 1, NeurIPS Datasets and Benchmarks 2021, December 2021, virtual</em>.
+
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://datasets-benchmarks-proceedings.neurips.cc/paper/2021/hash/c16a5320fa475530d9583c34fd356ef5-Abstract-round1.html" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://datasets-benchmarks-proceedings.neurips.cc/paper/2021/hash/c16a5320fa475530d9583c34fd356ef5-Abstract-round1.html</a>
+
+</span>
+</li>
+<li id="bib.bib39" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Madaan et al. (2023)</span>
+<span class="ltx_bibblock">
+Aman Madaan, Niket Tandon, Prakhar Gupta, Skyler Hallinan, Luyu Gao, Sarah Wiegreffe, Uri Alon, Nouha Dziri, Shrimai Prabhumoye, Yiming Yang, et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Self-refine: Iterative refinement with self-feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">Advances in Neural Information Processing Systems</em> 36 (2023), 46534–46594.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib40" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Olausson et al. (2023)</span>
+<span class="ltx_bibblock">
+Theo X Olausson, Jeevana Priya Inala, Chenglong Wang, Jianfeng Gao, and Armando Solar-Lezama. 2023.
+
+</span>
+<span class="ltx_bibblock">Is self-repair a silver bullet for code generation?
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2306.09896</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib41" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ouyang et al. (2024)</span>
+<span class="ltx_bibblock">
+Yicheng Ouyang, Jun Yang, and Lingming Zhang. 2024.
+
+</span>
+<span class="ltx_bibblock">Benchmarking Automated Program Repair: An Extensive Study on Both Real-World and Artificial Bugs. In <em class="ltx_emph ltx_font_italic">Proceedings of the 33rd ACM SIGSOFT International Symposium on Software Testing and Analysis</em> <em class="ltx_emph ltx_font_italic">(ISSTA 2024)</em>. Association for Computing Machinery, 440–452.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3650212.3652140" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3650212.3652140</a>
+
+</span>
+</li>
+<li id="bib.bib42" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ridnik et al. (2024)</span>
+<span class="ltx_bibblock">
+Tal Ridnik, Dedy Kredo, and Itamar Friedman. 2024.
+
+</span>
+<span class="ltx_bibblock">Code generation with alphacodium: From prompt engineering to flow engineering.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2401.08500</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib43" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Roziere et al. (2023)</span>
+<span class="ltx_bibblock">
+Baptiste Roziere, Jonas Gehring, Fabian Gloeckle, Sten Sootla, Itai Gat, Xiaoqing Ellen Tan, Yossi Adi, Jingyu Liu, Tal Remez, Jérémy Rapin, et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Code llama: Open foundation models for code.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2308.12950</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib44" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Saunders et al. (2022)</span>
+<span class="ltx_bibblock">
+William Saunders, Catherine Yeh, Jeff Wu, Steven Bills, Long Ouyang, Jonathan Ward, and Jan Leike. 2022.
+
+</span>
+<span class="ltx_bibblock">Self-critiquing models for assisting human evaluators.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2206.05802</em> (2022).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib45" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Schäfer et al. (2023)</span>
+<span class="ltx_bibblock">
+Max Schäfer, Sarah Nadi, Aryaz Eghbali, and Frank Tip. 2023.
+
+</span>
+<span class="ltx_bibblock">An empirical evaluation of using large language models for automated unit test generation.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">IEEE Transactions on Software Engineering</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib46" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Siddiq et al. (2023)</span>
+<span class="ltx_bibblock">
+Mohammed Latif Siddiq, Joanna Santos, Ridwanul Hasan Tanvir, Noshin Ulfat, FA Rifat, and V Carvalho Lopes. 2023.
+
+</span>
+<span class="ltx_bibblock">Exploring the effectiveness of large language models in generating unit tests.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2305.00418</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib47" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Su and McMillan (2024)</span>
+<span class="ltx_bibblock">
+Chia-Yi Su and Collin McMillan. 2024.
+
+</span>
+<span class="ltx_bibblock">Distilled GPT for source code summarization.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">Automated Software Engineering</em> 31, 1 (2024), 22.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib48" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sun et al. (2023)</span>
+<span class="ltx_bibblock">
+Weisong Sun, Chunrong Fang, Yudu You, Yun Miao, Yi Liu, Yuekang Li, Gelei Deng, Shenghan Huang, Yuchen Chen, Quanjun Zhang, et al. 2023.
+
+</span>
+<span class="ltx_bibblock">Automatic code summarization via chatgpt: How far are we?
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2305.12865</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib49" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Sun et al. (2024)</span>
+<span class="ltx_bibblock">
+Zhihong Sun, Chen Lyu, Bolun Li, Yao Wan, Hongyu Zhang, Ge Li, and Zhi Jin. 2024.
+
+</span>
+<span class="ltx_bibblock">Enhancing Code Generation Performance of Smaller Models by Distilling the Reasoning Ability of LLMs.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2403.13271</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib50" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Tamberg and Bahsi (2024)</span>
+<span class="ltx_bibblock">
+Karl Tamberg and Hayretdin Bahsi. 2024.
+
+</span>
+<span class="ltx_bibblock">Harnessing Large Language Models for Software Vulnerability Detection: A Comprehensive Benchmarking Study.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+<span class="ltx_bibblock">arXiv:2405.15614 [cs.CR]
+
+<a target="_blank" href="https://arxiv.org/abs/2405.15614" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://arxiv.org/abs/2405.15614</a>
+
+</span>
+</li>
+<li id="bib.bib51" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Tian et al. (2024)</span>
+<span class="ltx_bibblock">
+Runchu Tian, Yining Ye, Yujia Qin, Xin Cong, Yankai Lin, Yinxu Pan, Yesai Wu, Haotian Hui, Weichuan Liu, Zhiyuan Liu, et al. 2024.
+
+</span>
+<span class="ltx_bibblock">Debugbench: Evaluating debugging capability of large language models.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2401.04621</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib52" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Tip et al. (2024)</span>
+<span class="ltx_bibblock">
+Frank Tip, Jonathan Bell, and Max Schäfer. 2024.
+
+</span>
+<span class="ltx_bibblock">Llmorpheus: Mutation testing using large language models.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2404.09952</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib53" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Ugare et al. (2024)</span>
+<span class="ltx_bibblock">
+Shubham Ugare, Tarun Suresh, Hangoo Kang, Sasa Misailovic, and Gagandeep Singh. 2024.
+
+</span>
+<span class="ltx_bibblock">Improving llm code generation with grammar augmentation.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2403.01632</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib54" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2024a)</span>
+<span class="ltx_bibblock">
+Bo Wang, Mingda Chen, Youfang Lin, Mike Papadakis, and Jie M Zhang. 2024a.
+
+</span>
+<span class="ltx_bibblock">An exploratory study on using large language models for mutation testing.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2406.09843</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib55" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2024b)</span>
+<span class="ltx_bibblock">
+Xingyao Wang, Yangyi Chen, Lifan Yuan, Yizhe Zhang, Yunzhu Li, Hao Peng, and Heng Ji. 2024b.
+
+</span>
+<span class="ltx_bibblock">Executable code actions elicit better llm agents. In <em class="ltx_emph ltx_font_italic">Forty-first International Conference on Machine Learning</em>.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib56" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2023b)</span>
+<span class="ltx_bibblock">
+Xingyao Wang, Hao Peng, Reyhaneh Jabbarvand, and Heng Ji. 2023b.
+
+</span>
+<span class="ltx_bibblock">Leti: Learning to generate from textual interactions.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2305.10314</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib57" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2023c)</span>
+<span class="ltx_bibblock">
+Xingyao Wang, Zihan Wang, Jiateng Liu, Yangyi Chen, Lifan Yuan, Hao Peng, and Heng Ji. 2023c.
+
+</span>
+<span class="ltx_bibblock">Mint: Evaluating llms in multi-turn interaction with tools and language feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2309.10691</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib58" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2023a)</span>
+<span class="ltx_bibblock">
+Yanlin Wang, Lianghong Guo, Ensheng Shi, Wenqing Chen, Jiachi Chen, Wanjun Zhong, Menghan Wang, Hui Li, Hongyu Zhang, Ziyu Lyu, et al. 2023a.
+
+</span>
+<span class="ltx_bibblock">You Augment Me: Exploring ChatGPT-based Data Augmentation for Semantic Code Search. In <em class="ltx_emph ltx_font_italic">2023 IEEE International Conference on Software Maintenance and Evolution (ICSME)</em>. IEEE, 14–25.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib59" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Wang et al. (2024c)</span>
+<span class="ltx_bibblock">
+Ziliang Wang, Ge Li, Jia Li, Yingfei Xiong, and Zhi Jin. 2024c.
+
+</span>
+<span class="ltx_bibblock">M2CVD: Multi-Model Collaboration for Code Vulnerability Detection.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2406.05940</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib60" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Xia and Zhang (2022)</span>
+<span class="ltx_bibblock">
+Chunqiu Steven Xia and Lingming Zhang. 2022.
+
+</span>
+<span class="ltx_bibblock">Less training, more repairing please: revisiting automated program repair via zero-shot learning. In <em class="ltx_emph ltx_font_italic">Proceedings of the 30th ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering</em> <em class="ltx_emph ltx_font_italic">(ESEC/FSE 2022)</em>. Association for Computing Machinery, 959–971.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3540250.3549101" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3540250.3549101</a>
+
+</span>
+</li>
+<li id="bib.bib61" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Xia and Zhang (2024)</span>
+<span class="ltx_bibblock">
+Chunqiu Steven Xia and Lingming Zhang. 2024.
+
+</span>
+<span class="ltx_bibblock">Automated Program Repair via Conversation: Fixing 162 out of 337 Bugs for $0.42 Each using ChatGPT. In <em class="ltx_emph ltx_font_italic">Proceedings of the 33rd ACM SIGSOFT International Symposium on Software Testing and Analysis</em> <em class="ltx_emph ltx_font_italic">(ISSTA 2024)</em>. Association for Computing Machinery, 819–831.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3650212.3680323" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3650212.3680323</a>
+
+</span>
+</li>
+<li id="bib.bib62" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Xie et al. (2023)</span>
+<span class="ltx_bibblock">
+Zhuokui Xie, Yinghao Chen, Chen Zhi, Shuiguang Deng, and Jianwei Yin. 2023.
+
+</span>
+<span class="ltx_bibblock">ChatUniTest: a ChatGPT-based automated unit test generation tool.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2305.04764</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib63" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yan et al. (2024)</span>
+<span class="ltx_bibblock">
+Weixiang Yan, Haitian Liu, Yunkun Wang, Yunzhe Li, Qian Chen, Wen Wang, Tingyu Lin, Weishan Zhao, Li Zhu, Hari Sundaram, and Shuiguang Deng. 2024.
+
+</span>
+<span class="ltx_bibblock">CodeScope: An Execution-based Multilingual Multitask Multidimensional Benchmark for Evaluating LLMs on Code Understanding and Generation. In <em class="ltx_emph ltx_font_italic">Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em>. Association for Computational Linguistics, 5511–5558.
+
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://doi.org/10.18653/v1/2024.acl-long.301" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.18653/v1/2024.acl-long.301</a>
+
+</span>
+</li>
+<li id="bib.bib64" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yang et al. (2023)</span>
+<span class="ltx_bibblock">
+John Yang, Akshara Prabhakar, Karthik Narasimhan, and Shunyu Yao. 2023.
+
+</span>
+<span class="ltx_bibblock">Intercode: Standardizing and benchmarking interactive coding with execution feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">Advances in Neural Information Processing Systems</em> 36 (2023), 23826–23854.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib65" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yu et al. (2024)</span>
+<span class="ltx_bibblock">
+Hao Yu, Bo Shen, Dezhi Ran, Jiaxin Zhang, Qi Zhang, Yuchi Ma, Guangtai Liang, Ying Li, Qianxiang Wang, and Tao Xie. 2024.
+
+</span>
+<span class="ltx_bibblock">Codereval: A benchmark of pragmatic code generation with generative pre-trained models. In <em class="ltx_emph ltx_font_italic">Proceedings of the 46th IEEE/ACM International Conference on Software Engineering</em>. 1–12.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib66" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Yuan et al. (2023)</span>
+<span class="ltx_bibblock">
+Zhiqiang Yuan, Junwei Liu, Qiancheng Zi, Mingwei Liu, Xin Peng, and Yiling Lou. 2023.
+
+</span>
+<span class="ltx_bibblock">Evaluating instruction-tuned large language models on code comprehension and generation.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2308.01240</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib67" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zeng et al. (2024)</span>
+<span class="ltx_bibblock">
+Zhengran Zeng, Yidong Wang, Rui Xie, Wei Ye, and Shikun Zhang. 2024.
+
+</span>
+<span class="ltx_bibblock">CoderUJB: An Executable and Unified Java Benchmark for Practical Programming Scenarios. In <em class="ltx_emph ltx_font_italic">Proceedings of the 33rd ACM SIGSOFT International Symposium on Software Testing and Analysis</em> <em class="ltx_emph ltx_font_italic">(ISSTA 2024)</em>. Association for Computing Machinery, 124–136.
+
+</span>
+<span class="ltx_bibblock">
+
+<a target="_blank" href="https://doi.org/10.1145/3650212.3652115" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1145/3650212.3652115</a>
+
+</span>
+</li>
+<li id="bib.bib68" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhang et al. (2022)</span>
+<span class="ltx_bibblock">
+Zhuosheng Zhang, Aston Zhang, Mu Li, and Alex Smola. 2022.
+
+</span>
+<span class="ltx_bibblock">Automatic chain of thought prompting in large language models.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2210.03493</em> (2022).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib69" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhao et al. (2024)</span>
+<span class="ltx_bibblock">
+Yuze Zhao, Zhenya Huang, Yixiao Ma, Rui Li, Kai Zhang, Hao Jiang, Qi Liu, Linbo Zhu, and Yu Su. 2024.
+
+</span>
+<span class="ltx_bibblock">Repair: Automated program repair with process-based feedback.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2408.11296</em> (2024).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib70" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zheng et al. (2024)</span>
+<span class="ltx_bibblock">
+Tianyu Zheng, Ge Zhang, Tianhao Shen, Xueling Liu, Bill Yuchen Lin, Jie Fu, Wenhu Chen, and Xiang Yue. 2024.
+
+</span>
+<span class="ltx_bibblock">OpenCodeInterpreter: Integrating Code Generation with Execution and Refinement. In <em class="ltx_emph ltx_font_italic">Findings of the Association for Computational Linguistics: ACL 2024</em>, Lun-Wei Ku, Andre Martins, and Vivek Srikumar (Eds.). Association for Computational Linguistics, Bangkok, Thailand, 12834–12859.
+
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://doi.org/10.18653/v1/2024.findings-acl.762" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.18653/v1/2024.findings-acl.762</a>
+
+</span>
+</li>
+<li id="bib.bib71" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zheng et al. (2023a)</span>
+<span class="ltx_bibblock">
+Zibin Zheng, Kaiwen Ning, Jiachi Chen, Yanlin Wang, Wenqing Chen, Lianghong Guo, and Weicheng Wang. 2023a.
+
+</span>
+<span class="ltx_bibblock">Towards an understanding of large language models in software engineering tasks.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2308.11396</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib72" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zheng et al. (2023b)</span>
+<span class="ltx_bibblock">
+Zibin Zheng, Kaiwen Ning, Yanlin Wang, Jingwen Zhang, Dewu Zheng, Mingxi Ye, and Jiachi Chen. 2023b.
+
+</span>
+<span class="ltx_bibblock">A Survey of Large Language Models for Code: Evolution, Benchmarking, and Future Trends.
+
+</span>
+<span class="ltx_bibblock"><em class="ltx_emph ltx_font_italic">arXiv preprint arXiv:2311.10372</em> (2023).
+
+</span>
+<span class="ltx_bibblock">
+</span>
+</li>
+<li id="bib.bib73" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">zhipuAI (2024)</span>
+<span class="ltx_bibblock">
+zhipuAI. 2024.
+
+</span>
+<span class="ltx_bibblock">GLM-4-Plus.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://www.zhipu.ai/glm-4-plus" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://www.zhipu.ai/glm-4-plus</a>
+
+</span>
+</li>
+<li id="bib.bib74" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhu et al. (2022)</span>
+<span class="ltx_bibblock">
+Ming Zhu, Karthik Suresh, and Chandan K. Reddy. 2022.
+
+</span>
+<span class="ltx_bibblock">Multilingual Code Snippets Training for Program Translation.
+
+</span>
+<span class="ltx_bibblock">(2022), 11783–11790.
+
+</span>
+<span class="ltx_bibblock">
+<a target="_blank" href="https://doi.org/10.1609/AAAI.V36I10.21434" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://doi.org/10.1609/AAAI.V36I10.21434</a>
+
+</span>
+</li>
+<li id="bib.bib75" class="ltx_bibitem">
+<span class="ltx_tag ltx_role_refnum ltx_tag_bibitem">Zhuo et al. (2024)</span>
+<span class="ltx_bibblock">
+Terry Yue Zhuo, Minh Chien Vu, Jenny Chim, Han Hu, Wenhao Yu, Ratnadira Widyasari, Imam Nur Bani Yusuf, Haolan Zhan, Junda He, Indraneil Paul, Simon Brunner, Chen Gong, Thong Hoang, Armel Randy Zebaze, Xiaoheng Hong, Wen-Ding Li, Jean Kaddour, Ming Xu, Zhihan Zhang, Prateek Yadav, Naman Jain, Alex Gu, Zhoujun Cheng, Jiawei Liu, Qian Liu, Zijian Wang, David Lo, Binyuan Hui, Niklas Muennighoff, Daniel Fried, Xiaoning Du, Harm de
+Vries, and Leandro Von Werra. 2024.
+
+</span>
+<span class="ltx_bibblock">BigCodeBench: Benchmarking Code Generation with Diverse Function Calls and Complex Instructions.
+
+</span>
+<span class="ltx_bibblock">
+</span>
+<span class="ltx_bibblock">arXiv:2406.15877 [cs.SE]
+
+<a target="_blank" href="https://arxiv.org/abs/2406.15877" title="" class="ltx_ref ltx_url ltx_font_typewriter">https://arxiv.org/abs/2406.15877</a>
+
+</span>
+</li>
+</ul>
+</section>
+<div class="ltx_pagination ltx_role_newpage"></div>
+</article>
+</div>
+<div class="ar5iv-footer"><a href="/html/2504.06938" class="ar5iv-nav-button ar5iv-nav-button-prev">◄</a>
+    <a class="ar5iv-home-button" href="/"><img height="40" alt="ar5iv homepage" src="/assets/ar5iv.png"></a>
+    <a href="/feeling_lucky" class="ar5iv-text-button">Feeling<br>lucky?</a>
+    <a href="/land_of_honey_and_milk" rel="nofollow" aria-hidden="true" tabindex="-1"></a>
+    <a href="/log/2504.06939" class="ar5iv-text-button ar5iv-severity-error">Conversion<br>report</a>
+    <a class="ar5iv-text-button" target="_blank" href="https://github.com/dginev/ar5iv/issues/new?template=improve-article--arxiv-id-.md&title=Improve+article+2504.06939">Report<br>an issue</a>
+    <a href="https://arxiv.org/abs/2504.06939" class="ar5iv-text-button arxiv-ui-theme">View&nbsp;original<br>on&nbsp;arXiv</a><a href="/html/2504.06940" class="ar5iv-nav-button ar5iv-nav-button-next">►</a>
+</div><footer class="ltx_page_footer">
+<a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle ar5iv color scheme"><span class="color-scheme-icon"></span></a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/license" target="_blank">Copyright</a>
+<a class="ar5iv-footer-button" href="https://arxiv.org/help/policies/privacy_policy" target="_blank">Privacy Policy</a>
+
+<div class="ltx_page_logo">Generated  on Mon May  5 16:56:13 2025 by <a target="_blank" href="http://dlmf.nist.gov/LaTeXML/" class="ltx_LaTeXML_logo"><span style="letter-spacing:-0.2em; margin-right:0.1em;">L<span class="ltx_font_smallcaps" style="position:relative; bottom:2.2pt;">a</span>T<span class="ltx_font_smallcaps" style="font-size:120%;position:relative; bottom:-0.2ex;">e</span></span><span style="font-size:90%; position:relative; bottom:-0.2ex;">XML</span><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==" alt="Mascot Sammy"></a>
+</div></footer>
+</div>
+
+    <script>
+      var canMathML = typeof(MathMLElement) == "function";
+      if (!canMathML) {
+        var body = document.querySelector("body");
+        body.firstElementChild.setAttribute('style', 'opacity: 0;');
+        var loading = document.createElement("div");
+        loading.setAttribute("id", "mathjax-loading-spinner");
+        var message = document.createElement("div");
+        message.setAttribute("id", "mathjax-loading-message");
+        message.innerText = "Typesetting Equations...";
+        body.prepend(loading);
+        body.prepend(message);
+
+        var el = document.createElement("script");
+        el.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.querySelector("head").appendChild(el);
+
+        window.MathJax = {
+          startup: {
+            pageReady: () => {
+              return MathJax.startup.defaultPageReady().then(() => {
+                body.removeChild(loading);
+                body.removeChild(message);
+                body.firstElementChild.removeAttribute('style');
+              }); } } };
+      }
+    </script>
+    <script>
+    // Auxiliary function, building the preview feature when
+    // an inline citation is clicked
+    function clicked_cite(e) {
+      e.preventDefault();
+      let cite = this.closest('.ltx_cite');
+      let next = cite.nextSibling;
+      if (next && next.nodeType == Node.ELEMENT_NODE && next.getAttribute('class') == "ar5iv-bibitem-preview") {
+        next.remove();
+        return; }
+      // Before adding a preview modal,
+      // cleanup older previews, in case they're still open
+      document.querySelectorAll('span.ar5iv-bibitem-preview').forEach(function(node) {
+        node.remove();
+      })
+
+      // Create the preview
+      preview = document.createElement('span');
+      preview.setAttribute('class','ar5iv-bibitem-preview');
+      let target = document.getElementById(this.getAttribute('href').slice(1));
+      target.childNodes.forEach(function (child) {
+        preview.append(child.cloneNode(true));
+      });
+      let close_x = document.createElement('button');
+      close_x.setAttribute("aria-label","Close modal for bibliography item preview");
+      close_x.textContent = "×";
+      close_x.setAttribute('class', 'ar5iv-button-close-preview');
+      close_x.setAttribute('onclick','this.parentNode.remove()');
+      preview.append(close_x);
+      preview.querySelectorAll('.ltx_tag_bibitem').forEach(function(node) {
+        node.remove();
+      });
+      cite.parentNode.insertBefore(preview, cite.nextSibling);
+      return;
+    }
+    // Global Document initialization:
+    // - assign the preview feature to all inline citation links
+    document.querySelectorAll(".ltx_cite .ltx_ref").forEach(function (link) {
+      link.addEventListener("click", clicked_cite);
+    });
+    </script>
+    </body>
+</html>
