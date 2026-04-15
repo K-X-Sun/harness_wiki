@@ -2,15 +2,19 @@
 
 ## Domain
 
-This wiki captures knowledge about the **engineering of AI coding systems**: memory architectures, skill/tool frameworks, agent-IDE protocols, and harness runtime design. The focus is on **how these systems are built**, not how they are evaluated.
+This wiki captures knowledge about the **engineering of AI coding systems** through the lens of **externalization**—the progressive relocation of cognitive burdens from the model's internal computation into persistent, inspectable, and reusable external structures.
 
-Core areas:
-- **Memory Systems** — How AI agents manage context, project knowledge, long-term memory (RAG, vector stores, knowledge graphs)
-- **Skills & Tools** — Tool use frameworks, skill composition, agent capabilities, API design
-- **Protocols** — Agent-IDE communication (MCP, LSP), agent-agent coordination, execution protocols
-- **Harness Engineering** — Runtime environments, sandboxes, execution engines, security isolation
+**Foundational framework**: "Externalization in LLM Agents: A Unified Review of Memory, Skills, Protocols and Harness Engineering" (arXiv:2604.08224)
 
-The goal is to maintain a structured, cross-referenced knowledge base that tracks novel methods and engineering practices for building LLM-based coding assistants, enabling informed architectural decisions.
+Core thesis: *LLM agents are increasingly built not by changing model weights, but by reorganizing the runtime around them. Capabilities that earlier systems expected the model to recover internally are now externalized into memory stores, reusable skills, interaction protocols, and the surrounding harness.*
+
+Four externalization dimensions:
+- **Memory** — Externalizes state across time (converting recall into retrieval)
+- **Skills** — Externalizes procedural expertise (converting generation into composition)  
+- **Protocols** — Externalizes interaction structure (converting ad-hoc into governed)
+- **Harness Engineering** — The unification layer that coordinates them into governed execution
+
+The goal is to maintain a structured, cross-referenced knowledge base tracking novel methods and engineering practices for building LLM-based coding assistants.
 
 ## Structure
 
@@ -46,17 +50,17 @@ Tags, dates, and source counts in frontmatter enable Obsidian Dataview queries.
 
 Entities tracked in `wiki/entities/`:
 
-- **framework** — AI coding frameworks and platforms (Claude Code, Cursor, Aider, Continue, Cline, etc.)
+- **framework** — AI coding frameworks and platforms (Claude Code, Cursor, Aider, Continue, Cline, OpenHands, etc.)
   - Frontmatter: `primary_language`, `architecture_type`, `github_url`, `stars`, `license`
 - **protocol** — Communication protocols (MCP, LSP, custom agent protocols)
-  - Frontmatter: `protocol_type` (transport/data/control), `spec_url`, `implementations`, `version`
-- **memory-system** — Memory architectures (RAG systems, vector stores, knowledge graphs, context managers)
-  - Frontmatter: `storage_backend`, `retrieval_method`, `scalability`, `github_url`
-- **harness** — Runtime execution environments (sandboxes, containers, execution engines)
-  - Frontmatter: `isolation_method`, `supported_languages`, `security_model`, `github_url`
+  - Frontmatter: `protocol_type` (agent-tool/agent-agent/agent-user), `spec_url`, `implementations`, `version`
+- **memory-system** — Memory architectures and implementations
+  - Frontmatter: `architecture_type` (monolithic/retrieval-store/hierarchical/adaptive), `storage_backend`, `retrieval_method`, `github_url`
+- **harness** — Runtime execution environments and agent frameworks
+  - Frontmatter: `isolation_method`, `loop_architecture`, `observability_features`, `github_url`
 - **tool** — Specific tools and capabilities (code search, file ops, test runners, debuggers)
   - Frontmatter: `tool_category`, `api_surface`, `github_url`
-- **organization** — Companies and research groups (Anthropic, OpenAI, Microsoft, academic labs)
+- **organization** — Companies and research groups (Anthropic, OpenAI, Microsoft, SJTU, academic labs)
   - Frontmatter: `type` (company/academic/research_lab)
 - **person** — Researchers, engineers, and authors
   - Frontmatter: `affiliation`, `areas`
@@ -65,29 +69,88 @@ Entities tracked in `wiki/entities/`:
 
 Concepts tracked in `wiki/concepts/`:
 
-- **memory-strategy** — Memory management approaches (caching, retrieval, indexing, pruning)
-  - Frontmatter: `pattern_type`, `trade_offs`, `use_cases`
-- **skill-composition** — How tools/skills are composed (sequential, parallel, hierarchical, DAG-based)
-  - Frontmatter: `composition_model`, `execution_semantics`, `examples`
-- **architecture-pattern** — System design patterns (agent loop, planning, reflection, tool use, RAG)
-  - Frontmatter: `components`, `control_flow`, `use_cases`
-- **protocol-design** — Protocol design principles (versioning, backwards compatibility, error handling)
-  - Frontmatter: `design_principles`, `trade_offs`
-- **execution-model** — How code/tools are executed (synchronous, async, streaming, sandboxed)
-  - Frontmatter: `execution_semantics`, `safety_guarantees`
-- **security-boundary** — Isolation and security mechanisms (containers, VMs, capability-based, permission systems)
-  - Frontmatter: `threat_model`, `guarantees`, `limitations`
+#### Memory Concepts
+
+- **memory-content-type** — The four dimensions of externalized state:
+  - **working-context** — Live intermediate state (open files, temp vars, checkpoints)
+  - **episodic-experience** — Prior execution records (decision points, tool calls, failures, outcomes)
+  - **semantic-knowledge** — Abstractions that outlive episodes (domain facts, heuristics, conventions)
+  - **personalized-memory** — User-specific state (preferences, habits, recurring constraints)
+  - Frontmatter: `temporal_scope`, `retention_policy`, `retrieval_pattern`
+
+- **memory-architecture** — How memory is externalized (Du 2026):
+  - **monolithic-context** — All history in prompt
+  - **context-with-retrieval** — Near-term in context + external retrieval
+  - **hierarchical-memory** — Managed lifecycle (extraction, consolidation, forgetting)
+  - **adaptive-memory** — Dynamic modules + feedback-based strategy optimization
+  - Frontmatter: `control_policy`, `scalability`, `trade_offs`
+
+#### Skill Concepts
+
+- **procedural-expertise-type** — Three components externalized by skills:
+  - **operational-procedure** — Task skeleton (steps, phases, dependencies, stopping conditions)
+  - **decision-heuristics** — Branching rules and preference orderings
+  - **normative-constraints** — Acceptability conditions (safety, compliance, scope limits)
+  - Frontmatter: `stability_gains`, `variance_reduction`
+
+- **skill-lifecycle** — How skills are acquired and evolve:
+  - **authored** — Human-designed (SKILL.md, AGENTS.md, SOP templates)
+  - **distilled** — Induced from trajectories and episodic memory
+  - **discovered** — Extracted from environment exploration
+  - **composed** — Built from existing skill units
+  - Frontmatter: `acquisition_method`, `evolution_mechanism`
+
+- **skill-activation** — How skills become operational:
+  - **specification** — Declarative artifact (capabilities, scope, preconditions)
+  - **discovery** — Registry-based retrieval
+  - **progressive-disclosure** — Staged loading (name → manifest → full guide)
+  - **execution-binding** — Connection to tools, APIs, files, sub-agents
+  - **composition** — Serial, parallel, conditional, recursive coordination
+  - Frontmatter: `binding_targets`, `composition_patterns`
+
+#### Protocol Concepts
+
+- **protocol-type** — Interaction structure being externalized:
+  - **agent-tool** — Tool invocation, function calling, API schemas
+  - **agent-agent** — Multi-agent coordination, delegation, collaboration
+  - **agent-user** — User interaction, approval gates, feedback loops
+  - Frontmatter: `interaction_model`, `state_management`, `error_handling`
+
+- **protocol-design-principle** — How protocols transform tasks:
+  - **intent-capture** — Structured representation of agent goals
+  - **capability-discovery** — Tool registration and description
+  - **lifecycle-management** — Session states, transitions, checkpoints
+  - **schema-validation** — Typed fields, format enforcement
+  - Frontmatter: `representational_transformation`, `cognitive_offload`
+
+#### Harness Concepts
+
+- **harness-dimension** — Six analytical dimensions (Section 6.2):
+  - **agent-loop** — Control flow (perceive-plan-act-observe), termination, recursion bounds
+  - **sandboxing** — Execution isolation, filesystem restrictions, resource quotas
+  - **human-oversight** — Approval gates, escalation triggers, hook systems
+  - **observability** — Structured logging, execution traces, feedback loops
+  - **configuration** — Permission layers (user/project/org), policy encoding
+  - **context-budget** — Token allocation, summarization, staged loading, eviction
+  - Frontmatter: `control_mechanism`, `safety_guarantees`, `resource_management`
+
+- **externalization-transformation** — Cognitive artifact analysis:
+  - **recall-to-recognition** — Memory transforms unbounded recall into curated retrieval
+  - **generation-to-composition** — Skills transform improvisation into structured reuse
+  - **ad-hoc-to-governed** — Protocols transform ambiguous coordination into contracts
+  - Frontmatter: `cognitive_burden_relocated`, `task_restructuring`
 
 ### Tags
 
 Standard tags used in frontmatter:
 
-- Framework tags: `framework-claude-code`, `framework-cursor`, `framework-aider`, `framework-continue`
+- Framework tags: `framework-claude-code`, `framework-cursor`, `framework-aider`, `framework-openhands`
 - Protocol tags: `protocol-mcp`, `protocol-lsp`, `protocol-custom`
-- Memory tags: `memory-rag`, `memory-vector-db`, `memory-kg`, `memory-cache`
+- Memory architecture tags: `memory-monolithic`, `memory-retrieval`, `memory-hierarchical`, `memory-adaptive`
+- Memory content tags: `memory-working`, `memory-episodic`, `memory-semantic`, `memory-personalized`
+- Skill tags: `skill-authored`, `skill-distilled`, `skill-discovered`, `skill-composed`
+- Harness tags: `harness-loop`, `harness-sandbox`, `harness-observability`, `harness-context-mgmt`
 - Architecture tags: `arch-agent-loop`, `arch-tool-use`, `arch-planning`, `arch-reflection`, `arch-rag`
-- Execution tags: `exec-sync`, `exec-async`, `exec-streaming`, `exec-sandboxed`
-- Security tags: `security-container`, `security-vm`, `security-capability`, `security-permission`
 - Language tags: `lang-python`, `lang-javascript`, `lang-typescript`, `lang-go`, `lang-rust`
 
 ## Workflows
@@ -128,65 +191,76 @@ Standard tags used in frontmatter:
 ### For arXiv Papers
 - Always extract abstract verbatim
 - Focus on **novel methods** for memory, skills, protocols, harness design
-- Record architectural diagrams and system descriptions
-- Track implementation details (languages, frameworks used)
-- Note performance characteristics (latency, throughput, memory usage)
-- Record limitations and future work sections
+- Record which externalization dimension(s) the paper addresses
+- Track architectural innovations (new memory architectures, skill lifecycle methods, protocol designs)
+- Note the "representational transformation" claim (what cognitive burden is externalized? how?)
+- Record performance characteristics and empirical results
 - Note institutional affiliations of authors
 
 ### For GitHub Repositories
 - Record primary programming language and framework
-- Extract architecture overview from README/docs
-- Note tool/skill system design (how capabilities are defined and executed)
-- Track memory/context management approach
-- Record protocol support (MCP, LSP, custom)
-- Note sandbox/execution environment architecture
-- Track dependencies and system requirements
-- Record GitHub stars, forks, and last commit date as indicators of activity
+- Extract architecture overview focusing on externalization dimensions:
+  - Memory: what state is persistent? what's the retrieval method?
+  - Skills: are there reusable capability packages? how are they loaded?
+  - Protocols: what interaction contracts exist? (MCP, LSP, custom)
+  - Harness: loop architecture, sandboxing, observability, context management
+- Note system boundaries and integration points
+- Track dependencies and infrastructure requirements
+- Record GitHub stars, forks, and last commit date
 - Note license type
 
 ### For Protocol Specifications
 - Record protocol version and spec URL
-- Extract key design decisions and rationale
+- Identify protocol type: agent-tool, agent-agent, or agent-user
+- Extract key design decisions (state management, error handling, versioning)
 - Note message formats, transport mechanisms
-- Track implementations in different languages
-- Document versioning and compatibility strategy
-- Record security considerations
+- Track implementations in different languages/frameworks
+- Document how the protocol externalizes interaction structure
 
 ### For Framework Entities
-Must record:
-- Architecture type (agent loop, tool orchestrator, etc.)
-- Memory/context management strategy
-- Tool/skill system design
+Must record all six harness dimensions:
+1. **Agent loop**: control flow architecture, termination logic
+2. **Sandboxing**: isolation method, resource restrictions
+3. **Human oversight**: approval modes, escalation rules
+4. **Observability**: logging, tracing, metrics
+5. **Configuration**: permission layers, policy encoding
+6. **Context budget**: summarization, staged loading, eviction
+
+Also track:
+- Memory architecture (monolithic/retrieval/hierarchical/adaptive)
+- Skill system design (acquisition, discovery, binding, composition)
 - Protocol support (MCP, LSP, custom)
-- Execution environment (local, cloud, hybrid)
-- Key dependencies and infrastructure requirements
-- GitHub activity (stars, last commit)
 
 ### For Memory System Entities
-Must record:
-- Storage backend (vector DB, graph DB, file system, hybrid)
-- Retrieval method (semantic search, graph traversal, keyword)
-- Indexing strategy
-- Scalability characteristics
-- Integration points with frameworks
+Categorize by architecture type (Du 2026):
+- **Monolithic Context**: all history in prompt
+- **Context with Retrieval Storage**: near-term in context + external retrieval
+- **Hierarchical Memory**: managed lifecycle (extraction, consolidation, forgetting)
+- **Adaptive Memory**: dynamic modules + feedback optimization
 
-### For Protocol Entities
-Must record:
-- Protocol type (transport, data format, control flow)
-- Versioning scheme
-- Known implementations
-- Design principles and trade-offs
-- Security model
+Record which content types are externalized:
+- Working context, episodic experience, semantic knowledge, personalized memory
 
-### For Harness Entities
-Must record:
-- Isolation method (Docker, VM, process, capability-based)
-- Supported languages and runtimes
-- Security model and threat assumptions
-- Performance characteristics
-- Integration with frameworks
+### For Skill Entities
+Record all three components:
+- **Operational procedure**: task decomposition, step sequencing
+- **Decision heuristics**: branching rules, preference orderings
+- **Normative constraints**: safety boundaries, compliance requirements
+
+Track lifecycle:
+- Acquisition method (authored/distilled/discovered/composed)
+- Evolution mechanism (how skills improve over time)
+- Activation pipeline (specification → discovery → progressive disclosure → binding → composition)
+
+### For Research Papers on Externalization
+- Identify which transformation is being optimized:
+  - Memory: recall → recognition
+  - Skills: generation → composition
+  - Protocols: ad-hoc → governed
+- Note the "cognitive artifact" perspective: how does externalization change the task the model faces?
+- Track empirical evidence: does externalization reduce variance? improve reliability? enable governance?
+- Record trade-offs between parametric and externalized capability
 
 ---
 
-*This schema co-evolves over time. Update it as you discover what works for your domain and workflow. The goal is for CLAUDE.md to be a complete specification of how this wiki works, so that any future session can pick up seamlessly where the last left off.*
+*This schema is directly derived from "Externalization in LLM Agents" (Zhou et al., 2026, arXiv:2604.08224). The goal is to maintain a complete specification of how this wiki works, so that any future session can pick up seamlessly where the last left off.*
