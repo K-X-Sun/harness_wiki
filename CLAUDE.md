@@ -1,24 +1,30 @@
-# Wiki Schema — AI Coding Harness Engineering
+# Wiki Schema — AI Coding Systems Engineering
 
 ## Domain
 
-This wiki captures knowledge about AI coding harness engineering: evaluation benchmarks (SWE-Bench, HumanEval, ProdCodeBench), testing frameworks (OpenHands, Kortix, BigCode), agent architectures, evaluation methodologies, and the engineering practices for building and assessing LLM-based code generation systems.
+This wiki captures knowledge about the **engineering of AI coding systems**: memory architectures, skill/tool frameworks, agent-IDE protocols, and harness runtime design. The focus is on **how these systems are built**, not how they are evaluated.
 
-The goal is to maintain a structured, cross-referenced knowledge base that tracks the evolving landscape of AI code evaluation, enabling informed decisions about benchmark design, harness architecture, and evaluation methodology.
+Core areas:
+- **Memory Systems** — How AI agents manage context, project knowledge, long-term memory (RAG, vector stores, knowledge graphs)
+- **Skills & Tools** — Tool use frameworks, skill composition, agent capabilities, API design
+- **Protocols** — Agent-IDE communication (MCP, LSP), agent-agent coordination, execution protocols
+- **Harness Engineering** — Runtime environments, sandboxes, execution engines, security isolation
+
+The goal is to maintain a structured, cross-referenced knowledge base that tracks novel methods and engineering practices for building LLM-based coding assistants, enabling informed architectural decisions.
 
 ## Structure
 
 Three layers:
 
-- `raw/` — **Immutable source documents. Source of truth. Never modify files here.** Articles, papers, images, data files. The LLM reads from raw/ but never writes to it.
+- `raw/` — **Immutable source documents. Source of truth. Never modify files here.** Papers, docs, repo READMEs, protocol specs. The LLM reads from raw/ but never writes to it.
 - `raw/assets/` — Downloaded images and attachments.
 - `wiki/` — LLM-maintained markdown pages. The LLM owns this layer entirely. You read it; the LLM writes it.
   - `wiki/index.md` — Content catalog. Update on every ingest, query (when filing), and lint.
   - `wiki/log.md` — Append-only chronological log. Records every ingest, query, and lint pass.
   - `wiki/overview.md` — High-level synthesis. Update after every ingest.
   - `wiki/sources/` — One summary page per ingested source.
-  - `wiki/entities/` — Pages for benchmarks, harnesses, models, organizations, people, datasets, tools.
-  - `wiki/concepts/` — Pages for evaluation metrics, testing methodologies, architecture patterns, benchmark design principles, harness components, prompt patterns.
+  - `wiki/entities/` — Pages for frameworks, protocols, memory systems, harnesses, organizations, people, tools.
+  - `wiki/concepts/` — Pages for memory strategies, skill composition patterns, protocol design principles, execution models, security boundaries.
   - `wiki/queries/` — Filed query answers and analysis.
   - `wiki/syntheses/` — Synthesis and comparison pages.
 
@@ -29,7 +35,7 @@ Three layers:
 - Use `[[Page Title]]` (Obsidian wikilinks) for all cross-references.
 - Link every mention of a known entity or concept (at least the first mention per section).
 - Page filenames use kebab-case slugs derived from titles (lowercase, hyphens, max 60 chars).
-- Example: `[[SWE-Bench]]` resolves to `wiki/entities/swe-bench.md`.
+- Example: `[[Model Context Protocol]]` resolves to `wiki/entities/model-context-protocol.md`.
 
 ### Frontmatter
 
@@ -40,48 +46,49 @@ Tags, dates, and source counts in frontmatter enable Obsidian Dataview queries.
 
 Entities tracked in `wiki/entities/`:
 
-- **benchmark** — Evaluation benchmarks (SWE-Bench, HumanEval, ProdCodeBench, MBPP, etc.)
-  - Frontmatter: `task_count`, `languages`, `metrics_used`, `created_date`
-- **harness** — Evaluation harnesses and frameworks (OpenHands, Kortix, BigCode Evaluation Harness)
-  - Frontmatter: `primary_language`, `supported_benchmarks`, `github_url`, `stars`
-- **model** — LLM models evaluated (GPT-4, Claude, Codex, StarCoder, etc.)
-  - Frontmatter: `organization`, `release_date`, `parameters`
-- **organization** — Companies and research groups (Anthropic, OpenAI, Princeton NLP, Meta, etc.)
+- **framework** — AI coding frameworks and platforms (Claude Code, Cursor, Aider, Continue, Cline, etc.)
+  - Frontmatter: `primary_language`, `architecture_type`, `github_url`, `stars`, `license`
+- **protocol** — Communication protocols (MCP, LSP, custom agent protocols)
+  - Frontmatter: `protocol_type` (transport/data/control), `spec_url`, `implementations`, `version`
+- **memory-system** — Memory architectures (RAG systems, vector stores, knowledge graphs, context managers)
+  - Frontmatter: `storage_backend`, `retrieval_method`, `scalability`, `github_url`
+- **harness** — Runtime execution environments (sandboxes, containers, execution engines)
+  - Frontmatter: `isolation_method`, `supported_languages`, `security_model`, `github_url`
+- **tool** — Specific tools and capabilities (code search, file ops, test runners, debuggers)
+  - Frontmatter: `tool_category`, `api_surface`, `github_url`
+- **organization** — Companies and research groups (Anthropic, OpenAI, Microsoft, academic labs)
   - Frontmatter: `type` (company/academic/research_lab)
-- **person** — Researchers and authors
+- **person** — Researchers, engineers, and authors
   - Frontmatter: `affiliation`, `areas`
-- **dataset** — Training and evaluation datasets
-  - Frontmatter: `size`, `languages`, `source`, `license`
-- **tool** — Supporting tools (test runners, sandboxes, metric collectors)
-  - Frontmatter: `purpose`, `github_url`
 
 ### Concept Categories
 
 Concepts tracked in `wiki/concepts/`:
 
-- **evaluation-metric** — Metrics for measuring performance (pass@k, solve rate, accuracy, BLEU, CodeBLEU)
-  - Frontmatter: `formula`, `interpretation`, `limitations`
-- **testing-methodology** — Testing approaches (unit testing, integration testing, multi-run stability, test relevance validation)
-  - Frontmatter: `scope`, `strengths`, `weaknesses`
-- **architecture-pattern** — Design patterns (agent loop, tool use, multi-turn dialogue, retrieval-augmented generation)
-  - Frontmatter: `components`, `use_cases`
-- **benchmark-design** — Benchmark construction principles (task selection, data curation, contamination prevention, production-derivation)
-  - Frontmatter: `principles`, `trade_offs`
-- **harness-component** — Architectural components (execution sandbox, test runner, metric collector, prompt formatter)
-  - Frontmatter: `responsibilities`, `interfaces`
-- **prompt-pattern** — Prompting strategies (few-shot, chain-of-thought, self-correction, retrieval)
-  - Frontmatter: `structure`, `effectiveness`
+- **memory-strategy** — Memory management approaches (caching, retrieval, indexing, pruning)
+  - Frontmatter: `pattern_type`, `trade_offs`, `use_cases`
+- **skill-composition** — How tools/skills are composed (sequential, parallel, hierarchical, DAG-based)
+  - Frontmatter: `composition_model`, `execution_semantics`, `examples`
+- **architecture-pattern** — System design patterns (agent loop, planning, reflection, tool use, RAG)
+  - Frontmatter: `components`, `control_flow`, `use_cases`
+- **protocol-design** — Protocol design principles (versioning, backwards compatibility, error handling)
+  - Frontmatter: `design_principles`, `trade_offs`
+- **execution-model** — How code/tools are executed (synchronous, async, streaming, sandboxed)
+  - Frontmatter: `execution_semantics`, `safety_guarantees`
+- **security-boundary** — Isolation and security mechanisms (containers, VMs, capability-based, permission systems)
+  - Frontmatter: `threat_model`, `guarantees`, `limitations`
 
 ### Tags
 
 Standard tags used in frontmatter:
 
-- Benchmark tags: `benchmark-swe-bench`, `benchmark-humaneval`, `benchmark-prodcodebench`, `benchmark-mbpp`
-- Metric tags: `metric-pass-at-k`, `metric-solve-rate`, `metric-accuracy`, `metric-bleu`
-- Architecture tags: `arch-agent-loop`, `arch-tool-use`, `arch-multi-turn`, `arch-rag`
-- Language tags: `lang-python`, `lang-javascript`, `lang-java`, `lang-cpp`, `lang-go`, `lang-rust`, `lang-typescript`
-- Evaluation tags: `eval-offline`, `eval-online`, `eval-ab-testing`, `eval-production`
-- Method tags: `method-unit-test`, `method-integration-test`, `method-contamination-check`
+- Framework tags: `framework-claude-code`, `framework-cursor`, `framework-aider`, `framework-continue`
+- Protocol tags: `protocol-mcp`, `protocol-lsp`, `protocol-custom`
+- Memory tags: `memory-rag`, `memory-vector-db`, `memory-kg`, `memory-cache`
+- Architecture tags: `arch-agent-loop`, `arch-tool-use`, `arch-planning`, `arch-reflection`, `arch-rag`
+- Execution tags: `exec-sync`, `exec-async`, `exec-streaming`, `exec-sandboxed`
+- Security tags: `security-container`, `security-vm`, `security-capability`, `security-permission`
+- Language tags: `lang-python`, `lang-javascript`, `lang-typescript`, `lang-go`, `lang-rust`
 
 ## Workflows
 
@@ -120,47 +127,65 @@ Standard tags used in frontmatter:
 
 ### For arXiv Papers
 - Always extract abstract verbatim
-- Record evaluation metrics with exact numbers (e.g., "pass@1: 72.2%", "solve rate: 53.2%")
-- Note all benchmark names and versions tested
-- Track baseline comparisons and state-of-the-art claims
-- Record dataset sizes and programming language distributions
+- Focus on **novel methods** for memory, skills, protocols, harness design
+- Record architectural diagrams and system descriptions
+- Track implementation details (languages, frameworks used)
+- Note performance characteristics (latency, throughput, memory usage)
+- Record limitations and future work sections
 - Note institutional affiliations of authors
 
 ### For GitHub Repositories
-- Record primary programming language from repo metadata
-- Extract supported benchmarks from README
-- Note installation/usage instructions if complex
+- Record primary programming language and framework
+- Extract architecture overview from README/docs
+- Note tool/skill system design (how capabilities are defined and executed)
+- Track memory/context management approach
+- Record protocol support (MCP, LSP, custom)
+- Note sandbox/execution environment architecture
 - Track dependencies and system requirements
 - Record GitHub stars, forks, and last commit date as indicators of activity
 - Note license type
 
-### For Benchmark Entities
-Must record:
-- Task count and distribution
-- Programming languages covered
-- Evaluation metrics used
-- Creation date and last update
-- Maintainer/organization
-- Solve rates for major models (GPT-4, Claude, etc.)
+### For Protocol Specifications
+- Record protocol version and spec URL
+- Extract key design decisions and rationale
+- Note message formats, transport mechanisms
+- Track implementations in different languages
+- Document versioning and compatibility strategy
+- Record security considerations
 
-### For Harness Entities
+### For Framework Entities
 Must record:
-- Architecture overview (agent loop structure, tool system, test execution)
-- Supported benchmarks and evaluation modes
-- Programming languages supported
+- Architecture type (agent loop, tool orchestrator, etc.)
+- Memory/context management strategy
+- Tool/skill system design
+- Protocol support (MCP, LSP, custom)
+- Execution environment (local, cloud, hybrid)
 - Key dependencies and infrastructure requirements
 - GitHub activity (stars, last commit)
 
-### For Evaluation Metrics
-- Include formal definition or formula
-- Note interpretation guidelines (higher is better? range?)
-- Document known limitations or biases
-- Reference papers that introduced or validated the metric
+### For Memory System Entities
+Must record:
+- Storage backend (vector DB, graph DB, file system, hybrid)
+- Retrieval method (semantic search, graph traversal, keyword)
+- Indexing strategy
+- Scalability characteristics
+- Integration points with frameworks
 
-### For Research Papers with Benchmarks
-- If a paper introduces a new benchmark: create both a source page AND a benchmark entity page
-- If a paper uses an existing benchmark: update the benchmark entity page with new results
-- Always note the model context window, temperature, and other relevant hyperparameters when reported
+### For Protocol Entities
+Must record:
+- Protocol type (transport, data format, control flow)
+- Versioning scheme
+- Known implementations
+- Design principles and trade-offs
+- Security model
+
+### For Harness Entities
+Must record:
+- Isolation method (Docker, VM, process, capability-based)
+- Supported languages and runtimes
+- Security model and threat assumptions
+- Performance characteristics
+- Integration with frameworks
 
 ---
 
