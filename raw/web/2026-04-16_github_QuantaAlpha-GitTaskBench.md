@@ -1,0 +1,446 @@
+<div align="center">
+  
+  <h1 align="center" style="color: #2196F3; font-size: 24px; font-weight: 600; margin: 20px 0; line-height: 1.4;">
+    🚀 GitTaskBench: <span style="color: #555; font-weight: 400; font-size: 18px;"><em>A Benchmark for Code Agents Solving Real-World Tasks Through Code Repository Leveraging</em></span>
+  </h1>
+  
+  <p style="margin: 20px 0;">
+    <a href="https://arxiv.org/pdf/2508.18993"><img src="https://img.shields.io/badge/arXiv-2508.18993-B31B1B.svg?style=flat-square&logo=arxiv&logoColor=white" /></a>
+    <a href="https://gittaskbench.github.io"><img src="https://img.shields.io/badge/🌐_LeaderBoard-GitTaskBench-4A90E2.svg?style=flat-square&logo=github&logoColor=white" /></a>    
+    <a href="https://github.com/QuantaAlpha/RepoMaster"><img src="https://img.shields.io/badge/Agent-RepoMaster-4A90E2.svg?style=flat-square&logo=github&logoColor=white" /></a>
+    <a href="https://quantaalpha.github.io/"><img src="https://img.shields.io/badge/Team-QuantaAlpha-00A98F.svg?style=flat-square&logo=opensourceinitiative&logoColor=white" /></a>
+  </p>
+  <a href="https://gittaskbench.github.io/">
+    <img src="figs/leaderboard.png" width="800" /><br>
+  </a>
+</div>
+
+## 📰 News
+
+- **2025.09.19** 🎉 Excited to announce that our papers have been accepted to <u>**NeurIPS 2025**</u> — [**RepoMaster**](https://arxiv.org/abs/2505.21577) as a ***Spotlight*** (≈3.2%) and [**SE-Agent**](https://arxiv.org/abs/2508.02085) as a ***Poster*** (≈24.52%)!
+
+- **2025.08.28** 🎉 We open-sourced [**RepoMaster**](https://github.com/QuantaAlpha/RepoMaster) — an AI agent that leverages GitHub repos to solve complex real-world tasks.
+- **2025.08.26** 🎉 We open-sourced [**GitTaskBench**](https://github.com/QuantaAlpha/GitTaskBench) — a repo-level benchmark & tooling suite for real-world tasks.
+- **2025.08.10** 🎉 We open-sourced [**SE-Agent**](https://github.com/JARVIS-Xs/SE-Agent) — a self-evolution trajectory framework for multi-step reasoning.
+
+> 🔗 **Ecosystem**: [RepoMaster](https://github.com/QuantaAlpha/RepoMaster) · [GitTaskBench](https://github.com/QuantaAlpha/GitTaskBench) · [SE-Agent](https://github.com/JARVIS-Xs/SE-Agent) · [Team Homepage](https://quantaalpha.github.io)
+
+## 🧭 Motivation and Goal
+The ultimate vision for AI agents is to enable users to accomplish real-world tasks simply by describing their needs in natural language—leaving all planning and execution to the agent, which delivers the final results autonomously. 
+
+<p align="center">
+  <img src="./figs/README_simple-intro.jpg" width="800" /><br>
+</p>
+
+⚠️ While existing benchmarks evaluate various agent capabilities, few focus on tasks that reflect genuine real-world practicality, especially those requiring comprehensive understanding and use of full-scale project repositories.
+
+👋 To address this gap, we introduce **GitTaskBench**. Our benchmark focuses on tasks whose complexity and practical value demand leveraging repository-level code, mirroring how developers solve real problems using existing GitHub projects. 
+
+
+<p align="center">
+  <img src="./figs/overview.jpg" width="700" /><br>
+   <em>Overview of GitTaskBench. 7 example real-life tasks from different modalities and their evaluations are shown. </em>
+</p>
+
+🔍 We carefully selected **54 representative tasks** with real-world economic value, and for each task, searched and identified a corresponding GitHub repository that meets strict selection criteria (the repository for each task is fixed to ensure benchmark completeness, as some agent frameworks do not support searching for appropriate repositories). This setup allows us to systematically evaluate LLM agents' ability to utilize open-source repositories to solve complex, realistic problems.
+
+👉 By doing so, ***GitTaskBench offers a more authentic and comprehensive assessment of agent performance in practical, repository-driven environments***.
+
+
+## 🚀 How to Run
+
+⚡ If you only want to know how to use GitTaskBench, start here.
+
+### 0. Directory structure
+
+└── QuantaAlpha/GitTaskBench/
+
+    ├── README.md
+    ├── setup.py
+    ├── requirements.txt
+    ├── Task_Success_Criteria.xlsx   # listed clearly
+    ├── code_base/                   # all used repositories
+    │   ├── AnimeGANv3/
+    │   └── ...
+    ├── queries/                     # all task definitions
+    │   ├── AnimeGANv3_01/
+    │   │   └── query.json
+    │   ├── AnimeGANv3_02/
+    │   │   └── query.json
+    │   └── ...
+    ├── run_auto_prompt/             # generate all prompts
+    │   ├── new_run_setup.py
+    │   └── get_new_run_prompt.sh
+    ├── Aider/                       # agent framework
+    │   └── ... 
+    ├── SWE_agent/                   # agent framework
+    │   └── ... 
+    ├── OpenHands/                   # agent framework
+    │   └── ...
+    ├── config/                      # task evaluation configs
+    │   ├── AnimeGANv3_01/
+    │   │   └── task_info.yaml
+    │   ├── AnimeGANv3_02/
+    │   │   └── task_info.yaml
+    │   ├── AnimeGANv3_03/
+    │   └── ...
+    ├── groundtruth/                 # ground truth
+    │   ├── Trafilatura_02/
+    │   │   └── gt.md
+    │   └── Trafilatura_03/...
+    ├── output_for_show/             #  agent's outputs
+    │   ├── AnimeGANv3_01/
+    │   │   └── output.png
+    │   └── AnimeGANv3_02/...
+    ├── gittaskbench/                # evaluation settings
+    │   ├── __init__.py
+    │   └── ...
+    ├── test_scripts/                # test scripts
+    │   ├── AnimeGANv3_01/
+    │   │   └── test_script.py
+    │   ├── AnimeGANv3_02/
+    │   │   └── test_script.py
+    │   └──...
+    ├── test_results_for_show/       # analysis results
+    │   ├── AnimeGANv3_02/
+    │   │   └── results.jsonl
+    │   └──...
+    └── test_reports/                # summary report
+        ├── evaluation_report_openhands_gpt4o_100iters.txt
+        ├── evaluation_report_openhands_gpt4o_70iters.txt
+        ├── evaluation_report_openhands_gpt4o_30iters.txt
+        └── ...
+
+
+### 1. Set Up ⚙️ 
+<a name="set-up"></a>
+GitTaskBench offers easy-to-use shell commands to ensure reproducible evaluations. To build GitTaskBench from source, follow bellow steps. 
+
+First, create a new conda environment:
+```console
+conda create -n gittaskbench python=3.10 -y
+conda activate gittaskbench
+
+pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 \
+  --extra-index-url https://download.pytorch.org/whl/cu113
+```
+
+Then, you can install `gittaskbench` with pip:
+```console
+git clone https://github.com/your-org/GitTaskBench.git
+cd GitTaskBench
+# config
+pip install -e .
+```
+also you can
+```console
+# config
+pip install -r requirements.txt
+```
+
+### 2. Quick Start 💡 
+
+* #### **Single Task Evaluation:**
+
+If you need to evaluate a single, specific task, you can use the following command. The example below shows how to evaluate the `Trafilatura_01`  task:
+
+```console
+cd GitTaskBench
+# The outputs are saved in the DEFAULT "./output" directory, for example: "./output/Trafilatura_01/output.txt"
+```
+
+```console
+gittaskbench grade --taskid Trafilatura_01
+```
+
+Running the command will produce an analysis report (.jsonl) at the DEFAULT path (./test_results/Trafilatura_01). See ```test_results_for_show/``` for a sample. 
+
+The complete commands can be found in the [🤖 Automation Evaluation](#automation-evaluation) section.
+
+* #### **All Tasks Evaluation**
+When you need to evaluate all tasks, you can use the --all parameter. This command will automatically iterate through and execute the evaluation of all tasks:
+```console
+gittaskbench grade --all
+```
+
+* #### **Test Results Analysis**
+After completing the evaluation, if you want to analyze & summary the test results, you can use the statistics command. This command will analyze & summary  the evaluation results in the specified directory and output an analysis report (.txt):
+
+```console
+gittaskbench eval
+```
+See ```test_reports/``` for a sample.
+
+
+👉 That’s it. With the above commands you can run, and analyze the agent performance on GitTaskBench.
+
+
+## 📊 Benchmark Overview
+GitTaskBench is a comprehensive benchmark designed to evaluate the capabilities of intelligent agents across multiple modalities and task complexities. It encompasses **54 tasks** spanning **7 key domains**.
+
+Each domain features a curated set of tasks that reflect real-world applications and research challenges. These tasks assess an agent's autonomous ability to interpret complex instructions, process multi-modal inputs, perform reasoning, understand and explore the GitHub repositories, and deliver accurate, meaningful outputs. 
+
+The GitTaskBench data curation and processing pipeline is illustrated below.
+
+<p align="center">
+  <img src="./figs/data_construction.jpg"  width="900" /><br>
+     <em>Overview of the GitTaskBench data curation and processing pipeline. </em>
+</p>
+
+
+
+## ✅ Task Distribution
+
+| Domain                     | Task List                                                                                                                                                                  |
+|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Image Processing           | Style Transfer, Image Coloring, Image Restoration, Scratch Detection, Image Enhancement, Background Processing, Watermark Embedding |
+| Video Processing           | Video Action Analysis, Style Transfer, Video Coloring                                                                                                                      |
+| Speech Processing          | Speech Recognition, Speech Separation, Speech Enhancement, Noise Reduction, Speech Analysis                                  |
+| Physiological Signals Processing    | EDA (Electrodermal Activity) Data Analysis, ECG (Electrocardiogram) Data Analysis, EOG (Electrooculogram) Data Analysis                                                                                             |
+| Security and Privacy         | Data Simulation, Watermark Embedding, Watermark Extraction                                                                                             |
+| Web Scraping               | Web Content Extraction, Format Transformation                                                                                                                                                              |
+| Office Document Processing | Excel Document Parsing, PDF Content Extraction, PDF Content Processing                                                                                                                   |
+
+<div align="center">
+  <img src="./figs/Domain_subdomain.png" alt="Image 1" height="300"/>
+  <img src="./figs/Statistics_Summary.png" alt="Image 2" height="300"/><br>
+  <em>Task Domains and Summary Statistics.</em>
+</div>
+
+
+## 🛠️ Integrating with Agent Frameworks
+
+We provide detailed configuration guidelines on how to integrate **GitTaskBench** with existing state-of-the-art general-purpose agent frameworks, including **OpenHands**, **SWE-Agent** and **Aider**. This enables users to seamlessly run batches of benchmark tasks within their agent pipelines.
+
+*In fact, the batch runner we provide—designed to enable efficient execution of multiple tasks—**is not limited to GitTaskBench**, and can be broadly applied to other benchmarks and agent-based task suites as well.*
+
+👉 Configuration details for each agent framework are provided in the following files:
+
+- For **OpenHands**, see:
+  -  [OpenHands Configuration Guide](./OpenHands/run_batch_README.md)
+    ```console
+  cd OpenHands
+    poetry run python run_batch.py
+  ```
+- For **SWE-Agent**, see: 
+  - [SWE-Agent Configuration Guide 1](./SWE_agent/README_batch_add.md)
+  - [SWE-Agent Configuration Guide 2](./SWE_agent/README_batch_improvements.md)
+  ```console
+  cd SWE_agent
+  bash run_batch.sh
+  ```
+- For **Aider**, carefully review the configuration settings in `run_aider_batch_litellm.sh`, then run the command:
+  ```console
+  cd Aider
+  bash run_aider_batch_litellm.sh
+  ```
+
+
+## 🤖 Automation Evaluation
+<a name="automation-evaluation"></a>
+After finishing the [🚀 Set Up](#set-up) preparation, you can explore the complete usage of gittaskbench for automatiion evaluation:
+
+```console
+gittaskbench [-v] grade --taskid <taskid> [--output_dir <output_dir>] [--result <result>]
+```
+### 🔧 Options:
+
+- `--taskid <taskid> `: (Required in single task evaluation) The task identifier, e.g., Trafilatura_01.
+- `-v `: (Optional) Enable verbose output to display detailed error messages.
+- `--output_dir `: (Optional) The directory containing the agent's output files. If not specified, the default value is read from task_info.yaml.
+- `--result `:(Optional) The directory containing the agent's test results files. If not specified, the default value is read from task_info.yaml.
+
+```console
+gittaskbench eval  [--result <result>]
+```
+### 🔧 Options:
+
+- `--result `:(Optional) The directory containing the agent's test results files. If not specified, the default value is test_results file in repo.
+
+
+## 🔬 Evaluation Results
+GitTaskBench evaluates two key aspects: 
+
+- **Execution Completion Rate**: measures whether the agent can leverage the repository to produce any valid output.
+
+- **Task Pass Rate** : assesses whether the output meets task-specific evaluation criteria. 
+
+Given the diversity of tasks, all evaluation metrics are predefined and tailored to each task, drawing on commonly accepted standards within the developer community. This ensures a comprehensive and fair assessment.
+
+<p align="center">
+  <img src="./figs/exp_results.png"  width="700" /><br>
+    <em>Performance Comparison of Different Frameworks and LLMs on GitTaskBench.</em>
+</p>
+
+Regarding the domain-specific performance,
+<p align="center">
+  <img src="./figs/ratio_domain.jpg"  width="800" /><br>
+    <em>Performance Evaluation of GPT-4o, GPT-4.1, Claude 3.5, DeepSeek V3 across Different Task Domains.</em>
+</p>
+
+
+## 📝 Application Cases
+<details>
+<summary><strong>📄 Case 1: PDF Email Extraction</strong></summary>
+
+<br>
+
+```python
+task = """
+Extract all email addresses found in the given PDF and save them to a text file.
+Input file: /path/to/document.pdf
+Output requirement: Save as output.txt
+"""
+
+# evaluation metrics = """
+# Process: True/False (Data Integrity Check)  
+#     -- Confirms prediction file and ground truth file accessibility  
+#     -- Validates file parsing success (no read errors)  
+
+# Result: True/False (Performance Threshold)  
+#     -- Calculates accuracy: (Correct Emails / Total Ground Truth) ×100%  
+#     -- Applies pass criterion: Accuracy ≥98%   
+# """
+```
+</details>
+
+<details>
+<summary><strong>🎥 Case 2: Video Coloring</strong></summary>
+
+<br>
+
+```python
+task = """
+Colorize the provided black-and-white video to produce a fully colored version.
+Input file: /path/to/black_and_white_video
+Output requirement: Output video is named as "output"
+"""
+
+# evaluation metrics = """
+# Process: True/False (Technical Validity Verification)  
+#     -- Verifies input video file existence and non-empty status  
+#     -- Checks format compatibility (.mp4/.avi/.mov/.mkv)  
+#     -- Validates frame extraction capability  
+
+# Result: True/False (Color Intensity Threshold)  
+#     -- Samples 30 frames with standardized width (256px)  
+#     -- Computes per-frame colorfulness via Hasler-Bülthoff metric  
+#     -- Aggregates scores to calculate video-level average  
+#     -- Pass/Fail determination (Threshold: >10.0 )  
+# """
+```
+</details>
+
+<details>
+<summary><strong>🖼️ Case 3: Image Watermark Embedding</strong></summary>
+
+<br>
+
+```python
+task = """
+Embed a blind (invisible) watermark into the given PNG image.
+Input file: /path/to/image.png
+Output requirement: Save as output.png
+"""
+
+# evaluation metrics = """
+#  Process: True/False (Input Validation)  
+#     -- Verifies existence and non-empty status of original/watermarked images  
+#     -- Checks image file integrity (readable formats via OpenCV)  
+
+# Result: True/False (Watermark & Quality Compliance)  
+#     -- Extracts watermark text using DWT-DCT decoding  
+#     -- Matches extracted text against ground truth (100% match required)  
+#     -- Computes PSNR between original and watermarked images (≥30.0 dB threshold)  
+#     -- Final pass requires both watermark match AND PSNR compliance  
+# """
+```
+</details>
+
+## ✨ Key Features:
+- **Multi-Modal Support**: Encompasses vision, language, audio, time-series, and web-based data.
+- **Diverse Task Types**: Includes generation, recognition, enhancement, analysis, and simulation tasks.
+- **Real-World Relevance**: Tasks are derived from practical applications in media, healthcare, automation, and data science.
+- **Scalability**: Designed for future expansion with new tasks and evaluation metrics.
+
+
+## 🤝 Contributing
+
+We welcome community contributions! Please refer to the following guidelines:
+
+
+### Development Setup
+
+```bash
+git clone https://github.com/your-org/GitTaskBench.git
+cd GitTaskBench
+```
+To learn more about automation evaluation, please refer to the [🚀 Set Up](#set-up) section.
+
+
+### Contribution Types
+- 🐛 Bug fixes
+- ✨ New feature development
+- 📚 Documentation improvements
+- 🧪 Test case additions
+- 🔧 Repos and utilities
+
+### Submission Process
+1. Fork the project and create a feature branch
+2. Write code and tests
+3. Ensure all tests pass
+4. Submit Pull Request
+
+---
+
+## 🌐 About QuantaAlpha
+
+- QuantaAlpha was founded in **April 2025** by a team of professors, postdocs, PhDs, and master's students from **Tsinghua University, Peking University, CAS, CMU, HKUST**, and more.  
+
+🌟 Our mission is to explore the **"quantum"** of intelligence and pioneer the **"alpha"** frontier of agent research — from **CodeAgents** to **self-evolving intelligence**, and further to **financial and cross-domain specialized agents**, we are committed to redefining the boundaries of AI. 
+
+✨ In **2025**, we will continue to produce high-quality research in the following directions:  
+- **CodeAgent**: End-to-end autonomous execution of real-world tasks  
+- **DeepResearch**: Deep reasoning and retrieval-augmented intelligence  
+- **Agentic Reasoning / Agentic RL**: Agent-based reasoning and reinforcement learning  
+- **Self-evolution and collaborative learning**: Evolution and coordination of multi-agent systems  
+
+📢 We welcome students and researchers interested in these directions to join us!  
+
+🔗 Team Homepage: [QuantaAlpha](https://quantaalpha.github.io/)
+
+---
+
+## 📖 Citation
+If you find GitTaskBench useful in your research, please cite our work:
+```bibtex
+@misc{ni2025gittaskbench,
+      title={GitTaskBench: A Benchmark for Code Agents Solving Real-World Tasks Through Code Repository Leveraging}, 
+      author={Ziyi Ni and Huacan Wang and Shuo Zhang and Shuo Lu and Ziyang He and Wang You and Zhenheng Tang and Yuntao Du and Bill Sun and Hongzhang Liu and Sen Hu and Ronghao Chen and Bo Li and Xin Li and Chen Hu and Binxing Jiao and Daxin Jiang and Pin Lyu},
+      year={2025},
+      eprint={2508.18993},
+      archivePrefix={arXiv},
+      primaryClass={cs.SE},
+      url={https://arxiv.org/abs/2508.18993}, 
+}
+```
+
+## ⭐ Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=QuantaAlpha/GitTaskBench&type=Date)](https://star-history.com/#QuantaAlpha/GitTaskBench&Date)
+
+---
+<div align="center">
+
+**⭐ If GitTaskBench helps you, please give us a star!**
+
+Made with ❤️ by the GitTaskBench Team
+
+
+</div> 
+
+
+
+
+
+
+

@@ -1,0 +1,580 @@
+---
+date: '2026-04-15'
+source_type: paper
+tags:
+- type-paper
+- arxiv-2503-23278
+- topic-mcp
+- protocol
+- topic-security
+title: 'Model Context Protocol (MCP): Landscape, Security Threats, and Future Research
+  Directions'
+---
+
+# Model Context Protocol (MCP): Landscape, Security Threats, and Future Research Directions
+
+# Model Context Protocol (MCP): Landscape, Security Threats, and Future Research Directions
+
+Xinyi Hou [xinyihou@hust.edu.cn](mailto:xinyihou@hust.edu.cn) Huazhong University of Science and Technology Wuhan China , Yanjie Zhao [yanjie˙zhao@hust.edu.cn](mailto:yanjie%CB%99zhao@hust.edu.cn) Huazhong University of Science and Technology Wuhan China , Shenao Wang [shenaowang@hust.edu.cn](mailto:shenaowang@hust.edu.cn) Huazhong University of Science and Technology Wuhan China and Haoyu Wang [haoyuwang@hust.edu.cn](mailto:haoyuwang@hust.edu.cn) Huazhong University of Science and Technology Wuhan China
+
+
+###### Abstract.
+
+The Model Context Protocol (MCP) is a standardized interface designed to enable seamless interaction between AI models and external tools and resources, breaking down data silos and facilitating interoperability across diverse systems. This paper provides a comprehensive overview of MCP, focusing on its core components, workflow, and the lifecycle of MCP servers, which consists of three key phases: creation, operation, and update. We analyze the security and privacy risks associated with each phase and propose strategies to mitigate potential threats. The paper also examines the current MCP landscape, including its adoption by industry leaders and various use cases, as well as the tools and platforms supporting its integration. We explore future directions for MCP, highlighting the challenges and opportunities that will influence its adoption and evolution within the broader AI ecosystem. Finally, we offer recommendations for MCP stakeholders to ensure its secure and sustainable development as the AI landscape continues to evolve.
+
+
+
+## 1. Introduction
+
+
+In recent years, the vision of autonomous AI agents capable of interacting with a wide range of tools and data sources has gained significant momentum. This progress accelerated in 2023 with the introduction of function calling by OpenAI, which allowed language models to invoke external APIs in a structured way [(OpenAI, [2023b](https://arxiv.org/html/2503.23278v1#bib.bib37) )] . This advancement expanded the capabilities of LLMs, enabling them to retrieve real-time data, perform computations, and interact with external systems. As function calling gained adoption, an ecosystem formed around it. OpenAI introduced the ChatGPT plugin [(OpenAI, [2023a](https://arxiv.org/html/2503.23278v1#bib.bib36) )] , allowing developers to build callable tools for ChatGPT. LLM app stores such as Coze [(ByteDance, [2024](https://arxiv.org/html/2503.23278v1#bib.bib7) )] and Yuanqi [(Tencent, [2024](https://arxiv.org/html/2503.23278v1#bib.bib47) )] have launched their plugin stores , supporting tools specifically designed for their platforms. Frameworks like LangChain [(LangChain, [2022](https://arxiv.org/html/2503.23278v1#bib.bib24) )] and LlamaIndex [(Liu, [2022](https://arxiv.org/html/2503.23278v1#bib.bib27) )] provided standardized tool interfaces , making it easier to integrate LLMs with external services. Other AI providers, including Anthropic, Google, and Meta, introduced similar mechanisms, further driving adoption. Despite these advancements, integrating tools remains fragmented . Developers must manually define interfaces, manage authentication, and handle execution logic for each service. Function calling mechanisms vary across platforms, requiring redundant implementations. Additionally, current approaches rely on predefined workflows, limiting AI agents’ flexibility in dynamically discovering and orchestrating tools .
+
+
+
+In late 2024, Anthropic introduced the Model Context Protocol (MCP) [(Anthropic, [2024b](https://arxiv.org/html/2503.23278v1#bib.bib5) )] , a general-purpose protocol standardizing AI-tool interactions. Inspired by the Language Server Protocol (LSP) [(Gunasinghe and Marcus, [2021](https://arxiv.org/html/2503.23278v1#bib.bib21) )] , MCP provides a flexible framework for AI applications to communicate with external tools dynamically. Instead of relying on predefined tool mappings, MCP allows AI agents to autonomously discover, select, and orchestrate tools based on task context. It also supports human-in-the-loop mechanisms, enabling users to inject data or approve actions as needed. By unifying interfaces, MCP simplifies the development of AI applications and improves their flexibility in handling complex workflows. Since its release, MCP has rapidly grown from a niche protocol to a key foundation for AI-native application development. A thriving ecosystem has emerged, with thousands of community-driven MCP servers enabling model access to systems like GitHub [(Protocol, [2024a](https://arxiv.org/html/2503.23278v1#bib.bib41) )] , Slack [(Protocol, [2024b](https://arxiv.org/html/2503.23278v1#bib.bib42) )] , and even 3D design tools like Blender [(ahujasid, [2025](https://arxiv.org/html/2503.23278v1#bib.bib2) )] . Tools like Cursor [(Cursor, [2025](https://arxiv.org/html/2503.23278v1#bib.bib13) )] and Claude Desktop [(Anthropic, [2024a](https://arxiv.org/html/2503.23278v1#bib.bib4) )] demonstrate how MCP clients can extend their capabilities by installing new servers, turning developer tools, productivity platforms, and creative environments alike into multi-modal AI agents.
+
+
+
+Despite MCP rapid adoption, the MCP ecosystem remains in its early stages, with several key areas such as security, tool discoverability, and remote deployment still lacking comprehensive solutions. These issues present untapped opportunities for further research and development. Although MCP is widely recognized for its potential in the industry, it has not yet been extensively analyzed in academic research. This gap in research motivates this paper, which provides the first analysis of the MCP ecosystem, examining its architecture and workflow, defining the lifecycle of MCP servers, and identifying potential security risks at each stage, such as installer spoofing and tool name conflict. Through this study, we present a thorough exploration of MCP’s current landscape and offer a forward-looking vision that highlights key implications, outlines future research directions, and addresses the challenges that must be overcome to ensure its sustainable growth.
+
+
+
+Our contributions are as follows:
+
+1. (1)
+
+We provide the first analysis of the MCP ecosystem, detailing its architecture, components, and workflow.
+2. (2)
+
+We identify the key components of MCP servers and define their lifecycle, encompassing the stages of creation, operation, and update. We also highlight potential security risks associated with each phase, offering insights into safeguarding AI-to-tool interactions.
+3. (3)
+
+We examine the current MCP ecosystem landscape, analyzing the adoption, diversity, and use cases across various industries and platforms.
+4. (4)
+
+We discuss the implications of MCP’s rapid adoption, identifying key challenges for stakeholders, and outline future research directions on security, scalability, and governance to ensure its sustainable growth.
+
+
+
+The remainder of this paper is structured as follows: [§ 2](https://arxiv.org/html/2503.23278v1#S2) compares tool invocation with and without MCP, highlighting the motivation for this study. [§ 3](https://arxiv.org/html/2503.23278v1#S3) outlines the architecture of MCP, detailing the roles of the MCP host, client, and server, as well as the lifecycle of the MCP server. [§ 4](https://arxiv.org/html/2503.23278v1#S4) examines the current MCP landscape, focusing on key industry players and adoption trends. [§ 5](https://arxiv.org/html/2503.23278v1#S5) analyzes security and privacy risks across the MCP server lifecycle and proposes mitigation strategies. [§ 6](https://arxiv.org/html/2503.23278v1#S6) explores implications, future challenges, and recommendations to enhance MCP’s scalability and security in dynamic AI environments. Finally, [§ 7](https://arxiv.org/html/2503.23278v1#S7) concludes the whole paper.
+
+
+
+## 2. Background and Motivation
+
+
+### 2.1. AI Tooling
+
+
+Before the introduction of MCP, AI applications relied on various methods, such as manual API wiring, plugin-based interfaces, and agent frameworks, to interact with external tools. As shown in [Figure 1](https://arxiv.org/html/2503.23278v1#S2.F1) , these approaches required integrating each external service with a specific API, leading to increased complexity and limited scalability. MCP addresses these challenges by providing a standardized protocol that enables seamless and flexible interaction with multiple tools.
+
+
+![Refer to caption](x1.png)
+ *Figure 1 . Tool invocation with and without MCP.*
+
+
+
+#### 2.1.1. Manual API Wiring
+
+
+In traditional implementations, developers had to establish manual API connections for each tool or service that an AI application interacted with. This process required custom authentication, data transformation, and error handling for every integration . As the number of APIs increased, the maintenance burden became significant, often leading to tightly coupled and fragile systems that were difficult to scale or modify. MCP eliminates this complexity by offering a unified interface, allowing AI models to connect with multiple tools dynamically without the need for custom API wiring.
+
+
+
+#### 2.1.2. Standardized Plugin Interfaces
+
+
+To reduce the complexity of manual wiring, plugin-based interfaces such as OpenAI ChatGPT Plugins, introduced in November 2023 [(OpenAI, [2023a](https://arxiv.org/html/2503.23278v1#bib.bib36) )] , allowed AI models to connect with external tools through standardized API schemas like OpenAPI. For example, in the OpenAI Plugin ecosystem, plugins like Zapier allowed models to perform predefined actions, such as sending emails or updating CRM records. However, these interactions were often one-directional and could not maintain state or coordinate multiple steps in a task . New LLM app stores [(Zhao et al . , [2024](https://arxiv.org/html/2503.23278v1#bib.bib54) )] such as ByteDance Coze [(ByteDance, [2024](https://arxiv.org/html/2503.23278v1#bib.bib7) )] and Tencent Yuanqi [(Tencent, [2024](https://arxiv.org/html/2503.23278v1#bib.bib47) )] have also emerged, offering a plugin store for web services. While these platforms expanded available tool options, they created isolated ecosystems where plugins are platform-specific , limiting cross-platform compatibility and requiring duplicate maintenance efforts. MCP stands out by being open-source and platform-agnostic, enabling AI applications to engage in rich two-way interactions with external tools, facilitating complex workflows.
+
+
+
+#### 2.1.3. AI Agent Tool Integration
+
+
+The emergence of AI agent frameworks like LangChain [(LangChain, [2022](https://arxiv.org/html/2503.23278v1#bib.bib24) )] and similar tool orchestration frameworks provided a structured way for models to invoke external tools through predefined interfaces, improving automation and adaptability [(Xi et al . , [2025](https://arxiv.org/html/2503.23278v1#bib.bib51) )] . However, integrating and maintaining these tools remained largely manual, requiring custom implementations and increasing complexity as the number of tools grew. MCP simplifies this process by offering a standardized protocol that enables AI agents to seamlessly invoke, interact with, and chain multiple tools through a unified interface . This reduces manual configuration and enhances task flexibility, allowing agents to perform complex operations without extensive custom integration.
+
+
+
+#### 2.1.4. Retrieval-Augmented Generation (RAG) and vector database.
+
+
+Contextual information retrieval methods, such as RAG, leverage vector-based search to retrieve relevant knowledge from databases or knowledge bases, enabling models to supplement responses with up-to-date information [(Fan et al . , [2024](https://arxiv.org/html/2503.23278v1#bib.bib17) ; Cuconasu et al . , [2024](https://arxiv.org/html/2503.23278v1#bib.bib12) )] . While this approach addressed the problem of knowledge cutoff and improved model accuracy, it was limited to passive retrieval of information . It did not inherently allow models to perform active operations, such as modifying data or triggering workflows. For example, a RAG-based system could retrieve relevant sections from a product documentation database to assist a customer support AI. However, if the AI needed to update customer records or escalate an issue to human support, it could not take action beyond providing textual responses. MCP extends beyond passive information retrieval by enabling AI models to actively interact with external data sources and tools, facilitating both retrieval and action in a unified workflow.
+
+
+![Refer to caption](x2.png)
+ *Figure 2 . The workflow of MCP.*
+
+
+
+### 2.2. Motivation
+
+
+MCP has rapidly gained traction in the AI community due to its ability to standardize how AI models interact with external tools, fetch data, and execute operations. By addressing the limitations of manual API wiring, plugin interfaces, and agent frameworks, MCP has the potential to redefine AI-to-tool interactions and enable more autonomous and intelligent agent workflows. Despite its growing adoption and promising potential, MCP is still in its early stages, with an evolving ecosystem that remains incomplete. Many key aspects, such as security and tool discoverability, are yet to be fully addressed, leaving ample room for future research and improvement. Moreover, while MCP has gained rapid adoption in the industry, the academic community has yet to explore it.
+
+
+
+Motivated by this gap, this paper is the first to analyze the current MCP landscape, examine its emerging ecosystem, and identify potential security risks . Additionally, we outline a vision for MCP’s future development and highlight the key challenges that must be addressed to support its long-term success.
+
+
+
+## 3. MCP Architecture
+
+
+### 3.1. Core Components
+
+
+The MCP architecture is composed of three core components: MCP host , MCP client , and MCP server . These components collaborate to facilitate seamless communication between AI applications, external tools, and data sources, ensuring that operations are secure and properly managed. As shown in [Figure 2](https://arxiv.org/html/2503.23278v1#S2.F2) , in a typical workflow, the user sends a prompt to the MCP client, which analyzes the intent , selects the appropriate tools via the MCP server, and invokes external APIs to retrieve and process the required information before notifying the user of the results.
+
+
+
+#### 3.1.1. MCP Host
+
+
+The MCP host is an AI application that provides the environment for executing AI-based tasks while running the MCP client. It integrates interactive tools and data to enable smooth communication with external services. Examples include Claude Desktop for AI-assisted content creation, Cursor, an AI-powered IDE for code completion and software development, and AI agents that function as autonomous systems for executing complex tasks. The MCP host hosts the MCP client and ensures communication with external MCP servers.
+
+
+
+#### 3.1.2. MCP Client
+
+
+The MCP client acts as an intermediary within the host environment, managing communication between the MCP host and one or more MCP servers. It initiates requests to MCP servers, queries available functions, and retrieves responses that describe the server’s capabilities. This ensures seamless interaction between the host and external tools. In addition to managing requests and responses, the MCP client processes notifications from MCP servers, providing real-time updates about task progress and system status. It also performs sampling to gather data on tool usage and performance, enabling optimization and informed decision-making. The MCP client communicates with MCP servers through the transport layer, facilitating secure, reliable data exchange and smooth interaction between the host and external resources.
+
+
+
+#### 3.1.3. MCP Server
+
+
+The MCP server enables the MCP host and client to access external systems and execute operations, offering three core capabilities: tools, resources, and prompts .
+
+- •
+
+Tools: Enabling external operations . Tools allow the MCP server to invoke external services and APIs to execute operations on behalf of AI models. When the client requests an operation, the MCP server identifies the appropriate tool, interacts with the service, and returns the result. For instance, if an AI model requires real-time weather data or sentiment analysis, the MCP server connects to the relevant API, retrieves the data, and delivers it to the host. Unlike traditional function calling, which requires multiple steps and separates invocation from execution, Tools of MCP servers streamline this process by allowing the model to autonomously select and invoke the appropriate tool based on context. Once configured, these tools follow a standardized supply-and-consume model, making them modular, reusable, and easily accessible to other applications, thereby enhancing system efficiency and flexibility.
+- •
+
+Resources: Exposing data to AI models . Resources provide access to structured and unstructured datasets that the MCP server can expose to AI models. These datasets may come from local storage, databases, or cloud platforms. When an AI model requests specific data, the MCP server retrieves and processes the relevant information, enabling the model to make data-driven decisions. For example, a recommendation system may access customer interaction logs, or a document summarization task may query a text repository.
+- •
+
+Prompts: Reusable templates for workflow optimization . Prompts are predefined templates and workflows that the MCP server generates and maintains to optimize AI responses and streamline repetitive tasks. They ensure consistency in responses and improve task execution efficiency. For instance, a customer support chatbot may use prompt templates to provide uniform and accurate responses, while an annotation task may rely on predefined prompts to maintain consistency in data labeling.
+
+
+
+### 3.2. Transport Layer and Communication
+
+
+The transport layer ensures secure, bidirectional communication, allowing for real-time interaction and efficient data exchange between the host environment and external systems. The transport layer manages the transmission of initial requests from the client, the delivery of server responses detailing available capabilities, and the exchange of notifications that keep the client informed of ongoing updates. Communication between the MCP client and the MCP server follows a structured process, beginning with an initial request from the client to query the server’s functionalities. Upon receiving the request, the server responds with an initial response that lists the available tools, resources, and prompts that the client can leverage. Once the connection is established, the system maintains a continuous exchange of notifications to ensure that changes in server status or updates are communicated back to the client in real time. This structured communication ensures high-performance interactions and keeps AI models synchronized with external resources, enhancing the effectiveness of AI applications.
+
+
+
+### 3.3. MCP Server Lifecycle
+
+
+The MCP server lifecycle consists of three key phases: creation , operation , and update . Each phase defines critical activities that ensure the secure and efficient functioning of the MCP server, enabling seamless interaction between AI models and external tools, resources, and prompts.
+
+
+![Refer to caption](x3.png)
+ *Figure 3 . MCP servers components and lifecycle.*
+
+
+*Table 1 . Overview of MCP ecosystem adoption.*
+
+
+| Category | Company/Product | Key Features or Use Cases |
+|---|---|---|
+|  | Anthropic (Claude) (Anthropic, 2024a ) | Full MCP support in the desktop version, enabling interaction with external tools. |
+| AI Models and Frameworks | OpenAI (OpenAI, 2025 ) | MCP support in Agent SDK and API for seamless integration. |
+|  | Baidu Maps (Maps, 2025 ) | API integration using MCP to access geolocation services. |
+|  | Blender MCP (MCP, 2025b ) | Enables Blender and Unity 3D model generation via natural language commands. |
+|  | Replit (Replit, 2025 ) | AI-assisted development environment with MCP tool integration. |
+|  | Microsoft Copilot Studio (Studio, 2025 ) | Extends Copilot Studio with MCP-based tool integration. |
+| Developer Tools | Sourcegraph Cody (Cody, 2025 ) | Implements MCP through OpenCTX for resource integration. |
+|  | Codeium (Codeium, 2025 ) | Adds MCP support for coding assistants to facilitate cross-system tasks. |
+|  | Cursor (Cursor, 2025 ) | MCP tool integration in Cursor Composer for seamless code execution. |
+|  | Cline (Cline, 2025 ) | VS Code coding agent that manages MCP tools and servers. |
+|  | Zed (Zed, 2025 ) | Provides slash commands and tool integration based on MCP. |
+|  | JetBrains (JetBrains, 2025 ) | Integrates MCP for IDE-based AI tooling. |
+| IDEs/Editors | Windsurf Editor (Editor, 2025 ) | AI-assisted IDE with MCP tool interaction. |
+|  | TheiaAI/TheiaIDE (TheiaAI/TheiaIDE, 2025 ) | Enables MCP server interaction for AI-powered tools. |
+|  | Emacs MCP (MCP, 2025a ) | Enhances AI functionality in Emacs by supporting MCP tool invocation. |
+|  | OpenSumi (OpenSumi, 2025 ) | Supports MCP tools in IDEs and enables seamless AI tool integration. |
+|  | Cloudflare (Cloudflare, 2025 ) | Provides remote MCP server hosting and OAuth integration. |
+| Cloud Platforms and Services | Block (Square) ((2025), Square ) | Uses MCP to enhance data processing efficiency for financial platforms. |
+|  | Stripe (Stripe, 2025 ) | Exposes payment APIs via MCP for seamless AI integration. |
+|  | Apify MCP Tester (Tester, 2025 ) | Connects to any MCP server using SSE for API testing. |
+| Web Automation and Data | LibreChat (LibreChat, 2025 ) | Extends the current tool ecosystem through MCP integration. |
+|  | Goose (Goose, 2025 ) | Allows building AI agents with integrated MCP server functionality. |
+
+
+
+#### 3.3.1. MCP Server Components
+
+
+The MCP server is responsible for managing external tools, data sources, and workflows, providing AI models with the necessary resources to perform tasks efficiently and securely. It comprises several key components that ensure smooth and effective operations. Metadata includes essential information about the server, such as its name, version, and description, allowing clients to identify and interact with the appropriate server. Configuration involves the source code, configuration files, and manifest, which define the server’s operational parameters, environment settings, and security policies. The Tool list stores a catalog of available tools, detailing their functionalities, input-output formats, and access permissions, ensuring proper tool management and security. The Resources list governs access to external data sources, including web APIs, databases, and local files, specifying allowed endpoints and their associated permissions. Finally, Prompts and Templates include pre-configured task templates and workflows that enhance the efficiency of AI models in executing complex operations. Together, these components enable MCP servers to provide seamless tool integration, data retrieval, and task orchestration for AI-powered applications.
+
+
+
+#### 3.3.2. Creation Phase
+
+
+The creation phase is the initial stage of the MCP server lifecycle, where the server is registered, configured, and prepared for operation. This phase involves three key steps. Server registration assigns a unique name and identity to the MCP server, allowing clients to discover and connect to the appropriate server instance. Installer deployment involves installing the MCP server and its associated components, ensuring that the correct configuration files, source code, and manifests are in place. Code integrity verification validates the integrity of the server’s codebase to prevent unauthorized modifications or tampering before the server becomes operational. Successful completion of the creation phase ensures that the MCP server is ready to handle requests and interact securely with external tools and data sources.
+
+
+
+#### 3.3.3. Operation Phase
+
+
+The operation phase is where the MCP server actively processes requests, executes tool invocations, and facilitates seamless interaction between AI applications and external resources. Tool execution allows the MCP server to invoke the appropriate tools based on the AI application’s requests, ensuring that the selected tools perform their intended operations. Slash command handling enables the server to interpret and execute multiple commands, including those issued through user interfaces or AI agents, while managing potential command overlaps to prevent conflicts. Sandbox mechanism enforcement ensures that the execution environment is isolated and secure, preventing unauthorized access and mitigating potential risks. Throughout the operation phase, the MCP server maintains a stable and controlled environment, enabling reliable and secure task execution.
+
+
+
+#### 3.3.4. Update Phase
+
+
+The update phase ensures that the MCP server remains secure, up-to-date, and capable of adapting to evolving requirements. This phase includes three key tasks. Authorization management verifies that post-update access permissions remain valid, preventing unauthorized use of server resources after updates. Version control maintains consistency between different server versions, ensuring that new updates do not introduce vulnerabilities or conflicts. Old version management deactivates or removes outdated versions to prevent attackers from exploiting known vulnerabilities in previous versions.
+
+
+
+Understanding the MCP server lifecycle is essential for identifying potential vulnerabilities and designing effective security measures. Each phase introduces distinct challenges that must be carefully addressed to maintain the security, efficiency, and adaptability of the MCP server in dynamic AI environments.
+
+
+
+## 4. Current Landscape
+
+
+### 4.1. Ecosystem Overview
+
+
+#### 4.1.1. Key Adopters.
+
+
+[Table 1](https://arxiv.org/html/2503.23278v1#S3.T1) demonstrates how MCP has gained significant traction across diverse sectors, signaling its growing importance in enabling seamless AI-to-tool interactions. Notably, leading AI companies such as Anthropic [(Anthropic, [2024a](https://arxiv.org/html/2503.23278v1#bib.bib4) )] and OpenAI [(OpenAI, [2025](https://arxiv.org/html/2503.23278v1#bib.bib38) )] have integrated MCP to enhance agent capabilities and improve multi-step task execution. This adoption by industry pioneers has set a precedent, encouraging other major players to follow suit. Chinese tech giants like Baidu [(Maps, [2025](https://arxiv.org/html/2503.23278v1#bib.bib29) )] have also incorporated MCP into their ecosystems, highlighting the protocol’s potential to standardize AI workflows across global markets. Developer tools and IDEs, including Replit [(Replit, [2025](https://arxiv.org/html/2503.23278v1#bib.bib43) )] , Microsoft Copilot Studio [(Studio, [2025](https://arxiv.org/html/2503.23278v1#bib.bib46) )] , JetBrains [(JetBrains, [2025](https://arxiv.org/html/2503.23278v1#bib.bib23) )] , and TheiaIDE [(TheiaAI/TheiaIDE, [2025](https://arxiv.org/html/2503.23278v1#bib.bib49) )] , leverage MCP to facilitate agentic workflows and streamline cross-platform operations. This trend indicates a shift toward embedding MCP in developer environments to enhance productivity and reduce manual integration efforts. Furthermore, cloud platforms like Cloudflare [(Cloudflare, [2025](https://arxiv.org/html/2503.23278v1#bib.bib9) )] and financial service providers such as Block (Square) [((2025), [Square](https://arxiv.org/html/2503.23278v1#bib.bib44) )] and Stripe [(Stripe, [2025](https://arxiv.org/html/2503.23278v1#bib.bib45) )] are exploring MCP to improve security, scalability, and governance in multi-tenant environments. The widespread adoption of MCP by these industry leaders not only highlights its growing relevance but also points to its potential as a foundational layer in AI-powered ecosystems. As more companies integrate MCP into their operations, the protocol is set to play a central role in shaping the future of AI tool integration. Looking ahead, MCP is poised to become a key enabler of AI-driven workflows, driving more secure, scalable, and efficient AI ecosystems across industries.
+
+
+*Table 2 . Overview of MCP server collections and deployment modes (As of March 27, 2025).*
+
+
+| Collection | Author | Mode | # Servers |
+|---|---|---|---|
+| MCP.so (mcp.so, 2025 ) | mcp.so | Website | 4774 |
+| Glama (glama.ai, 2025 ) | glama.ai | Website | 3356 |
+| PulseMCP (et al., 2025 ) | Antanavicius et al. | Website | 3164 |
+| Smithery (Mao, 2025 ) | Henry Mao | Website | 2942 |
+| Dockmaster (mcp dockmater, 2025 ) | mcp-dockmater | Desktop | 517 |
+| Official Collection (Anthropic, 2025 ) | Anthropic | List | 320 |
+| AiMCP (Hekmon, 2025 ) | Hekmon | Website | 313 |
+| MCP.run (mcp.run, 2025 ) | mcp.run | Website | 114 |
+| Awesome MCP Servers (Akinyemi, 2025 ) | Stephen Akinyemi | List | 88 |
+| mcp-get registry (Latman, 2025 ) | Michael Latman | Website | 59 |
+| Awesome MCP Servers (wong2, 2025 ) | wong2 | Website | 34 |
+| OpenTools (opentoolsteam, 2025 ) | opentoolsteam | Website | 25 |
+| Toolbase (gching, 2025 ) | gching | Desktop | 24 |
+| make inference (mkinf, 2025 ) | mkinf | Website | 20 |
+| Crypto MCP Servers (Fan, 2025 ) | Luke Fan | List | 13 |
+
+
+
+#### 4.1.2. Community-Driven MCP servers.
+
+
+Anthropic has not yet released an official MCP marketplace, but the vibrant MCP community has stepped in to fill this gap by creating numerous independent server collections and platforms. As shown in [Table 2](https://arxiv.org/html/2503.23278v1#S4.T2) , platforms such as MCP.so [(mcp.so, [2025](https://arxiv.org/html/2503.23278v1#bib.bib34) )] , Glama [(glama.ai, [2025](https://arxiv.org/html/2503.23278v1#bib.bib19) )] , and PulseMCP [(et al., [2025](https://arxiv.org/html/2503.23278v1#bib.bib15) )] host thousands of servers, allowing users to discover and integrate a wide range of tools and services. These community-driven platforms have significantly accelerated the adoption of MCP by providing accessible repositories where developers can publish, manage, and share their MCP servers. Desktop-based solutions like Dockmaster [(mcp dockmater, [2025](https://arxiv.org/html/2503.23278v1#bib.bib32) )] and Toolbase [(gching, [2025](https://arxiv.org/html/2503.23278v1#bib.bib18) )] further enhance local MCP deployment capabilities, empowering developers to manage and experiment with servers in isolated environments. The rise of community-driven MCP server ecosystems reflects the growing enthusiasm for MCP and highlights the need for a formalized marketplace.
+
+
+
+#### 4.1.3. SDKs and Tools.
+
+
+With the continuous growth of community-driven tools and official SDKs, the MCP ecosystem is becoming increasingly accessible, allowing developers to integrate MCP into various applications and workflows efficiently. Official SDKs are available in multiple languages, including TypeScript , Python , Java , Kotlin , and C# , providing developers with versatile options to implement MCP in different environments. In addition to official SDKs, the community has contributed numerous frameworks and utilities that simplify MCP server development. Tools such as EasyMCP and FastMCP offer lightweight TypeScript-based solutions for quickly building MCP servers, while FastAPI to MCP Auto Generator enables the seamless exposure of FastAPI endpoints as MCP tools. For more complex scenarios, Foxy Contexts provides a Golang-based library to build MCP servers, and Higress MCP Server Hosting extends the API Gateway (based on Envoy) to host MCP servers with wasm plugins. Server generation and management platforms such as Mintlify , Speakeasy , and Stainless further enhance the ecosystem by automating MCP server generation , providing curated MCP server lists, and enabling faster deployment with minimal manual intervention. These platforms empower organizations to rapidly create and manage secure and well-documented MCP servers.
+
+
+
+### 4.2. Use Cases
+
+
+MCP has become a vital tool for AI applications to effectively communicate with external tools, APIs, and systems. By standardizing interactions, MCP simplifies complex workflows, boosting the efficiency of AI-driven applications. Below, we explore three key platforms (i.e., OpenAI, Cursor, and Cloudflare) that have successfully integrated MCP, highlighting their distinct use cases.
+
+
+
+#### 4.2.1. OpenAI: MCP Integration in AI Agents and SDKs
+
+
+OpenAI has adopted MCP to standardize AI-to-tool communication, recognizing its potential to enhance integration with external tools. Recently, OpenAI introduced MCP support in its Agent SDK, enabling developers to create AI agents that seamlessly interact with external tools. In a typical workflow, developers use the Agent SDK to define tasks that require external tool invocation. When an AI agent encounters a task like retrieving data from an API or querying a database, the SDK routes the request through an MCP server. The request is transmitted via the MCP protocol, ensuring proper formatting and real-time response delivery to the agent. OpenAI’s plan to integrate MCP into the Responses API will streamline AI-to-tool communication, allowing AI models like ChatGPT to interact with tools dynamically without extra configuration. Additionally, OpenAI aims to extend MCP support to ChatGPT desktop applications, enabling AI assistants to handle various user tasks by connecting to remote MCP servers, further bridging the gap between AI models and external systems.
+
+
+
+#### 4.2.2. Cursor: Enhancing Software Development with MCP-Powered Code Assistants
+
+
+Cursor uses MCP to enhance software development by enabling AI-powered code assistants that automate complex tasks. With MCP, Cursor allows AI agents to interact with external APIs, access code repositories, and automate workflows directly within the integrated development environment. When a developer issues a command within the IDE, the AI agent evaluates whether external tools are needed. If so, the agent sends a request to an MCP server, which identifies the appropriate tool and processes the task, such as running API tests, modifying files, or analyzing code. The results are then returned to the agent for further action. This integration helps automate repetitive tasks, minimizing errors and enhancing overall development efficiency. By simplifying complex processes, Cursor boosts both productivity and accuracy, allowing developers to execute multi-step operations effortlessly.
+
+
+
+#### 4.2.3. Cloudflare: Remote MCP Server Hosting and Scalability
+
+
+Cloudflare has played a pivotal role in transforming MCP from a local deployment model to a cloud-hosted architecture by introducing remote MCP server hosting. This approach eliminates the complexities associated with configuring MCP servers locally, allowing clients to connect to secure, cloud-hosted MCP servers seamlessly. The workflow begins with Cloudflare hosting MCP servers in secure cloud environments that are accessible via authenticated API calls. AI agents initiate requests to the Cloudflare MCP server using OAuth-based authentication, ensuring that only authorized entities can access the server. Once authenticated, the agent dynamically invokes external tools and APIs through the MCP server, executing tasks such as data retrieval, document processing, or API integration. This approach not only reduces the risk of misconfiguration but also ensures seamless execution of AI-powered workflows across distributed environments. Furthermore, Cloudflare’s multi-tenant architecture allows multiple users to securely access and manage their own MCP instances, ensuring isolation and preventing data leakage. Cloudflare’s solution thus extends MCP’s capabilities by enabling enterprise-grade scalability and secure multi-device interoperability.
+
+
+
+The adoption of MCP by platforms like OpenAI, Cursor, and Cloudflare highlights its flexibility and growing role in AI-driven workflows, enhancing efficiency, adaptability, and scalability across development tools, enterprise applications, and cloud services.
+
+
+
+## 5. Security and Privacy Analysis
+
+
+MCP servers, as open and extensible platforms, introduce various security risks throughout their lifecycle. In this section, we analyze security threats across different phases: creation , operation , and update . Each phase of the MCP server lifecycle presents unique challenges that, if not properly mitigated, can compromise system integrity, data security, and user privacy.
+
+
+
+### 5.1. Security Risks in the Creation Phase
+
+
+The creation phase of an MCP server involves registering the server, deploying the installer, and verifying code integrity. This phase introduces three key risks: name collision, installer spoofing, and code injection/backdoor.
+
+
+
+#### 5.1.1. Name Collision
+
+
+Server name collision occurs when a malicious entity registers an MCP server with an identical or deceptively similar name to a legitimate server, deceiving users during the installation phase. Since MCP clients primarily rely on the server’s name and description when selecting servers , they are vulnerable to such impersonation attacks. Once a compromised server is installed, it can mislead AI agents and clients into invoking the malicious server, potentially exposing sensitive data, executing unauthorized commands, or disrupting workflows. For example, an attacker could register a server named mcp-github that mimics the legitimate github-mcp server, allowing them to intercept and manipulate sensitive interactions between AI agents and trusted services. Although MCP currently operates primarily in local environments, future adoption in multi-tenant environments introduces additional risks of name collision. In these scenarios, where multiple organizations or users might register servers with similar names, the lack of centralized naming control can increase the likelihood of confusion and impersonation attacks. Additionally, as MCP marketplaces grow to support public server listings, supply chain attacks may become a critical concern , where malicious servers can replace legitimate ones. To mitigate these risks, future research can focus on establishing strict namespace policies, implementing cryptographic server verification, and designing reputation-based trust systems to secure MCP server registrations.
+
+
+
+#### 5.1.2. Installer Spoofing
+
+
+Installer spoofing occurs when attackers distribute modified MCP server installers that introduce malicious code or backdoors during the installation process. Each MCP server requires a unique configuration that users must manually set up in their local environments before the client can invoke the server. This manual configuration process creates a barrier for less technical users, prompting the emergence of unofficial auto-installers that automate the setup process. As shown in [Table 3](https://arxiv.org/html/2503.23278v1#S5.T3) , tools such as Smithery-CLI , mcp-get , and mcp-installer streamline the installation process, allowing users to quickly configure MCP servers without dealing with intricate server settings.
+
+
+*Table 3 . Unofficial MCP auto installers (As of March 27, 2025).*
+
+
+| Tool | Author | # Stars | # Servers | URL |
+|---|---|---|---|---|
+| Smithery CLI | Henry Mao | 170 | 2942 | smithery.ai |
+| mcp.run | Dylibso | / | 118 | docs.mcp.run |
+| mcp-get | Michael Latman | 318 | 59 | mcp-get.com |
+| Toolbase | gching | / | 24 | gettoolbase.ai |
+| mcp-installer | Ani Betts | 767 | NL 1 | mcp-installer |
+
+- 1
+
+Enables MCP server installation through natural language interaction with the client.
+
+
+
+However, while these auto-installers enhance usability, they also introduce new attack surfaces by potentially distributing compromised packages. Since these unofficial installers are often sourced from unverified repositories or community-driven platforms, they may inadvertently expose users to security risks such as installing tampered servers or misconfigured environments. Attackers can exploit these auto-installers by embedding malware that grants unauthorized access, modifies system configurations, or creates persistent backdoors . Moreover, most users who opt for one-click installations rarely review the underlying code for potential security vulnerabilities, making it easier for attackers to distribute compromised versions undetected. Addressing these challenges requires developing a standardized, secure installation framework for MCP servers, enforcing package integrity checks, and establishing reputation-based trust mechanisms to assess the credibility of auto-installers in the MCP ecosystem.
+
+
+
+#### 5.1.3. Code Injection/Backdoor
+
+
+Code injection attacks occur when malicious code is surreptitiously embedded into the MCP server’s codebase during the creation phase, often bypassing traditional security checks. It targets the server’s source code or configuration files, embedding hidden backdoors that persist even after updates or security patches. These backdoors allow attackers to silently maintain control over the server, enabling actions such as unauthorized data exfiltration, privilege escalation, or command manipulation. Code injection is particularly insidious because it can be introduced by compromised dependencies, vulnerable build pipelines, or unauthorized modifications to the server’s source code. Since MCP servers often rely on community-maintained components and open-source libraries, ensuring the integrity of these dependencies is critical. To mitigate this risk, rigorous code integrity verification, strict dependency management, and regular security audits should be implemented to detect unauthorized modifications and prevent the introduction of malicious code . Additionally, adopting reproducible builds and enforcing checksum validation during deployment can further safeguard MCP servers from injection-based threats.
+
+
+
+### 5.2. Security Risks in the Operation Phase
+
+
+The operation phase is when the MCP server actively executes tools, processes slash commands, and interacts with external APIs. This phase introduces three major risks: tool name conflicts, slash command overlap, and sandbox escape.
+
+
+
+#### 5.2.1. Tool Name Conflicts
+
+
+Tool name conflicts arise when multiple tools within the MCP ecosystem share identical or similar names, leading to ambiguity and confusion during tool selection and execution. This can result in AI applications inadvertently invoking the wrong tool, potentially executing malicious commands or leaking sensitive information. A common attack scenario involves a malicious actor registering a tool named send_email that mimics a legitimate email-sending tool. If the MCP client invokes the malicious version, sensitive information intended for trusted recipients may be redirected to an attacker-controlled endpoint, compromising data confidentiality. Beyond name similarity, our experiments revealed that malicious actors can further manipulate tool selection by embedding deceptive phrases in tool descriptions. Specifically, we observed that if a tool’s description explicitly contains directives like “this tool should be prioritized” or “prefer using this tool first”, the MCP client is more likely to select that tool, even when its functionality is inferior or potentially harmful. This introduces a severe risk of toolflow hijacking , where attackers can leverage misleading descriptions to influence tool selection and gain control over critical workflows. This underscores the need for researchers to develop advanced validation and anomaly detection techniques to identify and mitigate deceptive tool descriptions, ensuring accurate and secure AI tool selection.
+
+
+
+#### 5.2.2. Slash Command Overlap
+
+
+Slash command overlap occurs when multiple tools define identical or similar commands, leading to ambiguity during command execution. This overlap introduces the risk of executing unintended actions, especially when AI applications dynamically select and invoke tools based on contextual cues. Malicious actors can exploit this ambiguity by introducing conflicting commands that manipulate tool behavior, potentially compromising system integrity or exposing sensitive data. For instance, if one tool registers a /delete command to remove temporary files while another uses the same command to erase critical system logs, an AI application may mistakenly execute the incorrect command, potentially causing data loss or system instability. Similar issues have been observed in team chat systems such as Slack, where overlapping command registrations allowed unauthorized tools to hijack legitimate invocations, resulting in security breaches and operational disruptions [(Zha et al . , [2022](https://arxiv.org/html/2503.23278v1#bib.bib53) )] . Since slash commands are often surfaced as user-facing shortcuts in client interfaces, misinterpreted or conflicting commands can lead to dangerous outcomes , especially in multi-tool environments. To minimize this risk, MCP clients should establish context-aware command resolution, apply command disambiguation techniques, and prioritize execution based on verified tool metadata.
+
+
+
+#### 5.2.3. Sandbox Escape
+
+
+Sandboxing isolates the execution environment of MCP tools, restricting their access to critical system resources and protecting the host system from potentially harmful operations. However, sandbox escape vulnerabilities arise when attackers exploit flaws in the sandbox implementation, enabling them to break out of the restricted environment and gain unauthorized access to the host system. Once outside the sandbox, attackers can execute arbitrary code, manipulate sensitive data, or escalate privileges, compromising the security and stability of the MCP ecosystem. Common attack vectors include exploiting weaknesses in system calls, improperly handled exceptions, and vulnerabilities in third-party libraries. For instance, a malicious MCP tool could exploit unpatched vulnerabilities in the underlying container runtime to bypass confinement and execute commands with elevated privileges. Similarly, side-channel attacks may allow attackers to extract sensitive data, undermining the intended isolation of the sandbox. Examining real-world sandbox escape scenarios in MCP environments can provide valuable insights for strengthening sandbox security and preventing future exploitation.
+
+
+
+### 5.3. Security Risks in the Update Phase
+
+
+The update phase involves managing server versions, modifying configurations, and adjusting access controls. This phase introduces three critical risks: post-update privilege persistence, re-deployment of vulnerable versions, and configuration drift.
+
+
+
+#### 5.3.1. Post-Update Privilege Persistence
+
+
+Post-update privilege persistence occurs when outdated or revoked privileges remain active after an MCP server update, allowing previously authorized users or malicious actors to retain elevated privileges. This vulnerability arises when privilege modifications, such as API key revocations or permission changes, are not properly synchronized or invalidated following server updates . If these outdated privileges persist, attackers may exploit them to maintain unauthorized access to sensitive resources or perform malicious operations. For example, in API-driven environments like GitHub or AWS, privilege persistence has been observed when outdated OAuth tokens or IAM session tokens remain valid after privilege revocation. Similarly, in MCP ecosystems, if a revoked API key or modified role configuration is not promptly invalidated after an update, an attacker could continue invoking privileged actions, potentially compromising the integrity of the system. Enforcing strict privilege revocation policies, ensuring privilege changes propagate consistently across all server instances, and implementing automatic expiration for API keys and session tokens are essential to reducing the likelihood of privilege persistence. Comprehensive logging and auditing of privilege modifications further enhance visibility and help detect inconsistencies that could indicate privilege persistence.
+
+
+
+#### 5.3.2. Re-deployment of Vulnerable Versions
+
+
+MCP servers, being open-source and maintained by individual developers or community contributors , lack a centralized platform for auditing and enforcing security updates. Users typically download MCP server packages from repositories like GitHub, npm, or PyPi and configure them locally, often without formal review processes. This decentralized model increases the risk of re-deploying vulnerable versions, either due to delayed updates, version rollbacks, or reliance on unverified package sources. When users update MCP servers, they may unintentionally roll back to older, vulnerable versions to address compatibility issues or maintain stability. Additionally, unofficial auto-installers, such as mcp-get and mcp-installer , which streamline server installation, may default to cached or outdated versions, exposing systems to previously patched vulnerabilities. Since these tools often prioritize ease of use over security , they may lack version verification or fail to notify users about critical updates. Because security patches in the MCP ecosystem rely on community-driven maintenance, delays between vulnerability disclosure and patch availability are common . Users who do not actively track updates or security advisories may unknowingly continue using vulnerable versions, creating opportunities for attackers to exploit known flaws. For example, an attacker could exploit an outdated MCP server to gain unauthorized access or manipulate server operations. From a research perspective, analyzing version management practices in MCP environments can identify potential gaps and highlight the need for automated vulnerability detection and mitigation. On the other hand, there is also a pressing need to establish an official package management system with a standardized packaging format for MCP servers and a centralized server registry to facilitate secure discovery and verification of available MCP servers.
+
+
+
+#### 5.3.3. Configuration Drift
+
+
+Configuration drift occurs when unintended changes accumulate in the system configuration over time, deviating from the original security baseline. These deviations often arise due to manual adjustments, overlooked updates, or conflicting modifications made by different tools or users. In MCP environments, where servers are typically configured and maintained locally by end-users, such inconsistencies can introduce exploitable gaps and undermine the overall security posture. With the emergence of remote MCP server support, such as Cloudflare’s hosted MCP environments, configuration drift becomes an even more pressing concern. Unlike local MCP deployments, where configuration issues may only affect a single user’s environment, configuration drift in remote or cloud-based MCP servers can impact multiple users or organizations simultaneously. Misconfigurations in multi-tenant environments may expose sensitive data, lead to privilege escalation, or inadvertently grant malicious actors broader access than intended. Addressing this issue requires the implementation of automated configuration validation mechanisms and regular consistency checks to ensure that both local and remote MCP environments adhere to secure baseline configurations.
+
+
+
+## 6. Discussion
+
+
+### 6.1. Implications
+
+
+The rapid adoption of MCP is transforming the AI application ecosystem, introducing new opportunities and challenges that have significant implications for developers, users, MCP ecosystem maintainers, and the broader AI community.
+
+
+
+For developers , MCP reduces the complexity of integrating external tools, enabling the creation of more versatile and capable AI agents that can perform complex, multi-step tasks. By providing a standardized interface for invoking tools, MCP shifts the focus from managing intricate integrations to enhancing agent logic and functionality. However, this increased efficiency comes with the responsibility to ensure that MCP implementations are secure, version-controlled, and aligned with best practices. Developers must remain vigilant about maintaining secure tool configurations and preventing potential misconfigurations that could expose systems to vulnerabilities.
+
+
+
+For users , MCP enhances the experience by enabling seamless interactions between AI agents and external tools, automating workflows across platforms such as enterprise data management and IoT integration. However, as MCP servers gain deeper access to sensitive data and critical operations, users must remain vigilant about the risks posed by unverified tools and misconfigured servers.
+
+
+
+For MCP ecosystem maintainers , the decentralized nature of MCP server development and distribution introduces a fragmented security landscape. MCP servers are often hosted on open-source platforms, where updates and patches are community-driven and may vary in quality and frequency. Without centralized oversight, inconsistencies in server configurations and outdated versions can introduce potential vulnerabilities. As the MCP ecosystem evolves to support remote server hosting and multi-tenant environments, maintainers must remain attentive to potential risks associated with configuration drift, privilege persistence, and re-deployment of vulnerable versions.
+
+
+
+For the broader AI community , MCP unlocks new possibilities by enhancing agentic workflows through cross-system coordination, dynamic tool invocation, and collaborative multi-agent systems. MCP’s ability to standardize interactions between agents and tools has the potential to accelerate AI adoption across industries, driving innovation in fields such as healthcare, finance, and enterprise automation. However, as MCP adoption grows, the AI community must address emerging ethical and operational concerns, such as ensuring fair and unbiased tool selection, safeguarding sensitive user data, and preventing potential misuse of AI capabilities. Balancing these considerations will be essential to ensuring that MCP’s benefits are widely distributed while maintaining accountability and trust within the AI ecosystem.
+
+
+
+### 6.2. Challenges
+
+
+Despite its potential, MCP’s adoption brings forth a range of challenges that need to be addressed to ensure its sustainable growth and responsible development:
+
+
+
+Lack of centralized security oversight. Since MCP servers are managed by independent developers and contributors, there is no centralized platform to audit, enforce, or validate security standards. This decentralized model increases the likelihood of inconsistencies in security practices, making it difficult to ensure that all MCP servers adhere to secure development principles. Moreover, the absence of a unified package management system for MCP servers complicates the installation and maintenance process, increasing the likelihood of deploying outdated or misconfigured versions. The use of unofficial installation tools across different MCP clients further introduces variability in server deployment, making it harder to maintain consistent security standards.
+
+
+
+Authentication and authorization gaps. MCP currently lacks a standardized framework for managing authentication and authorization across different clients and servers. Without a unified mechanism to verify identities and regulate access, it becomes difficult to enforce granular permissions, especially in multi-tenant environments where multiple users and agents may interact with the same MCP server. The absence of robust authentication protocols increases the risk of unauthorized tool invocation and exposes sensitive data to malicious actors. Moreover, inconsistencies in how different MCP clients handle user credentials further exacerbate these security challenges, making it difficult to maintain a consistent access control policy across deployments.
+
+
+
+Insufficient debugging and monitoring mechanisms. MCP lacks comprehensive debugging and monitoring mechanisms, making it difficult for developers to diagnose errors, trace tool interactions, and assess system behavior during tool invocation. Since MCP clients and servers operate independently, inconsistencies in error handling and logging can obscure critical security events or operational failures. Without robust monitoring frameworks and standardized logging mechanisms, identifying anomalies, preventing system failures, and mitigating potential security incidents becomes challenging, hindering the development of more resilient MCP ecosystems.
+
+
+
+Maintaining consistency in multi-step, cross-system workflows. MCP allows AI agents to execute multi-step workflows by invoking multiple tools across different systems through a unified interface. Ensuring consistent context across successive tool interactions is inherently difficult due to the distributed nature of these systems. Without effective state management and error recovery mechanisms, MCP risks propagating errors or losing intermediate results, leading to incomplete or inconsistent workflows. Additionally, dynamic coordination across diverse platforms can introduce delays and conflicts, further complicating the seamless execution of workflows within MCP environments.
+
+
+
+Scalability challenges in multi-tenant environments. As MCP evolves to support remote server hosting and multi-tenant environments, maintaining consistent performance, security, and tenant isolation becomes increasingly complex. Without robust mechanisms for resource management and tenant-specific configuration policies, misconfigurations can lead to data leakage, performance issues, and privilege escalation. Ensuring scalability and isolation is critical for MCP’s reliability in enterprise deployments.
+
+
+
+Challenges in embedding MCP in smart environments. Integrating MCP into smart environments, such as smart homes, industrial IoT systems, or enterprise automation platforms, introduces unique challenges related to real-time responsiveness, interoperability, and security. MCP servers in these environments must handle continuous streams of data from multiple sensors and devices while maintaining low-latency responses. Moreover, ensuring seamless interaction between AI agents and heterogeneous device ecosystems often requires custom adaptations, increasing development complexity. Compromised MCP servers in smart environments can lead to unauthorized control over critical systems, threatening both safety and data integrity.
+
+
+
+### 6.3. Recommendations for MCP stakeholders
+
+
+To safeguard the long-term success and security of MCP, all stakeholders, including MCP maintainers, developers, researchers, and end-users, should implement best practices and proactively address evolving challenges within the ecosystem.
+
+
+
+Recommendations for MCP maintainers. MCP maintainers play a critical role in establishing security standards, improving version control, and ensuring ecosystem stability. To reduce the risk of security vulnerabilities, maintainers should establish a formal package management system that enforces strict version control and ensures that only verified updates are distributed to users. Additionally, introducing a centralized server registry would enable users to discover and validate MCP servers more securely, reducing the risk of interacting with malicious or misconfigured servers. To further enhance security, maintainers should promote the adoption of cryptographic signatures for verifying MCP packages and encourage periodic security audits to identify and mitigate vulnerabilities. Moreover, implementing a secure sandboxing framework can help prevent privilege escalation and protect host environments from malicious tool executions.
+
+
+
+Recommendations for developers. Developers integrating MCP into AI applications should prioritize security and resilience by adhering to secure coding practices and maintaining thorough documentation. Enforcing version management policies can prevent rollbacks to vulnerable versions, while thorough testing ensures reliable MCP integrations before deployment. To mitigate configuration drift, developers should automate configuration management and adopt infrastructure-as-code (IaC) practices. Additionally, implementing robust tool name validation and disambiguation techniques can prevent conflicts that lead to unintended behavior. Leveraging runtime monitoring and logging helps track tool invocations, detect anomalies, and mitigate threats effectively.
+
+
+
+Recommendations for researchers. Given the decentralized nature of MCP server deployment and the evolving threat landscape, researchers should focus on conducting systematic security analyses to uncover potential vulnerabilities in tool invocation, sandbox implementations, and privilege management. Exploring techniques to enhance sandbox security, mitigate privilege persistence, and prevent configuration drift can significantly strengthen MCP’s security posture. In addition, researchers should investigate more effective approaches for version control and package management in decentralized ecosystems to reduce the likelihood of re-deploying vulnerable versions. By developing automated vulnerability detection methods and proposing secure update pipelines, researchers can help MCP maintainers and developers stay ahead of emerging threats. Another critical area for research is the exploration of context-aware agent orchestration in multi-tool environments. As MCP increasingly supports multi-step, cross-system workflows, ensuring state consistency and preventing tool invocation conflicts becomes paramount. Researchers can explore techniques for dynamic state management, error recovery, and workflow validation to ensure seamless operation in complex environments.
+
+
+
+Recommendations for end-users. End-users should remain vigilant about security risks and adopt practices to safeguard their environments. They should prioritize using verified MCP servers and avoid unofficial installers that may introduce vulnerabilities. Regularly updating MCP servers and monitoring configuration changes can prevent misconfigurations and reduce exposure to known exploits. Properly configuring access control policies helps prevent privilege escalation and unauthorized tool usage. For users relying on remote MCP servers, choosing providers that follow strict security standards can minimize risks in multi-tenant environments. Promoting user awareness and encouraging best practices will enhance overall security and resilience.
+
+
+
+## 7. Conclusion
+
+
+This paper presents the first comprehensive analysis of the MCP ecosystem landscape. We examine its architecture, core components, operational workflows, and server lifecycle stages. Furthermore, we explore the adoption, diversity, and use cases, while identifying potential security threats throughout the creation, operation, and update phases. We also highlight the implications and risks associated with MCP adoption and propose actionable recommendations for stakeholders to enhance security and governance. Additionally, we outline future research directions to tackle emerging risks and improve MCP’s resilience. As MCP continues to gain traction with industry leaders such as OpenAI and Cloudflare, addressing these challenges will be vital to ensuring its long-term success and enabling AI agents to securely and efficiently interact with an expanding array of external tools and services.
+
+
+
+## References
+
+- (1)
+- ahujasid (2025) ahujasid. 2025. BlenderMCP - Blender Model Context Protocol Integration. [https://github.com/ahujasid/blender-mcp](https://github.com/ahujasid/blender-mcp) .
+- Akinyemi (2025) Stephen Akinyemi. 2025. Awesome MCP Servers by Appcypher. [https://github.com/appcypher/awesome-mcp-servers](https://github.com/appcypher/awesome-mcp-servers) .
+- Anthropic (2024a) Anthropic. 2024a. For Claude Desktop Users. [https://modelcontextprotocol.io/quickstart/user](https://modelcontextprotocol.io/quickstart/user) .
+- Anthropic (2024b) Anthropic. 2024b. Introducing the Model Context Protocol. [https://www.anthropic.com/news/model-context-protocol](https://www.anthropic.com/news/model-context-protocol) .
+- Anthropic (2025) Anthropic. 2025. Official Collection of MCP Servers. [https://github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) .
+- ByteDance (2024) ByteDance. 2024. Coze plugin store. [https://www.coze.com/store/plugin](https://www.coze.com/store/plugin) .
+- Cline (2025) Cline. 2025. Cline. [https://github.com/cline/cline](https://github.com/cline/cline) .
+- Cloudflare (2025) Cloudflare. 2025. Cloudflare. [https://www.cloudflare.com](https://www.cloudflare.com) .
+- Codeium (2025) Codeium. 2025. Codeium. [https://codeium.com](https://codeium.com) .
+- Cody (2025) Sourcegraph Cody. 2025. Cody supports additional context through Anthropic’s Model Context Protocol. [https://sourcegraph.com/blog/cody-supports-anthropic-model-context-protocol](https://sourcegraph.com/blog/cody-supports-anthropic-model-context-protocol) .
+- Cuconasu et al . (2024) Florin Cuconasu, Giovanni Trappolini, Federico Siciliano, Simone Filice, Cesare Campagnano, Yoelle Maarek, Nicola Tonellotto, and Fabrizio Silvestri. 2024. The Power of Noise: Redefining Retrieval for RAG Systems. In *Proceedings of the 47th International ACM SIGIR Conference on Research and Development in Information Retrieval* (Washington DC, USA) *(SIGIR ’24)* . Association for Computing Machinery, New York, NY, USA, 719–729. [https://doi.org/10.1145/3626772.3657834](https://doi.org/10.1145/3626772.3657834)
+- Cursor (2025) Cursor. 2025. Learn how to add and use custom MCP tools within Cursor. [https://docs.cursor.com/context/model-context-protocol](https://docs.cursor.com/context/model-context-protocol) .
+- Editor (2025) Windsurf Editor. 2025. Windsurf Editor. [https://windsurf.com](https://windsurf.com) .
+- et al. (2025) Antanavicius et al. 2025. PulseMCP. [https://www.pulsemcp.com](https://www.pulsemcp.com) .
+- Fan (2025) Luke Fan. 2025. Awesome Crypto MCP Servers. [https://github.com/badkk/awesome-crypto-mcp-servers](https://github.com/badkk/awesome-crypto-mcp-servers) .
+- Fan et al . (2024) Wenqi Fan, Yujuan Ding, Liangbo Ning, Shijie Wang, Hengyun Li, Dawei Yin, Tat-Seng Chua, and Qing Li. 2024. A Survey on RAG Meeting LLMs: Towards Retrieval-Augmented Large Language Models. In *Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining* (Barcelona, Spain) *(KDD ’24)* . Association for Computing Machinery, New York, NY, USA, 6491–6501. [https://doi.org/10.1145/3637528.3671470](https://doi.org/10.1145/3637528.3671470)
+- gching (2025) gching. 2025. Toolbase. [https://gettoolbase.ai](https://gettoolbase.ai) .
+- glama.ai (2025) glama.ai. 2025. Glama MCP Servers. [https://glama.ai/mcp/servers](https://glama.ai/mcp/servers) .
+- Goose (2025) Goose. 2025. Goose. [https://goose.ai](https://goose.ai) .
+- Gunasinghe and Marcus (2021) Nadeeshaan Gunasinghe and Nipuna Marcus. 2021. *Language Server Protocol and Implementation* . Springer.
+- Hekmon (2025) Hekmon. 2025. AiMCP. [https://www.aimcp.info](https://www.aimcp.info) .
+- JetBrains (2025) JetBrains. 2025. JetBrains MCP Server. [https://plugins.jetbrains.com/plugin/26071-mcp-server](https://plugins.jetbrains.com/plugin/26071-mcp-server) .
+- LangChain (2022) LangChain. 2022. LangChain: Framework for developing applications powered by language models. [https://github.com/langchain-ai/langchain](https://github.com/langchain-ai/langchain) .
+- Latman (2025) Michael Latman. 2025. mcp-get. [https://mcp-get.com](https://mcp-get.com) .
+- LibreChat (2025) LibreChat. 2025. LibreChat. [https://librechat.ai](https://librechat.ai) .
+- Liu (2022) Jerry Liu. 2022. LlamaIndex: A data framework for LLM applications. [https://github.com/run-llama/llama_index](https://github.com/run-llama/llama_index) .
+- Mao (2025) Henry Mao. 2025. Smithery. [https://smithery.ai](https://smithery.ai) .
+- Maps (2025) Baidu Maps. 2025. Baidu Maps MCP Servers. [https://lbs.baidu.com/faq/api?title=mcpserver/base](https://lbs.baidu.com/faq/api?title=mcpserver/base) .
+- MCP (2025a) Emacs MCP. 2025a. Emacs MCP. [https://github.com/lizqwerscott/mcp.el](https://github.com/lizqwerscott/mcp.el) .
+- MCP (2025b) Tripo3D MCP. 2025b. Tripo3D MCP. [https://blender-mcp.com/](https://blender-mcp.com/) .
+- mcp dockmater (2025) mcp dockmater. 2025. Dockmaster. [https://mcp-dockmaster.com](https://mcp-dockmaster.com) .
+- mcp.run (2025) mcp.run. 2025. mcp.run. [https://mcp.run](https://mcp.run) .
+- mcp.so (2025) mcp.so. 2025. MCP.so. [https://mcp.so/](https://mcp.so/) .
+- mkinf (2025) mkinf. 2025. make inference. [https://mkinf.io](https://mkinf.io) .
+- OpenAI (2023a) OpenAI. 2023a. ChatGPT plugins. [https://openai.com/index/chatgpt-plugins/](https://openai.com/index/chatgpt-plugins/) .
+- OpenAI (2023b) OpenAI. 2023b. Funcation Calling. [https://platform.openai.com/docs/guides/function-calling?api-mode=responses](https://platform.openai.com/docs/guides/function-calling?api-mode=responses) .
+- OpenAI (2025) OpenAI. 2025. OpenAI Agents SDK - Model context protocol (MCP). [https://openai.github.io/openai-agents-python/mcp/](https://openai.github.io/openai-agents-python/mcp/) .
+- OpenSumi (2025) OpenSumi. 2025. OpenSumi. [https://github.com/opensumi/core](https://github.com/opensumi/core) .
+- opentoolsteam (2025) opentoolsteam. 2025. OpenTools. [https://opentools.com](https://opentools.com) .
+- Protocol (2024a) Model Context Protocol. 2024a. GitHub MCP Server. [https://github.com/modelcontextprotocol/servers/tree/main/src/github](https://github.com/modelcontextprotocol/servers/tree/main/src/github) .
+- Protocol (2024b) Model Context Protocol. 2024b. Slack MCP Server. [https://github.com/modelcontextprotocol/servers/tree/main/src/slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) .
+- Replit (2025) Replit. 2025. Replit. [https://replit.com](https://replit.com) .
+- (44) Block (Square). 2025. Block (Square). [https://glama.ai/mcp/servers/@block/square-mcp/tools/team](https://glama.ai/mcp/servers/@block/square-mcp/tools/team) .
+- Stripe (2025) Stripe. 2025. Stripe. [https://stripe.com](https://stripe.com) .
+- Studio (2025) Microsoft Copilot Studio. 2025. Introducing Model Context Protocol (MCP) in Copilot Studio: Simplified Integration with AI Apps and Agents. [https://www.microsoft.com/en-us/microsoft-copilot/blog/copilot-studio/introducing-model-context-protocol-mcp-in-copilot-studio-simplified-integration-with-ai-apps-and-agents/](https://www.microsoft.com/en-us/microsoft-copilot/blog/copilot-studio/introducing-model-context-protocol-mcp-in-copilot-studio-simplified-integration-with-ai-apps-and-agents/) .
+- Tencent (2024) Tencent. 2024. Tencent plugin shop. [https://yuanqi.tencent.com/plugin-shop](https://yuanqi.tencent.com/plugin-shop) .
+- Tester (2025) Apify MCP Tester. 2025. Apify MCP Tester. [https://apify.com/jiri.spilka/tester-mcp-client](https://apify.com/jiri.spilka/tester-mcp-client) .
+- TheiaAI/TheiaIDE (2025) TheiaAI/TheiaIDE. 2025. TheiaAI/TheiaIDE. [https://theia-ide.org/docs/user_ai/](https://theia-ide.org/docs/user_ai/) .
+- wong2 (2025) wong2. 2025. Awesome MCP Servers by wong2. [https://mcpservers.org](https://mcpservers.org) .
+- Xi et al . (2025) Zhiheng Xi, Wenxiang Chen, Xin Guo, Wei He, Yiwen Ding, Boyang Hong, Ming Zhang, Junzhe Wang, Senjie Jin, Enyu Zhou, Rui Zheng, Xiaoran Fan, Xiao Wang, Limao Xiong, Yuhao Zhou, Weiran Wang, Changhao Jiang, Yicheng Zou, Xiangyang Liu, Zhangyue Yin, Shihan Dou, Rongxiang Weng, Wenjuan Qin, Yongyan Zheng, Xipeng Qiu, Xuanjing Huang, Qi Zhang, and Tao Gui. 2025. The rise and potential of large language model based agents: a survey. *Science China Information Sciences* 68, 2 (Jan. 2025), 121101. [https://doi.org/10.1007/s11432-024-4222-0](https://doi.org/10.1007/s11432-024-4222-0)
+- Zed (2025) Zed. 2025. Zed - Model Context Protocol. [https://zed.dev/docs/assistant/model-context-protocol](https://zed.dev/docs/assistant/model-context-protocol) .
+- Zha et al . (2022) Mingming Zha, Jice Wang, Yuhong Nan, Xiaofeng Wang, Yuqing Zhang, and Zelin Yang. 2022. Hazard Integrated: Understanding Security Risks in App Extensions to Team Chat Systems. In *29th Annual Network and Distributed System Security Symposium, NDSS 2022, San Diego, California, USA, April 24-28, 2022* . The Internet Society. [https://www.ndss-symposium.org/ndss-paper/auto-draft-262/](https://www.ndss-symposium.org/ndss-paper/auto-draft-262/)
+- Zhao et al . (2024) Yanjie Zhao, Xinyi Hou, Shenao Wang, and Haoyu Wang. 2024. LLM App Store Analysis: A Vision and Roadmap. *ACM Trans. Softw. Eng. Methodol.* (Dec. 2024). [https://doi.org/10.1145/3708530](https://doi.org/10.1145/3708530) Just Accepted.
+
+
+
+
+Generated on Sun Mar 30 01:58:14 2025 by [L a T e XML ![Mascot Sammy](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==)
+](http://dlmf.nist.gov/LaTeXML/)

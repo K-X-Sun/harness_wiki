@@ -1,0 +1,1137 @@
+---
+date: '2026-04-15'
+source_type: paper
+tags:
+- type-paper
+- arxiv-2604-07551
+- topic-mcp
+- protocol
+- topic-security
+title: 'MCP-DPT: A Defense-Placement Taxonomy and Coverage Analysis for Model Context
+  Protocol Security'
+---
+
+# MCP-DPT: A Defense-Placement Taxonomy and Coverage Analysis for Model Context Protocol Security
+
+##### Report GitHub Issue
+ ×
+Title:
+Content selection saved. Describe the issue below:
+ Description:
+ Submit without GitHub Submit in GitHub
+[![arXiv logo](/static/browse/0.3.4/images/arxiv-logo-one-color-white.svg)
+ Back to arXiv](/)
+ TOC, dark mode, links
+
+[License: CC BY 4.0](https://info.arxiv.org/help/license/index.html#licenses-available)
+arXiv:2604.07551v1 [cs.CR] 08 Apr 2026
+
+
+
+# MCP-DPT: A Defense-Placement Taxonomy and Coverage Analysis for Model Context Protocol Security
+
+Mehrdad Rostamzadeh [mrost004@odu.edu](2604.07551v1/mailto:mrost004@odu.edu) [0000-0003-0977-6510](https://orcid.org/0000-0003-0977-6510) Old Dominion University Norfolk Virginia USA , Sidhant Narula Old Dominion University Norfolk Virginia USA [snaru004@odu.edu](2604.07551v1/mailto:snaru004@odu.edu) , Nahom Birhan [nbirh002@odu.edu](2604.07551v1/mailto:nbirh002@odu.edu) Old Dominion University Norfolk Virginia USA , Mohammad Ghasemigol [mghasemi@odu.edu](2604.07551v1/mailto:mghasemi@odu.edu) Old Dominion University Norfolk Virginia USA and Daniel Takabi [takabi@odu.edu](2604.07551v1/mailto:takabi@odu.edu) Old Dominion Univer Norfolk Virginia USA
+
+
+###### Abstract.
+
+The Model Context Protocol (MCP) enables large language models (LLMs) to dynamically discover and invoke third-party tools, significantly expanding agent capabilities while introducing a distinct security landscape. Unlike prompt-only interactions, MCP exposes pre-execution artifacts, shared context, multi-turn workflows, and third-party supply chains to adversarial influence across independently operated components. While recent work has identified MCP-specific attacks and evaluated defenses, existing studies are largely attack-centric or benchmark-driven, providing limited guidance on where mitigation responsibility should reside within the MCP architecture. This is problematic given MCP’s multi-party design and distributed trust boundaries. We present a defense-placement–oriented security analysis of MCP, introducing a layer-aligned taxonomy that organizes attacks by the architectural component responsible for enforcement. Threats are mapped across six MCP layers, and primary and secondary defense points are identified to support principled defense-in-depth reasoning under adversaries controlling tools, servers, or ecosystem components. A structured mapping of existing academic and industry defenses onto this framework reveals uneven and predominantly tool-centric protection, with persistent gaps at the host orchestration, transport, and supply-chain layers. These findings suggest that many MCP security weaknesses stem from architectural misalignment rather than isolated implementation flaws.
+
+ † † isbn: 978-1-4503-XXXX-X/2018/06
+
+## 1. Introduction
+
+
+Large language models (LLMs) are increasingly deployed as agentic systems that reason over context [(Giurgiu and Nidd, [2025](#bib.bib57) )] , plan multi-step actions, and invoke external tools [(Wang et al. , [2025a](#bib.bib58) )] to accomplish user goals. The Model Context Protocol (MCP) has emerged as a common substrate for such tool-augmented agents by standardizing how LLM applications connect to external tools and data sources [(Anthropic, [2024](#bib.bib2) ; Model Context Protocol, [2025](#bib.bib3) )] . MCP introduces a host–client–server architecture in which tool providers expose capabilities via MCP servers, and agent hosts dynamically discover and invoke those capabilities through standardized messages, schemas, and tool descriptors [(Model Context Protocol, [2025](#bib.bib3) )] . This design addresses integration fragmentation and encourages a rapidly growing ecosystem of third-party servers and reusable connectors [(Anthropic, [2024](#bib.bib2) ; Hou et al. , [2025](#bib.bib9) )] . At the same time, MCP shifts the attack surface from a single prompt boundary to a distributed, multi-party context and tool supply chain [(Errico et al. , [2025](#bib.bib16) )] .
+
+
+
+A defining characteristic of MCP systems is that they expose rich pre-execution artifacts—tool names, natural-language descriptions, argument schemas, and server-provided prompts/resources—that are incorporated into the model context and directly influence tool selection and parameterization [(Model Context Protocol, [2025](#bib.bib3) ; Zhang et al. , [2025](#bib.bib39) )] . Unlike conventional API integrations, where interfaces are typically static and machine-validated, MCP explicitly places natural-language metadata in the control loop, creating new avenues for adversarial influence *before* any tool execution occurs. Recent measurement work supports this concern at ecosystem scale: large-scale studies of open-source MCP servers report MCP-specific vulnerabilities beyond conventional software bugs, including tool poisoning patterns that manifest in server-provided tool metadata [(Hasan et al. , [2025](#bib.bib12) )] . More broadly, MCP surveys highlight security and privacy risks throughout the server lifecycle (creation, operation, update) and emphasize that distribution and maintenance practices are inseparable from runtime security for an open and rapidly evolving protocol ecosystem [(Hou et al. , [2025](#bib.bib9) )] .
+
+
+
+Recent work has started to systematize MCP security through dedicated benchmarks and taxonomies. MCPSecBench [(Yang et al. , [2025b](#bib.bib38) )] , MSB [(Zhang et al. , [2025](#bib.bib39) )] , and MCP-SafetyBench [(Zong et al. , [2025](#bib.bib37) )] evaluate MCP-specific attacks across tool-augmented workflows, covering threats that span servers, hosts/clients, and realistic multi-turn settings. Complementary studies highlight MCP-native vectors such as tool poisoning and adversarial servers, demonstrating that malicious behavior can be introduced through tool metadata or server implementations and propagated through an emerging ecosystem with limited vetting [(Wang et al. , [2025b](#bib.bib23) ; Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+In parallel, early defense efforts motivate ecosystem-aware mitigations. SafeMCP [(Fang et al. , [2025](#bib.bib26) )] emphasizes third-party safety risk as a first-class concern, while MCIP [(Jing et al. , [2025](#bib.bib33) )] and MCP-Guard [(Xing et al. , [2025](#bib.bib30) )] propose protocol- and system-level defenses and accompanying evaluation resources for adversarial testing. These works collectively suggest that securing MCP-based agents requires controls beyond prompt filtering, spanning tool-metadata integrity and broader host/client and ecosystem boundaries.
+
+
+
+Despite rapid progress, existing MCP security research remains predominantly attack-centric: it emphasizes how attacks are executed and how often they succeed, while offering limited guidance on *where* defenses must be deployed across MCP’s layered trust boundaries and *which stakeholders* are responsible for enforcing them. This gap is consequential because MCP deployments are operationally distributed—spanning model provider/alignment, host/application, client/SDK, server/tool execution, transport/network, and registry/supply-chain layers—and defenses that are effective in one layer may be ineffective or unenforceable in another [(Yang et al. , [2025b](#bib.bib38) ; Hou et al. , [2025](#bib.bib9) )] . As a result, current mitigations tend to cluster around tool-centric or prompt-centric protections, while structurally critical layers—notably host orchestration, transport, and supply-chain governance—remain comparatively underdefended. This paper makes the following contributions to MCP security research.
+
+1. (1)
+
+We introduce a *defense-placement perspective* for MCP security that shifts the focus from attack execution to enforcement responsibility across the protocol ecosystem.
+2. (2)
+
+We develop a *layer-aligned taxonomy* of MCP-specific attacks that reflects real trust boundaries and ownership roles within MCP deployments.
+3. (3)
+
+For each attack, we identify *primary* (earliest enforceable) and *secondary* (fallback) defense layers, enabling principled defense-in-depth reasoning and clearer assignment of mitigation responsibility.
+4. (4)
+
+We systematically map existing academic and industry defenses onto this taxonomy and conduct a *capability-based coverage analysis* , revealing that current protections are uneven and disproportionately tool-centric.
+5. (5)
+
+We show that critical layers—particularly transport, host, and registry/supply-chain—remain under-defended, indicating that prevailing MCP security gaps are *structural* rather than incidental.
+
+
+
+## 2. Background
+
+
+MCP introduces new security risks that extend beyond prompt-level failures and manifest across clients, protocols, servers, and ecosystem infrastructure. Existing work has identified many of these attack vectors, but they appear in different architectural layers and are studied in isolation. This motivates a structured examination of MCP attack surfaces, prior taxonomies, and their limitations, as discussed in the following subsections.
+
+
+
+### 2.1. Tool-Augmented LLMs and MCP
+
+
+Modern LLM-based systems increasingly rely on structured interfaces that allow models to interact with external resources beyond their native context [(Li et al. , [2023](#bib.bib63) )] , extending their functionality through tool invocation and environment interaction [(Yao and others, [2023](#bib.bib53) ; Wang et al. , [2024](#bib.bib54) )] .
+
+
+
+MCP defines a protocol-level abstraction that enables LLM clients to dynamically discover, invoke, and interact with tools hosted on heterogeneous servers [(Guo et al. , [2025a](#bib.bib10) ; Zong et al. , [2025](#bib.bib37) )] . By decoupling tool implementations from model logic, MCP facilitates scalable and interoperable tool integration, allowing LLM-based agents to operate in distributed environments with shared context and standardized communication semantics [(Guo et al. , [2025b](#bib.bib40) ; Wu et al. , [2025](#bib.bib41) )] .
+
+
+
+### 2.2. MCP Security Implications
+
+
+MCP fundamentally reshapes the security landscape of LLM-based systems [(Thirumalaisamy et al. , [2025](#bib.bib18) )] . Unlike prompt-only deployments, MCP introduces additional control surface [(Hatami et al. , [2026](#bib.bib79) )] through pre-execution artifacts, shared and persistent context, and interactions with third-party services operating outside the model provider’s trust boundary [(Tan et al. , [2026](#bib.bib34) ; Rayarao and Donikena, [2025](#bib.bib5) )] . Decisions made by LLM agents are influenced not only by user prompts [(Jishan et al. , [2024](#bib.bib83) )] , but also by tool metadata, schemas, and server-provided context that are incorporated into the model’s reasoning process. These characteristics increase system expressiveness and interoperability, but also introduce new security considerations [(Maloyan and Namiot, [2026](#bib.bib28) )] that span multiple architectural layers and stakeholders [(Li et al. , [2025a](#bib.bib7) )] , motivating the need for systematic security analysis beyond traditional prompt-centric assumptions [(Errico et al. , [2025](#bib.bib16) ; Lei et al. , [2025](#bib.bib4) )] .
+
+
+
+As a consequence, MCP expands the attack surface along three recurring axes. First, *pre-execution manipulation* of manifests, descriptions, and schemas can steer agents before any tool invocation; empirical evaluations demonstrate high attack success from metadata-only tool poisoning in live-server settings [(Wang et al. , [2025b](#bib.bib23) ; Guo et al. , [2025a](#bib.bib10) )] . Second, *cross-context propagation* emerges in multi-turn workflows, where intermediate artifacts, handles, and partial plans enable chained influence across tools, sessions, and servers; safety degrades as task horizons lengthen and server interactions accumulate [(Zong et al. , [2025](#bib.bib37) ; Guo et al. , [2025a](#bib.bib10) )] . Third, *third-party control* introduces heterogeneous identity, authorization, and failure modes outside the model provider’s boundary, motivating ecosystem-level mitigations and protocol-enforceable controls [(Fang et al. , [2025](#bib.bib26) ; Jing et al. , [2025](#bib.bib33) )] .
+
+
+
+### 2.3. MCP Attack Surfaces and Threat Vectors
+
+
+Recent work shows that MCP-related attacks manifest across multiple components of the system rather than at a single execution point [(Guo et al. , [2025a](#bib.bib10) )] . At the MCP client and host level, researchers have identified permission abuse and excessive capability attacks [(Bühler et al. , [2025](#bib.bib35) )] , where over-privileged tool exposure allows agents to perform unintended actions beyond user intent, particularly in long-running workflows [(Jing et al. , [2025](#bib.bib33) ; Errico et al. , [2025](#bib.bib16) )] . At the protocol and context-management layer, context injection and contamination attacks exploit shared or persistent context to influence downstream reasoning and tool selection between tasks and sessions [(Song et al. , [2025](#bib.bib13) ; Zong et al. , [2025](#bib.bib37) )] . Attacks targeting the server and tool execution layer include malicious tool behavior and covert data exfiltration [(Thirumalaisamy et al. , [2025](#bib.bib18) )] , where tools return adversarial outputs or leak sensitive information under the guise of legitimate responses [(Fang et al. , [2025](#bib.bib26) ; Guo et al. , [2025a](#bib.bib10) )] . In addition, studies have highlighted registry and supply-chain level risks—such as tool substitution or version manipulation—which undermine trust assumptions in open MCP ecosystems [(Hasan et al. , [2025](#bib.bib12) ; Wu et al. , [2025](#bib.bib41) )] . While these attacks demonstrate that vulnerabilities span clients, protocol logic, servers, and ecosystem infrastructure, existing defenses are typically proposed in isolation and remain unevenly applied across components, leaving substantial portions of the MCP attack surface insufficiently covered.
+
+
+
+Although several defensive mechanisms have been proposed or deployed in both academic prototypes [(Xing et al. , [2025](#bib.bib30) ; Wang et al. , [2025c](#bib.bib29) ; Cisco AI Defense, [2025](#bib.bib49) ; Lasso Security, [2025](#bib.bib46) ; AIM Intelligence, [2025](#bib.bib42) ; eqtylab, [2025](#bib.bib48) ; Jing et al. , [2025](#bib.bib33) )] and industrial MCP implementations, to the best of our knowledge, there is no existing work that systematically reviews, categorizes, or analyzes MCP defenses across architectural layers or stakeholders.
+
+
+
+### 2.4. Prior Work on MCP Security Attack Taxonomies
+
+
+Prior research on MCP security has largely focused on enumerating attack vectors and organizing them into attack-centric taxonomies or benchmark-driven threat lists.
+
+
+
+Song et al. [(Song et al. , [2025](#bib.bib13) )] provide one of the earliest structured analyses of the MCP ecosystem by categorizing malicious server behaviors—such as tool poisoning, rug-pull attacks, and adversarial external resources—and by empirically demonstrating their real-world feasibility. Building on this perspective, Zhao et al. [(Zhao et al. , [2025b](#bib.bib14) )] further systematize server-side MCP threats by classifying malicious behaviors and studying their detectability and mitigation challenges.
+
+
+
+Several benchmark efforts introduce taxonomies through structured attack lists and evaluation pipelines. Yang et al. [(Yang et al. , [2025b](#bib.bib38) )] propose MCPSecBench, which organizes MCP attacks across multiple interaction surfaces and evaluates their success against real-world tools, while Zhang et al. [(Zhang et al. , [2025](#bib.bib39) )] introduce MSB, defining attacks along the tool-use pipeline from planning to execution and response handling. Focusing specifically on metadata-based manipulation, Wang et al. [(Wang et al. , [2025b](#bib.bib23) )] present MCPTox, demonstrating that high attack success rates can be achieved through tool poisoning alone without executing malicious tools.
+
+
+
+Extending attack categorization to more realistic settings, Zong et al. [(Zong et al. , [2025](#bib.bib37) )] introduce MCP-SafetyBench, which classifies attacks across server-, host-, and user-level interactions and highlights compounding safety failures in multi-turn, cross-server workflows. Complementing these studies, the large-scale ecosystem analysis by Hasan et al. [(Hasan et al. , [2025](#bib.bib12) )] reveals that MCP-specific vulnerabilities are widespread in open-source servers, underscoring the systemic nature of the threat landscape. Finally, Jing et al. [(Jing et al. , [2025](#bib.bib33) )] propose MCIP, a protocol-level safety framework accompanied by a fine-grained taxonomy of unsafe MCP behaviors, emphasizing contextual integrity rather than isolated exploits. Collectively, these works establish a rich catalog of MCP attack classes, but they predominantly organize threats by attack technique or evaluation surface, offering limited guidance on defense placement across MCP’s architectural trust boundaries.
+
+
+
+### 2.5. Limitations of Existing MCP Security Research
+
+
+Despite recent progress in analyzing the security of the Model Context Protocol (MCP), existing work exhibits several important limitations.
+
+
+
+- •
+
+Attack-centric focus. Most studies prioritize identifying attack vectors or measuring vulnerability and attack success rates, but do not specify where defenses should be deployed within the MCP architecture or which components are responsible for enforcement.
+- •
+
+Lack of defense placement guidance. Existing taxonomies and mitigation efforts rarely distinguish between *primary* (earliest feasible) and *secondary* (fallback or compensatory) defense layers, making it difficult to reason about defense ordering and composition.
+- •
+
+Partial defense coverage. Proposed defenses—including protocol-level constraints and runtime monitoring mechanisms—address only subsets of known attacks, leaving gaps at critical layers such as registries, clients, transport, and the software supply chain.
+- •
+
+Unclear defense effectiveness. Current benchmarks primarily evaluate attack feasibility and success, but seldom map attacks to available academic or industrial defenses or explicitly identify which attacks remain uncovered.
+- •
+
+Lack of a systematic defense overview. To the best of our knowledge, there is no unified overview or systematic review of available MCP defense mechanisms across academic and industrial deployments, making it difficult to assess defense coverage, compare approaches, or reason about residual risk at the ecosystem level.
+
+
+
+Table [1](#S3.T1) compares six representative MCP security works against our taxonomy across nine evaluation dimensions. The first two rows show that all prior works adopt either an attack-surface, pipeline-stage, or scenario-based taxonomy type — none organizes threats by where defenses must be enforced. Rows three through five reveal that while attack-centricity is universal ( ✓ \checkmark across all six works), control- and defense-centric reasoning is only partial ( ∼ \sim ) in MCPSecBench and When MCP Servers Attack, and absent in MSB, MCP-SafetyBench, and MCPLib. Critically, no prior work explicitly maps attacks to defense layers or assigns enforcement responsibility to specific architectural stakeholders — both dimensions receive × \times across all six columns. Trust-boundary awareness and defense-in-depth reasoning appear sporadically, with MCIP being the strongest prior work ( ✓ \checkmark on defense-in-depth), yet even MCIP does not identify primary versus secondary defense points or expose under-defended layers. The final three rows — primary/secondary defense points, identifying under-defended layers, and coverage analysis — are exclusive to this work, marking the core contribution of MCP-DPT: shifting the framing from *what attacks exist* to *where and by whom they must be stopped* .
+
+
+
+## 3. Taxonomy
+
+![Refer to caption](2604.07551v1/figures/attack_diagram.jpg)
+ *Figure 1. Primary and secondary defense layers for a rug pull attack.*
+
+
+
+We conducted a structured review of MCP security literature published through 2025 and 2026, collecting attack descriptions from benchmarks [(Yang et al. , [2025b](#bib.bib38) ; Guo et al. , [2025a](#bib.bib10) ; Zhao et al. , [2025b](#bib.bib14) )] , server-side threat analyses [(Zhao et al. , [2025b](#bib.bib14) ; Song et al. , [2025](#bib.bib13) ; Stacklok, [2025](#bib.bib47) )] , ecosystem measurement studies [(Hasan et al. , [2025](#bib.bib12) )] , and protocol safety frameworks [(Jing et al. , [2025](#bib.bib33) )] . Each identified attack was assigned to the MCP architectural layer first becomes enforceable. We then assigned a primary defense layer—the earliest boundary where prevention is feasible with sufficient authority and visibility—and a secondary defense layer—the fallback containment point if the primary fails. This assignment was guided by the trust boundaries and ownership roles inherent in each layer [(Hou et al. , [2025](#bib.bib9) )] not by the frequency of attacks or empirical success rates.
+
+
+
+In our defense-placement-oriented taxonomy for MCP security, we classify attacks based on where countermeasures must be implemented, rather than by attack technique or attacker intent as in previous work [(Yang et al. , [2025b](#bib.bib38) ; Zhao et al. , [2025b](#bib.bib14) )] . Our framework organizes threats according to the architectural layer primarily responsible for mitigation—Model Provider/LLM Alignment, MCP Host/Application, MCP Client/SDK, MCP Server/Tool Execution, Transport/Network, and Registry/Marketplace & Supply-chain—reflecting the ownership and trust boundaries of the MCP ecosystem. By explicitly aligning each attack with the component that must enforce its defense, this perspective yields a more actionable understanding of vulnerabilities, clarifies the boundaries of responsibility, and enables more effective and targeted mitigation strategies. As shown in Figure [2](#S3.F2) , every attack entry is associated with a primary and secondary defense layer, guiding practitioners toward an effective placement of safeguards. To our knowledge, this is the first taxonomy that structures MCP threats around defense placement, providing a practical, deployment-oriented framework for securing MCP-based systems.
+
+
+*Table 1. Comparison of MCP security benchmarks and analyses with respect to defense placement and enforcement responsibility. ✓ \checkmark = fully supported; ∼ \sim = partially supported; × \times = not supported.*
+
+
+| Aspect | MCPSec Bench ( Yang et al. , 2025b ) | MSB ( Zhang et al. , 2025 ) | MCP-Safety Bench ( Zong et al. , 2025 ) | MCPLib ( Guo et al. , 2025a ) | When MCP Servers Attack ( Zhao et al. , 2025b ) | MCIP ( Jing et al. , 2025 ) | MCP-DPT (This Work) |
+|---|---|---|---|---|---|---|---|
+| Primary focus | Security benchmark | Attack benchmark | Safety benchmark | Attack library/ taxonomy | Malicious MCP servers | Safety-enhanced protocol | Defense placement |
+| Taxonomy type | Attack-surface | Pipeline-stage attack | Safety-scenario | Attack-method taxonomy | Server-component attack | Unsafe-behavior/ lifecycle taxonomy | Defense-placement taxonomy |
+| Attack-centric | ✓ \checkmark | ✓ \checkmark | ✓ \checkmark | ✓ \checkmark | ✓ \checkmark | ∼ \sim | × \times |
+| Control-/defense-centric | ∼ \sim | × \times | × \times | × \times | ∼ \sim | ✓ \checkmark | ✓ \checkmark |
+| Maps attacks → \rightarrow defenses | × \times | × \times | × \times | × \times | ∼ \sim | ∼ \sim | ✓ \checkmark |
+| Assigns enforcement responsibility | × \times | × \times | × \times | × \times | × \times | × \times | ✓ \checkmark |
+| Trust-boundary aware | ∼ \sim | × \times | ∼ \sim | × \times | ∼ \sim | ∼ \sim | ✓ \checkmark |
+| Defense-in-depth reasoning | ∼ \sim | × \times | × \times | × \times | ∼ \sim | ✓ \checkmark | ✓ \checkmark |
+| Primary/secondary defense points | × \times | × \times | × \times | × \times | × \times | × \times | ✓ \checkmark |
+| Identifies under-defended layers | × \times | × \times | × \times | × \times | × \times | × \times | ✓ \checkmark |
+| Supports coverage analysis | × \times | × \times | × \times | × \times | × \times | × \times | ✓ \checkmark |
+
+
+
+The taxonomy is structured around three conceptual axes: (i) the *primary defense layer* (where the attack must first be prevented), (ii) the *attack class* itself, and (iii) the *secondary defense layer* (where residual risk must be mitigated if the primary defense fails). This structure shifts the focus from how attacks are executed to where defenses must be deployed within the MCP ecosystem. The appendix provides detailed descriptions and illustrative examples for a representative subset of 49 attacks that cover all architectural layers and attack classes.
+
+
+![Refer to caption](2604.07551v1/figures/taxonomy.png)
+ *Figure 2. Defense placement taxonomy of attacks.*
+
+
+
+### 3.1. Architectural Layers as Security Boundaries
+
+
+The taxonomy is grounded in the MCP architecture and its real operational trust boundaries. We define six layers, each corresponding to a distinct ownership domain and control surface.
+
+
+
+#### 3.1.1. Model Provider / LLM Alignment
+
+
+This layer encompasses the language model itself and the mechanisms that govern its behavior, including alignment policies, refusal logic, tool selection behavior, and training data assumptions, which are typically established through alignment techniques such as reinforcement learning from human feedback (RLHF) [(Ouyang et al. , [2022](#bib.bib51) )] . It is responsible for ensuring that model output remains semantically safe, policy-compliant, and aligned with the intent of the developer. Security failures at this layer typically stem from limitations in model reasoning, degradation of alignment during fine-tuning [(Yang et al. , [2025a](#bib.bib71) )] , or compromised training integrity—including the presence of latent backdoors that can selectively bypass alignment constraints at inference time [(Shen et al. , [2025](#bib.bib72) )] .
+
+
+
+#### 3.1.2. MCP Host / Application
+
+
+The host layer occupies a central position in the MCP architecture because it is responsible for mediating between model outputs and real-world tool execution. As the component that embeds the language model within an application context, the host governs execution state, capability exposure, resource boundaries, and orchestration logic across tools and services. Prior work has shown that many failures in LLM-based systems arise not from the model itself, but from insufficient enforcement at the application boundary where model decisions are translated into actions [(Wei et al. , [2023](#bib.bib67) ; Kang et al. , [2024](#bib.bib69) )] . Because the host layer retains visibility into tool schemas, execution intent, and system state, it provides a uniquely effective location to enforce safety invariants, validate model outputs, and constrain behavior before irreversible side effects occur [(Guo et al. , [2025a](#bib.bib10) )] . For these reasons, the host layer forms a distinct and indispensable element of the taxonomy, reflecting both its architectural responsibility and its role as the final programmable control point prior to tool invocation.
+
+
+
+#### 3.1.3. MCP Client / SDK
+
+
+The MCP Client/SDK layer comprises the software runtime that bridges the language model-driven agent with external MCP servers, handling protocol parsing, request construction, response interpretation, and local execution logic. This layer operates at a sensitive trust boundary, as it transforms high-level model decisions into concrete network interactions and local actions, often within proximity to user resources and credentials [(Hou et al. , [2025](#bib.bib9) )] . Security risks arise when client implementations implicitly trust server responses, fail to enforce strict schemas, or allow model-influenced output to trigger unintended behavior. Because the client mediates both inbound data from servers and outbound actions initiated by the model, weaknesses at this layer can amplify upstream failures or enable direct compromise even when other components behave correctly. Consequently, the client layer is a critical enforcement point for validation, isolation, and permission scope within the MCP architecture [(Xing et al. , [2025](#bib.bib30) )] .
+
+
+
+#### 3.1.4. MCP Server / Tool Execution
+
+
+The MCP Server/Tool Execution layer represents the runtime environment in which MCP tools are implemented and executed [(Tan et al. , [2026](#bib.bib34) ; Rayarao and Donikena, [2025](#bib.bib5) )] , including server-side logic, exposed APIs, authentication checks, plugin loading, and resource management. This layer is responsible for safely handling inputs received from MCP hosts and clients, enforcing isolation boundaries, and ensuring that tool execution does not violate system or data integrity [(Yang et al. , [2025b](#bib.bib38) )] . Security failures here typically arise from unsafe execution environments, weak authentication or authorization, overly permissive introspection interfaces, or inadequate isolation between tools and underlying infrastructure. Because this layer directly executes code and processes data on behalf of the LLM, it forms a critical containment boundary: once compromised, attacks can escalate beyond the MCP ecosystem into broader systems, making robust server-side safeguards essential for defense in depth [(Thirumalaisamy et al. , [2025](#bib.bib18) )] .
+
+
+
+#### 3.1.5. Transport / Network
+
+
+The Transport/Network layer captures the communication channels over which MCP messages, tool invocations, and responses are exchanged between hosts, clients, and servers. This layer encompasses network protocols, session management, message framing, encryption, authentication of endpoints, and guarantees related to integrity, freshness, and ordering. Unlike higher layers that reason about intent or semantics, the transport layer is responsible for ensuring that messages are delivered faithfully and only between authenticated parties, even in the presence of network-level adversaries.
+
+
+
+Security failures at this layer arise from weak or absent transport protections, such as insufficient authentication of MCP endpoints, lack of message integrity or replay protection, improper session binding, or insecure transport configurations. These weaknesses can enable man-in-the-middle attacks, replay or reordering of tool calls, downgrade attacks, or injection of stale or malicious responses that remain syntactically valid at higher layers. Because MCP agents often assume reliable and trustworthy communication, transport-layer compromises can silently subvert otherwise correct behavior at the client, host, or server layers, making robust network-level safeguards essential for preserving end-to-end security guarantees [(Yang et al. , [2025b](#bib.bib38) ; Hasan et al. , [2025](#bib.bib12) )] .
+
+
+
+#### 3.1.6. Registry / Marketplace & Supply-chain
+
+
+The Registry/Marketplace–Supply-chain layer captures all mechanisms responsible for discovery, distribution, versioning, and provenance of MCP servers, tools, plugins, and their updates. This layer sits upstream of execution and governs how components enter the MCP ecosystem in the first place. Its security role is to ensure authenticity, integrity, and traceability of MCP artifacts before they are ever invoked by a host or client. Failures at this layer undermine trust assumptions across the entire stack: once a malicious or compromised component is registered, updated, or promoted through the supply chain, downstream layers may execute it correctly yet still produce unsafe outcomes. As a result, this layer is fundamental for enforcing trust boundaries, provenance guarantees, and long-term ecosystem safety rather than runtime correctness alone [(Hasan et al. , [2025](#bib.bib12) )] .
+
+
+
+### 3.2. Attack
+
+
+This dimension captures the specific malicious technique or exploit employed by an adversary, describing the mechanism by which the attack is realized within the MCP ecosystem. Rather than exhaustively defining individual attacks in the main text, we use this dimension to reference established MCP-specific threat types and illustrate how they manifest across architectural layers. Detailed definitions and assumptions for each attack type are provided in Appendix [A](#A1) , allowing the core taxonomy to focus on structural relationships between attacks, defenses, and enforcement responsibilities.
+
+
+
+### 3.3. Primary Defense Layer
+
+
+The primary defense layer refers to the first line of protection designed to prevent an attack from occurring in the first place, or to block it at the earliest possible point of interaction with the system. This layer operates closest to the attack source, aiming to stop malicious inputs, behaviors, or configurations before they can influence downstream components. In the context of MCP, this notion is especially important because attacks may originate through different entry points—such as model-facing metadata, client interactions, server behavior, transport channels, or supply-chain artifacts—while their effects may only become visible later in the execution flow. For this reason, the primary defense layer is not simply the place where an attack is eventually detected, but the earliest architectural boundary where meaningful prevention can be enforced with sufficient authority and visibility.
+
+
+
+By identifying this earliest enforceable boundary, the primary defense layer provides a principled way to assign mitigation responsibility across the MCP ecosystem. It clarifies which component should serve as the first point of intervention before malicious influence propagates into later stages such as orchestration, tool invocation, or runtime execution. This is particularly valuable in a distributed architecture like MCP, where different layers possess different control surfaces and trust assumptions. Accordingly, the primary defense layer serves as the foundation for defense-in-depth: it is responsible for blocking the threat at entry, while downstream layers act as secondary safeguards to contain impact if that initial protection fails.
+
+
+
+### 3.4. Secondary Defense Layer
+
+
+The secondary defense layer provides defense-in-depth by limiting the impact and propagation of an attack when the primary defense layer fails, is misconfigured, or is deliberately bypassed. Rather than preventing initial compromise, this layer focuses on containment, mitigation, and recovery.
+
+
+
+To clarify how primary and secondary defense layers differ in practice, Figure [1](#S3.F1) presents a concrete example based on a rug pull attack. The diagram illustrates how a malicious MCP tool can successfully pass pre-execution trust decisions at the registry and approval stage—where evaluation is limited to static metadata, declared interfaces, and expected behavior—while deferring its malicious actions until after trust has been established. Once the trusted tool is executed at runtime, its behavior transitions in a time- or state-dependent manner, making the attack observable only within the secondary (host-level) defense layer. This example is not intended to propose a mitigation strategy, but rather to illustrate how defense responsibilities are distributed across layers in the taxonomy.
+
+
+
+### 3.5. Motivation for Defense Layer Stratification
+
+
+The primary/secondary distinction was motivated by two observations:
+
+
+
+First, MCP is a distributed, multi-owner architecture [(Hou et al. , [2025](#bib.bib9) )] in which no single component controls the entire stack [(Errico et al. , [2025](#bib.bib16) )] , making a single defense point inherently insufficient. An attack may enter at one layer but only become observable or stoppable at another — as Figure [1](#S3.F1) illustrates. The registry layer, for instance, can only evaluate static metadata at submission time, whereas malicious behavior may only manifest at runtime within the host layer [(Song et al. , [2025](#bib.bib13) )] .
+
+
+
+Second, existing defenses fail silently at layer boundaries. As shown in Table [1](#S3.T1) , no existing taxonomy assigns enforcement responsibility to specific architectural components. Consequently, practitioners deploying a single tool-layer defense have no guidance on what happens if that defense fails, is misconfigured, or is deliberately bypassed [(Xing et al. , [2025](#bib.bib30) ; Jing et al. , [2025](#bib.bib33) )] .
+
+
+
+## 4. Available Defense Mechanisms
+
+
+This section provides an overview of existing defense mechanisms specifically designed to address attacks in MCP-based systems. The goal is to review their key features and to analyze which classes of MCP attacks they are capable of mitigating.
+
+
+
+In this work, the effectiveness of a defense mechanism is assessed in terms of *capability-based coverage* rather than empirical detection accuracy. A defense is considered to cover an attack class if it can reasonably detect, block, or constrain that class under commonly assumed MCP threat models and deployment conditions. This notion of coverage reflects whether a defense is architecturally positioned to mitigate an attack type, not whether it achieves perfect prevention in practice. Consequently, our analysis focuses on structural defense applicability and enforcement potential rather than quantitative metrics. Tables [2](#S4.T2) illustrates how each attack is addressed by the available defense mechanisms described in the following sections.
+
+
+*Table 2. Capability-based defense coverage across all 49 taxonomy attacks and 13 defense mechanisms, organized by the primary MCP architectural layer responsible for enforcement. ∙ \bullet = covered; ∘ \circ = not covered.*
+
+
+| Attack | MCP-Scan | MCIP-Guardian | Cisco MCP Scanner | MCP-Gateway | MCP Guardian (eqtylab) | MCP-Defender | MCP-Guard | Prisma AIRS | MCPScan.ai | MCP-Shield | ToolHive | MindGuard | AIM-Guard-MCP |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Model Provider / LLM Alignment |
+| Prompt Injection | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet |
+| Tool/Service Misuse (“Confused AI”) | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet |
+| Jailbreak Attacks | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Hallucination Attacks | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Prompt Leakage | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| Memory Poisoning | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ |
+| Semantic Misalignment Exploit | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Goal Hijack | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Backdoor Attacks | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| MCP Server / Tool Execution |
+| Server Resource Exhaustion / DoS | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Insecure Server Authentication | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Function Dependency Injection | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Function Return Injection | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Configuration Drift | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Cross-Origin Violation | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Transport / Network |
+| Man-in-the-Middle (MiTM) | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| MCP Rebinding (DNS Rebinding) | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Agent Communication Poisoning | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Agent Coordination / Collusion | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Registry / Marketplace & Supply-Chain |
+| Tool Shadowing (Mirror Attacks) | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| Malicious Tool Registration | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| Package Name Squatting (Tool / Server) | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| Tool Poisoning Attack | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∙ \bullet |
+| Tool Squatting Amplification | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Promotional / Deceptive Metadata | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| MCP Host / Application |
+| Control-Flow Hijack | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Credential Theft | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Persistence via Host Auto-Launch | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ |
+| File-Based Injection | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| Resource Overload / DoS | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Unauthorized Resource Invocation | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Sampling Abuse | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Token Theft | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Resource Type Confusion | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Binary Payload Delivery | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Remote Code Execution | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Multi-Tool Cooperation / Propagation | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Endpoint Exposure | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| MCP Client / SDK |
+| Remote Listener | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| DoS Against the Client | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Slash Command Overlap | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Command Execution | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Vulnerable Client (CVE-2025-6514) | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet |
+| Server Code Leakage | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Resource Type Confusion / Impersonation | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Schema Inconsistency | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Selection Inducement | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| Information Overcollection | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ |
+| Malicious Tool Installation | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+
+
+
+### 4.1. Static / Pre-Execution Defenses
+
+
+Static/pre-execution defenses analyze MCP configurations, tool metadata, manifests, and policies before execution to identify security risks without observing runtime behavior [(Jamshidi et al. , [2025](#bib.bib31) )] .
+
+
+
+### 4.2. Behavior-Level / Runtime Defenses
+
+
+Behavior-level/runtime defenses monitor and analyze the runtime behavior of LLMs and tool interactions, focusing on detecting anomalous, malicious, or policy-violating actions during execution.
+
+
+
+### 4.3. Isolation-Based / Architecture Defenses
+
+
+Isolation-based/architecture defenses redesign the system architecture to enforce strict trust boundaries between LLMs, tools, and servers, limiting the impact of compromised components [(Xing et al. , [2025](#bib.bib30) )] .
+
+
+
+### 4.4. Decision-Level Defenses
+
+
+Decision-level defenses protect the LLM’s internal decision-making process, particularly tool selection and parameterization, by analyzing how decisions are formed rather than only their final outcomes [(Wang et al. , [2025c](#bib.bib29) )] . These approaches monitor intermediate decision signals to identify subtle manipulation attempts—such as tool poisoning or preference steering—that may evade output-level defenses. By intervening during decision-making, they can detect attacks before harmful actions are executed. This capability is especially important in multi-step, context-rich MCP workflows. As a result, decision-level defenses complement traditional outcome-based protections.
+
+
+
+### 4.5. Defense Mechanisms
+
+
+#### 4.5.1. MCP-Scan (Invariant Labs)
+
+
+MCP-Scan is a static security analysis tool that inspects MCP client configurations and tool metadata prior to execution to identify prompt injection risks, tool poisoning, rug-pull attacks, and unsafe cross-origin settings. It focuses on configuration hardening by scanning tool descriptions, enforcing trusted tool pinning, and validating allowlists, making it well suited for pre-deployment security checks and CI/CD integration [(Invariant Labs, [2025](#bib.bib43) )] .
+
+
+
+#### 4.5.2. MCPScan.ai
+
+
+MCPScan.ai provides a hosted, enterprise-grade MCP security platform that extends static analysis with continuous repository monitoring and reporting. It scans MCP-related assets for prompt injection, tool poisoning, and cross-origin escalation risks, generating comprehensive security reports and dashboards that support organizational governance, auditing, and large-scale MCP deployments [(MCPScan.ai, [2025](#bib.bib44) )] .
+
+
+
+#### 4.5.3. MCIP-Guardian
+
+
+MCIP-Guardian is an MCP-native, context-aware safety guard that detects unsafe tool use by reasoning over the full interaction context, not just individual function calls. It logs MCP interactions as structured information-flow trajectories (sender, receiver, data subject, information type, transmission principle) and uses a taxonomy-guided safety model to determine whether a tool call is appropriate in context. Unlike network or sandbox defenses, MCIP-Guardian focuses on semantic and contextual misuse—e.g., function injection, excessive privileges, replay, and configuration drift—and operates as a runtime risk-detection layer for MCP agents, improving safety without changing the underlying MCP protocol [(Jing et al. , [2025](#bib.bib33) )] .
+
+
+
+#### 4.5.4. MCP Defender
+
+
+MCP-Defender provides runtime, behavior-level protection by monitoring and blocking malicious MCP traffic within developer environments such as Cursor, Claude, VS Code, and Windsurf. It detects suspicious tool interactions and exploit attempts in real time, offering endpoint-level defense during live agent execution [(MCP-Defender, [2025](#bib.bib45) )] .
+
+
+
+#### 4.5.5. MCP-Gateway (Lasso Security)
+
+
+MCP-Gateway acts as a secure proxy and orchestration layer between LLM clients and MCP servers, enforcing zero-trust access control and centralized policy management. By intercepting and routing MCP traffic, it prevents unauthorized tool usage, supports multi-MCP aggregation, and provides architectural isolation between agents and tools [(Lasso Security, [2025](#bib.bib46) )] .
+
+
+
+#### 4.5.6. ToolHive (Stacklok)
+
+
+ToolHive focuses on secure MCP server deployment and lifecycle management, mitigating supply-chain and misconfiguration risks through automated setup and access control enforcement. It enables organizations to securely provision, manage, and govern MCP servers while reducing the operational overhead associated with manual configuration [(Stacklok, [2025](#bib.bib47) )] .
+
+
+
+#### 4.5.7. MCP-Guard
+
+
+MCP-Guard is a proxy-based defense framework designed to secure Model Context Protocol (MCP) interactions between LLMs and external tools. It employs a three-stage layered defense: (i) lightweight, pattern-based static scanning to quickly block obvious threats such as prompt injection, sensitive file access, and command injection; (ii) a learnable neural detector based on a fine-tuned E5 embedding model to identify subtle, semantic attacks such as tool poisoning; and (iii) LLM-based arbitration to resolve uncertain cases and reduce false positives. This fail-fast, escalation-based design enables high detection accuracy, low latency, hot-updatable rules, and registry-free deployment, making MCP-Guard suitable for real-time protection in production MCP environments [(Xing et al. , [2025](#bib.bib30) )] .
+
+
+
+#### 4.5.8. MCP Guardian (eqtylab)
+
+
+MCP Guardian (eqtylab) operates as an enterprise MCP access and governance gateway, enforcing authorization, approval workflows, and compliance controls over LLM-to-tool interactions. It provides real-time auditing, policy enforcement, and monitoring to prevent unauthorized access and ensure secure MCP usage in regulated environments [(eqtylab, [2025](#bib.bib48) )] .
+
+
+
+#### 4.5.9. MindGuard
+
+
+MindGuard detects MCP tool poisoning attacks in which malicious tool metadata corrupts an LLM’s planning without executing the poisoned tool. It identifies both explicit invocation hijacking (forcing unrelated high-privilege calls) and implicit parameter manipulation (subtly altering arguments), and can precisely attribute each attack to the poisoned tool source using decision-level analysis [(Wang et al. , [2025c](#bib.bib29) )] .
+
+
+
+#### 4.5.10. Cisco MCP Scanner
+
+
+Cisco MCP Scanner combines rule-based and semantic analysis to detect malicious MCP artifacts, including poisoned tool metadata, prompt injection vectors, and over-privileged tools. By integrating YARA rules, LLM-based semantic judgment, and Cisco AI Defense heuristics, it identifies both syntactic and contextual threats and can be deployed as a standalone scanner or integrated via an SDK [(Cisco AI Defense, [2025](#bib.bib49) )] .
+
+
+
+#### 4.5.11. MCP-Shield
+
+
+MCP-Shield is a CLI-based security scanner that analyzes MCP servers and configurations to detect tool poisoning, hidden instructions, covert data exfiltration channels, and tool shadowing attacks. It leverages LLM-powered semantic analysis to assess contextual risk and produces human-readable security findings with safe-list support [(Rise and Ignite, [2025](#bib.bib50) )] .
+
+
+
+#### 4.5.12. AIM-MCP
+
+
+AIM-MCP intervenes before an action is executed, influencing whether and how an AI agent proceeds with an MCP interaction. It analyzes the agent’s intent, prompt content, contextual parameters (MCP type, operation, sensitivity), and risk signals, then modifies, constrains, or blocks the decision itself by injecting security instructions, issuing warnings, or flagging high-risk behavior. This directly shapes the agent’s decision-making process rather than merely observing outcomes or enforcing post-hoc checks.
+
+
+
+Crucially, AIM-Guard-MCP does not rely on isolation, sandboxing, or static code analysis. Instead, it operates at runtime and alters agent behavior dynamically based on contextual and behavioral signals—such as prompt-injection patterns, credential exposure, and malicious URLs. Because the defense acts at the point where the agent chooses what to do next, it squarely belongs to the decision-level defense layer, making it especially effective against vulnerable-client attacks driven by malicious or misleading tool outputs [(AIM Intelligence, [2025](#bib.bib42) )] .
+
+
+*Table 3. Categorical mapping of representative MCP defense mechanisms across four orthogonal defense types. ∙ \bullet = supported; ∘ \circ = not supported.*
+
+
+| Defense Mechanism | Static / Pre-Exec. | Behavior / Runtime | Isolation / Architect. | Decision Level |
+|---|---|---|---|---|
+| MCP-Scan (Invariant Labs) | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| MCPScan.ai | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| MCIP-Guardian | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ |
+| AegisMCP | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ |
+| MCP-Defender | ∘ \circ | ∙ \bullet | ∘ \circ | ∘ \circ |
+| MCP-Gateway / Lasso | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ |
+| ToolHive (Stacklok) | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ |
+| MCP-Guard | ∙ \bullet | ∙ \bullet | ∙ \bullet | ∘ \circ |
+| MCP Guardian (eqtylab) | ∘ \circ | ∘ \circ | ∙ \bullet | ∘ \circ |
+| MindGuard | ∘ \circ | ∘ \circ | ∘ \circ | ∙ \bullet |
+| Cisco MCP Scanner | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| MCP-Shield | ∙ \bullet | ∘ \circ | ∘ \circ | ∘ \circ |
+| AIM-Guard-MCP | ∘ \circ | ∙ \bullet | ∘ \circ | ∙ \bullet |
+
+
+
+
+
+Static / Pre-Exec.: Static/Pre-Execution — analyzes tool metadata and configurations before runtime. Behavior / Runtime: monitors and constrains tool interactions during execution. Isolation / Architect.: enforces trust boundaries between agents and tools via mediation layers. Decision Level: protects the LLM’s internal tool-selection and parameterization process.
+
+
+
+### 4.6. Categorical Mapping of MCP Defense Mechanisms by Defense Type
+
+
+Table [3](#S4.T3) presents a categorical mapping of representative MCP defense mechanisms across four orthogonal defense types: Static/Pre-Execution, Behavior-Level/Runtime, Isolation/Architectural, and Decision-Level. Each row corresponds to a concrete defense system, while each column denotes a defense type. A checkmark indicates that the defense substantially and explicitly implements the corresponding protection mechanism. Multiple checkmarks per row indicate strong, intentional overlap rather than incidental or auxiliary functionality. The figure is designed to emphasize where in the MCP execution lifecycle a defense primarily intervenes, enabling a clear comparison of coverage patterns and defense placement.
+
+
+
+##### Analysis and Key Observations.
+
+
+Static vs. runtime separation is clear and non-overlapping. Static defenses such as MCP-Scan, MCPScan.ai, Cisco MCP Scanner, and MCP-Shield are exclusively categorized under Static/Pre-Execution, reflecting their focus on analyzing tool metadata, configurations, and MCP artifacts before execution. These defenses do not monitor live agent behavior and therefore do not provide runtime enforcement. Conversely, AegisMCP, MCP-Defender, and MCIP-Guardian are classified under Behavior-Level/Runtime, as they operate by observing or constraining tool interactions during execution. This clear separation highlights the complementary roles of static hardening and runtime monitoring.
+
+
+
+Isolation-based defenses form a distinct architectural layer. Defenses such as MCP-Gateway/Lasso, ToolHive, and MCP Guardian (eqtylab) are solely marked under Isolation/Architectural, reflecting their role as mediation layers that enforce trust boundaries between agents and tools. These systems reduce blast radius and privilege exposure without performing semantic reasoning or behavioral anomaly detection. Notably, isolation-based defenses do not inherently detect malicious intent; instead, they assume partial compromise and limit the consequences of misuse.
+
+
+
+Decision-level defenses are rare but semantically powerful. Only MindGuard and AIM-Guard-MCP are marked under Decision-Level, underscoring how uncommon defenses are that directly protect the LLM’s internal decision-making process—such as tool selection and parameter formation. These defenses are particularly relevant for vulnerable-client attacks, where malicious tool metadata or outputs manipulate agent planning without triggering overt policy violations or runtime anomalies. Decision-level defenses thus represent a specialized but critical layer not covered by static scanning or architectural isolation alone.
+
+
+
+Intentional overlap reflects layered defense, not redundancy. A small number of defenses—most notably MCP-Guard and AIM-Guard-MCP—span multiple columns. This overlap is intentional and meaningful. MCP-Guard combines static scanning, runtime interception, and proxy-based isolation, making it a genuinely multi-layer defense. AIM-Guard-MCP spans Behavior-Level and Decision-Level, as it both observes runtime context and actively intervenes in agent decisions before execution. The figure avoids weak or incidental overlaps, ensuring that each mark represents a core security mechanism rather than an auxiliary feature.
+
+
+
+Implication for MCP security evaluation. The distribution of marks reveals that most existing defenses cluster around static analysis and runtime monitoring, while decision-level protection remains underexplored. This imbalance motivates the need for benchmarks and evaluations that explicitly consider planning-time manipulation and vulnerable-client scenarios, rather than focusing solely on execution-time exploits.
+
+
+
+### 4.7. Attack Volume and Coverage Across MCP Categories
+
+
+Based on the benchmarking results, the distribution of defense capabilities across the MCP ecosystem reveals significant disparities in coverage. The defense-in-depth landscape is currently characterized by a heavy concentration of protection in specific layers, while structural gaps remain in others.
+
+
+
+### 4.8. Core Coverage Patterns
+
+
+Table [4](#S4.T4) quantifies the capability-based coverage of each defense mechanism across the six MCP architectural layers, expressed as the percentage of attacks in that layer that the mechanism can reasonably detect, block, or constrain. Each row corresponds to a defense tool, and each column represents a primary enforcement layer: Model Provider/LLM Alignment (MP/LA), MCP Host/Application (MH/A), Registry/Marketplace & Supply-Chain (R/M&SC), MCP Client/SDK (MC/S), MCP Server/Tool Execution (MS/TE), and Transport/Network (T/N). Bold values mark the highest coverage per column. Three patterns emerge clearly. First, registry and server-execution layers attract the strongest protection — ToolHive achieves 100 % 100\% registry coverage, and MCP-Guardian and ToolHive each reach 50 % 50\% at the server-execution layer. Second, model-alignment coverage is partial across all tools, with MCIP-Guardian and MCP-Guard leading at 44 % 44\% . Third, and most critically, the Transport/Network layer is almost entirely undefended: all tools except MCP-Gateway ( 50 % 50\% ) report 0 % 0\% coverage, and host-side orchestration peaks at only 38 % 38\% via MCP-Gateway. These figures confirm that current defenses cluster around tool-adjacent layers while the infrastructure layers that carry the highest blast radius remain structurally underprotected.
+
+
+*Table 4. Defense Coverage Across MCP Ecosystem Layers*
+
+
+| Defense Mechanism | MP/LA | MH/A | R/M&SC | MC/S | MS/TE | T/N |
+|---|---|---|---|---|---|---|
+| MCP-Scan | 11% | 8% | 83% | 9% | 33% | 0% |
+| MCIP-Guardian | 44% | 8% | 0% | 0% | 17% | 0% |
+| Cisco MCP | 11% | 0% | 17% | 0% | 0% | 0% |
+| MCP-Gateway | 22% | 38% | 0% | 9% | 33% | 50% |
+| MCP-Guardian | 33% | 8% | 0% | 36% | 50% | 0% |
+| MCP-Defender | 11% | 31% | 0% | 36% | 33% | 0% |
+| MCP-Guard | 44% | 23% | 17% | 0% | 33% | 25% |
+| Prisma AIRS | 33% | 31% | 17% | 9% | 33% | 0% |
+| MCPScan.ai | 0% | 0% | 17% | 9% | 0% | 0% |
+| MCP-Shield | 0% | 0% | 17% | 0% | 17% | 0% |
+| ToolHive | 0% | 23% | 100% | 9% | 50% | 0% |
+| MindGuard | 0% | 8% | 50% | 0% | 17% | 0% |
+| AIM-MCP | 0% | 8% | 17% | 36% | 0% | 25% |
+
+
+
+
+
+MP/LA : Model Provider/LLM Alignment; MH/A : MCP Host/Application; R/M&SC : Registry/Marketplace & Supply Chain; MC/S : MCP Client/SDK; MS/TE : MCP Server/Tool Execution; T/N : Transport/Network. Bold values indicate the highest coverage per column.
+
+
+
+## 5. Discussion
+
+
+This section interprets our coverage analysis to identify (i) the dominant patterns in today’s MCP defenses, (ii) the highest-impact gaps, and (iii) practical priorities for closing them. Importantly, our coverage results reflect *capability-based applicability* under common MCP threat assumptions, not empirical detection accuracy or guarantees of security.
+
+
+
+A key finding is that current defenses cluster around pre-execution scanning and runtime monitoring, yielding comparatively stronger support for tool-execution-adjacent threats—e.g., metadata poisoning and malicious tool outputs—than for ecosystem and infrastructure threats. In contrast, attacks involving transport manipulation, host orchestration failures, and registry/supply-chain compromise remain underdefended, despite their broad blast radius across deployments. This imbalance suggests that many MCP failures are *structural* : defenses are often deployed where tools are easiest to inspect, rather than where authority and visibility are sufficient to reliably prevent or contain the attack.
+
+
+
+Two implications follow. First, practitioners should prioritize controls that reduce systemic exposure: strengthen host-side enforcement (policy checks, permission scoping, and auditability), harden transport assumptions (secure binding and integrity), and improve registry/supply-chain hygiene (provenance and update controls). Second, the scarcity of decision-level defenses indicates an important research gap—attacks that steer tool selection or parameterization can evade output-only checks, especially in multi-step workflows. In general, the taxonomy can serve as a placement-oriented checklist for evaluating MCP deployments and as a roadmap for developing defenses that cover currently underprotected threat classes.
+
+
+
+## 6. Conclusion
+
+
+This paper introduced a defense-placement-oriented taxonomy for Model Context Protocol (MCP) security that organizes MCP-specific attacks by architectural responsibility and identifies primary and secondary enforcement points to support defense-in-depth reasoning. Using this taxonomy, we mapped representative academic and industry defenses and conducted a capability-based coverage analysis to characterize how current mitigations align with the MCP threat landscape.
+
+
+
+Our analysis shows that existing defenses are uneven and frequently concentrate on tool-adjacent protections, while important threats involving host orchestration, transport assumptions, and registry/supply-chain mechanisms remain comparatively underdefended. These gaps suggest that many MCP security failures are *structural* : defenses are often deployed where implementation is easiest rather than where authority and visibility are sufficient to reliably prevent or contain an attack.
+
+
+
+We expect this taxonomy and mapping to serve as a practical reference for evaluating MCP deployments and for prioritizing new mitigations that address undercovered attack classes. Future work should strengthen defenses in the most underprotected layers and expand decision-level protections that can resist planning-time manipulation in multi-step MCP workflows.
+
+
+
+## Appendix A Attack Descriptions
+
+
+This appendix provides definitions and illustrative descriptions for the MCP-specific attacks enumerated in the taxonomy. Each entry describes the attack mechanism, the adversarial objective, and the primary pathway through which it manifests in MCP-based systems.
+
+
+
+##### Tool Poisoning.
+
+
+An adversary embeds malicious natural-language instructions into a tool’s description or metadata, which are then loaded into the agent’s context during MCP registration [( Wang et al. , [2025b](#bib.bib23) )] . The agent treats these poisoned instructions as part of the tool specification, leading it to perform unauthorized operations—e.g., secret exfiltration—via otherwise legitimate tools. The maliciously modified tool behaves unexpectedly, causing the MCP system or LLM to execute unauthorized actions. This can result in data leaks, incorrect decisions, or indirect compromise of downstream tools while appearing syntactically normal [( Errico et al. , [2025](#bib.bib16) ; Xing et al. , [2025](#bib.bib30) )] .
+
+
+
+##### Parameter Poisoning.
+
+
+The attacker does not block the tool but secretly alters the parameters the agent uses—e.g., file path, stock ticker, or account identifier. As a result, the agent performs the correct type of operation but on attacker-chosen, harmful targets [( Li et al. , [2026](#bib.bib22) )] .
+
+
+
+##### Command Injection.
+
+
+Malicious payloads such as shell commands or code fragments are injected into tool descriptions or outputs. When the agent or host executes these as commands instead of treating them as data, the attacker can achieve arbitrary code execution on the underlying system [( OWASP Foundation , [2025](#bib.bib76) )] .
+
+
+
+##### Function Overlapping.
+
+
+The attacker introduces tools whose names and signatures overlap with benign tools but whose behavior is adversarial. Because the model must choose among similar tools under natural-language instructions, it can be steered toward the dangerous variant [( Zong et al. , [2025](#bib.bib37) )] .
+
+
+
+##### Preference Manipulation Attack.
+
+
+Tool descriptions are written to strongly promote a particular tool—e.g., “most accurate” or “recommended for all tasks.” The agent’s tool-selection policy is biased toward the attacker-controlled tool, even when safer or more appropriate alternatives exist [( Zong et al. , [2025](#bib.bib37) ; Wang et al. , [2025d](#bib.bib21) )] .
+
+
+
+##### Tool Shadowing.
+
+
+A malicious tool or server is given a name and description that closely mimic a trusted one, effectively acting as a shadow version. The agent or user may connect to and invoke this shadow instance by mistake, exposing data or privileges to the attacker [( Styer et al. , [2025](#bib.bib6) )] .
+
+
+
+##### Rug Pull / Malicious Automatic Update.
+
+
+A tool or server behaves benignly at first and becomes integrated into normal workflows [( Song et al. , [2025](#bib.bib13) )] . After trust is established, the implementation or metadata is changed to include malicious behavior, enabling sudden data exfiltration or destructive actions without obvious changes in interface [( Errico et al. , [2025](#bib.bib16) )] .
+
+
+
+##### Package Name Squatting (Server Name).
+
+
+Package name squatting on server names targets the server layer rather than individual tools. The attacker publishes or registers an MCP server whose identifier closely resembles that of a legitimate server, so that host configurations or users accidentally bind to the malicious server, thereby routing tool calls and data flows through an adversary-controlled infrastructure [( Yang et al. , [2025b](#bib.bib38) )] .
+
+
+
+##### Package Name Squatting (Tool Name).
+
+
+Tool name squatting occurs when a malicious MCP server registers a tool with a name identical or deceptively similar to a trusted one. This exploits the LLM’s selection logic, causing it to inadvertently execute the attacker’s tool and perform actions that diverge from the user’s original intent [( Yang et al. , [2025b](#bib.bib38) )] .
+
+
+
+##### Privilege Escalation (MCP Context).
+
+
+The attacker causes the agent to use tools or resources with broader permissions than the user intended. Small manipulations in planning or tool selection can result in the agent performing high-impact operations—e.g., modifying system files or sensitive accounts. Although prior studies demonstrate MCP scenarios in which agents are induced to invoke high-privilege tools beyond user intent [( Radosevich and Halloran , [2025](#bib.bib20) ; Song et al. , [2025](#bib.bib13) ; Zhao et al. , [2025a](#bib.bib24) )] , existing work does not explicitly characterize these behaviors as privilege escalation attacks. We formalize this class and analyze it through the lens of defense placement.
+
+
+
+##### Intent Injection.
+
+
+The context injected through tools, resources, or prior messages is designed to change the model’s interpretation of the user’s true goal. The agent then plans and acts according to this altered intention—e.g., “test security” or “gather secrets”—rather than the original benign request [( Jing et al. , [2025](#bib.bib33) )] .
+
+
+
+##### Data Tampering.
+
+
+The attacker modifies data delivered by MCP tools—e.g., financial prices, navigation results, or repository contents—while preserving valid formats. The agent makes decisions based on corrupted but plausible data, enabling subtle and impactful manipulation of outcomes. Several studies show that MCP agents can consume manipulated but syntactically valid tool output originating from malicious servers, leading to incorrect decisions and downstream effects [( Song et al. , [2025](#bib.bib13) ; Radosevich and Halloran , [2025](#bib.bib20) ; Zhao et al. , [2025a](#bib.bib24) )] .
+
+
+
+##### Identity Spoofing.
+
+
+Tool responses or messages are crafted to appear as if they originate from a specific user or trusted component. The agent, believing the spoofed identity, may execute sensitive actions or reveal information that would be withheld from an untrusted source [( Gasmi et al. , [2025](#bib.bib17) )] .
+
+
+
+##### Replay Injection.
+
+
+Old but valid messages, tool calls, or tool outputs are replayed in a new context. Because the agent often trusts its history, these replayed elements can trigger outdated operations or bypass checks that assumed one-time or time-bound behavior [( Zong et al. , [2025](#bib.bib37) )] .
+
+
+
+##### Malicious Code Execution / Remote Code Execution.
+
+
+The agent is convinced to generate and run attacker-chosen code through powerful tools—e.g., shell, Python, or notebook environments. Once executed on the host environment, the attacker gains system-level access, collapsing the boundary between prompt compromise and classic OS exploitation [( Radosevich and Halloran , [2025](#bib.bib20) ; Siddiq et al. , [2026](#bib.bib82) )] .
+
+
+
+##### Credential Theft.
+
+
+The agent is guided to access and expose secrets—API keys, SSH keys, tokens, or passwords—from files, environment variables, or secret stores accessible to MCP tools [( Radosevich and Halloran , [2025](#bib.bib20) )] . Stolen credentials can then be used for persistent account takeover or lateral movement outside the MCP system [( Zong et al. , [2025](#bib.bib37) ; Guo et al. , [2025a](#bib.bib10) )] .
+
+
+
+##### Jailbreak.
+
+
+Carefully constructed prompts or contexts are used to bypass the LLM’s safety rules. In MCP settings, a successful jailbreak is especially dangerous because the now-unconstrained model can directly drive tools to perform harmful real-world operations [( Asl et al. , [2025](#bib.bib70) )] .
+
+
+
+##### Prompt Leakage.
+
+
+The attacker uses crafted queries or indirect injections to extract hidden system prompts, tool schemas, or internal policies. Knowledge of these internal details enables more targeted attacks, including stronger prompt injection, better tool poisoning, and more precise privilege escalation [( Guo et al. , [2025a](#bib.bib10) )] .
+
+
+
+##### Tool Misuse via Confused AI.
+
+
+Tool misuse via “confused AI” exploits the model’s imperfect understanding of tool semantics, permissions, or context. By presenting misleading or ambiguous instructions and metadata, attackers induce the agent to select and combine tools in ways that violate security assumptions—such as using high-privilege tools for low-risk tasks or revealing more information than requested [( OWASP Foundation , [2025](#bib.bib76) )] .
+
+
+
+##### Man-in-the-Middle.
+
+
+A man-in-the-middle (MitM) attack occurs when an adversary intercepts and potentially modifies the communication channel between the MCP client and the server [( Gasmi et al. , [2025](#bib.bib17) )] . By relaying or altering JSON-RPC messages, the attacker can observe sensitive data, inject additional tool calls, or tamper with tool responses without the knowledge of either endpoint [( Yang et al. , [2025b](#bib.bib38) )] .
+
+
+
+##### Vulnerable Client (CVE-2025-6514).
+
+
+Vulnerable client attacks occur when MCP client or SDK implementations implicitly trust data returned by MCP servers [( Hasan et al. , [2025](#bib.bib12) )] and perform unsafe local actions based on that data. As demonstrated in [( Yang et al. , [2025b](#bib.bib38) )] , a malicious MCP server can exploit flaws in client-side logic—such as blindly opening URLs or executing commands embedded in server responses—to achieve arbitrary code execution or data exfiltration on the client machine, even when the model itself behaves correctly. These vulnerabilities stem from insecure client SDK design, insufficient input validation, and over-privileged local execution paths, making the client a critical but often overlooked attack surface in MCP deployments [( Lotfi et al. , [2025](#bib.bib36) )] .
+
+
+
+##### Prompt Injection.
+
+
+Prompt injection denotes any attack in which adversarial text is crafted to override, circumvent, or subvert the model’s existing safety instructions and policies. In MCP settings, such payloads can be delivered via user input, tool output, or external resources, causing the agent to prioritize attacker goals and potentially invoke high-impact tools in violation of the original intent [( Gulyamov et al. , [2026](#bib.bib66) )] .
+
+
+
+##### Goal Hijack.
+
+
+Goal hijacking occurs when an attacker manipulates the context so that the model revises its internal understanding of the overarching task objective [( Guo et al. , [2025a](#bib.bib10) )] . Rather than merely altering individual steps, the adversary reframes the “true” goal—e.g., from assisting a user to exfiltrating secrets—leading the agent to plan and execute entire tool-calling workflows aligned with the attacker’s aims.
+
+
+
+##### Memory Poisoning.
+
+
+Memory poisoning targets persistent or long-lived memory components of an agent, injecting misleading or adversarial content that will inform future decisions. By corrupting stored facts, user preferences, or historical summaries, the attacker induces systematic misbehavior between sessions, including biased tool selection, unsafe defaults, and repeated security policy violations [( Yan et al. , [2025](#bib.bib27) )] .
+
+
+
+##### Semantic Misalignment.
+
+
+Semantic misalignment describes the divergence between the intended semantics of instructions, tools, or policies and the model’s internal interpretation of them. In MCP workflows, this misalignment can be exploited so that the agent believes it is complying with safety constraints or user intent while performing operations that are broader, riskier, or qualitatively different than specified [( Li et al. , [2025a](#bib.bib7) )] .
+
+
+
+##### Hallucination Attacks.
+
+
+Hallucination attacks exploit the model’s tendency to generate confident but false statements by shaping prompts or context so that the agent “fills in” missing details with fabricated tools, resources, or behaviors. In MCP systems, such fabricated beliefs can lead the agent to invoke non-existent components, misinterpret security-relevant outputs, or rationalize unsafe actions as legitimate [( Guo et al. , [2025a](#bib.bib10) )] .
+
+
+
+##### Resource Type Confusion / Impersonation.
+
+
+Prior work indicates that MCP agents can be misled about the semantic role or trust level of resources returned by tools or servers, causing untrusted artifacts to be interpreted as authoritative data or executable guidance [( Radosevich and Halloran , [2025](#bib.bib20) ; Zhao et al. , [2025a](#bib.bib24) )] . Resource type confusion arises when an adversary deliberately presents a resource—such as a file, URL, or API endpoint—in a form that obscures its true provenance or intent. By masquerading adversarial content as benign artifacts (e.g., logs, documentation, or configuration files), the attacker induces the agent to ascribe undue trust to the resource and to incorporate its contents into planning, reasoning, or subsequent tool invocations.
+
+
+
+##### Control-Flow Hijack.
+
+
+Control-flow hijack in MCP workflows refers to attacks that redirect the agent’s multi-step reasoning or tool-calling sequence away from the intended execution path. By inserting adversarial instructions or misleading intermediate results, the attacker causes the agent to execute an alternative sequence of tool calls—often skipping validation steps, invoking more powerful tools, or entering unintended loops—to achieve malicious objectives. Prior work shows that manipulated intermediate outputs or context can cause MCP agents to deviate from expected execution paths, although these behaviors are not explicitly framed as control-flow hijacking [( Zhao et al. , [2025a](#bib.bib24) ; Song et al. , [2025](#bib.bib13) )] .
+
+
+
+##### Malicious Tool Registration.
+
+
+Malicious tool registration occurs when an attacker registers a tool whose implementation or semantics are adversarial but whose interface appears benign. Once the tool is accepted into the MCP environment, any invocation can execute hidden malicious logic, leveraging the privileges and trust associated with its declared capabilities [( Guo et al. , [2025a](#bib.bib10) )] .
+
+
+
+##### Unauthorized Resource Invocation.
+
+
+Unauthorized resource invocation denotes scenarios where the agent is induced to access tools, servers, or data sources that are outside the user’s intended security scope. This can arise from prompt injection, misconfigured permissions, or ambiguous instructions, leading the agent to fetch or manipulate resources that should require additional authorization or explicit approval [( Radosevich and Halloran , [2025](#bib.bib20) )] .
+
+
+
+##### MCP Rebinding.
+
+
+MCP rebinding refers to the unauthorized reassignment of an existing server or tool identifier to a different endpoint or implementation. Because clients and agents typically trust the identifier rather than the underlying address, subsequent invocations are transparently routed to the attacker-controlled backend, enabling interception, manipulation, or full compromise of workflows that rely on the original binding [( Yang et al. , [2025b](#bib.bib38) )] .
+
+
+
+##### Installer Spoof.
+
+
+Installer spoof attacks target the distribution or setup phase by presenting a malicious installer, script, or configuration bundle that mimics a legitimate MCP tool or server installation. Once executed, the spoofed installer silently registers adversarial tools, modifies bindings, or plants backdoors, so that subsequent MCP workflows operate atop a compromised foundation [( Hou et al. , [2025](#bib.bib9) )] .
+
+
+
+##### Multi-Tool Cooperation / Propagation.
+
+
+Multi-tool cooperation or propagation describes attacks that deliberately chain multiple tools to amplify impact or spread compromise across components. An adversary designs intermediate outputs and dependencies so that the results of a compromised tool trigger follow-up invocations in other tools, allowing lateral movement, persistent misconfiguration, or data exfiltration across the MCP ecosystem [( Zhao et al. , [2025a](#bib.bib24) )] .
+
+
+
+##### Resource Overload.
+
+
+Resource overload attacks exploit the tool-centric execution model of MCP to induce an agent to issue excessive or pathologically expensive tool calls. By repeatedly invoking computationally intensive tools, constructing oversized request payloads, or triggering unbounded control flows—e.g., deep tool recursion, large data retrievals, or massive file operations—an attacker can exhaust computational, storage, or network resources. Such attacks degrade agent responsiveness and may result in partial denial-of-service affecting co-located agents, shared MCP servers, or downstream services [( OWASP Foundation , [2025](#bib.bib76) ; Li et al. , [2025b](#bib.bib25) )] .
+
+
+
+##### Sampling Abuse.
+
+
+A malicious MCP server exploits the sampling feature to secretly cause the user’s LLM to generate content during tool execution instead of using its own resources. This shifts computational cost to the user while the attacker benefits from free, high-quality AI output [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Malicious Tool Installation.
+
+
+In a malicious project installation attack, attackers hide harmful commands in the README file of a software package to exploit MCP server-assisted installation. For example, a README.md might include a line such as curl http://malicious.example.com/malware.sh | bash . When users follow the instructions, the script executes automatically. This type of attack can spread widely through software supply chains as affected packages are adopted by many users [( Guo et al. , [2025a](#bib.bib10) )] .
+
+
+
+##### Information Overcollection.
+
+
+An information overcollection attack occurs when a malicious actor tricks or manipulates an MCP server or agent into collecting more information than necessary. For example, an attacker submits a task asking an agent to return weather data alongside all users’ email addresses and session tokens, causing overcollection of sensitive information [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Binary Payload.
+
+
+Binary payloads constitute a potential attack vector in MCP interactions. Resources may return base64-encoded binary data accompanied by a mimeType field, which the client decodes and processes accordingly. A malicious server could craft such payloads to exploit vulnerabilities in the host’s parsing or rendering stack, potentially leading to system compromise [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Slash Command Overlap.
+
+
+Slash command overlap occurs when multiple MCP tools define identical or similar slash commands—e.g., /remove [( Yu et al. , [2025](#bib.bib55) )] —creating execution conflicts. An attacker can exploit this ambiguity to trigger unintended actions, compromising system reliability and potentially causing data loss [( Anbiaee et al. , [2026](#bib.bib19) )] .
+
+
+
+##### Agent Communication Poisoning.
+
+
+Agent communication poisoning occurs when a malicious actor injects false, misleading, or incomplete messages into the communication channels used by agents to coordinate [( Eslami and Yu , [2025](#bib.bib78) ; Ghosh et al. , [2025](#bib.bib77) )] . These manipulated messages can distort an agent’s understanding of its environment or the intentions of other components, causing it to execute unintended actions. Since the resulting behavior may appear structurally correct, the MCP system often lacks indicators that upstream coordination was compromised, allowing attackers to subtly disrupt workflows or influence decision-making [( OWASP Foundation , [2024](#bib.bib75) )] .
+
+
+
+##### Malicious Authorization Metadata.
+
+
+Malicious authorization metadata arises when an MCP server transmits authorization-related information—such as an authorization server URL—over HTTP. If an attacker manipulates this metadata to point to a hostile endpoint or embeds executable instructions, and the client does not properly validate it, the system may be redirected to the attacker-controlled resource or unintentionally execute harmful code [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Server Metadata Poisoning / Deceptive Naming.
+
+
+Server metadata poisoning occurs when an attacker manipulates MCP server metadata—such as names or descriptions—to appear trustworthy. This can lure users into integrating malicious servers or mislead LLMs into treating harmful servers as legitimate, potentially exposing both the model and users to subsequent attacks [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Remote Listener.
+
+
+A remote listener attack involves embedding persistent control commands—e.g., reverse shells—within MCP tool descriptions, often disguised as benign utilities such as “debugging tools” or “network plugins.” Because MCP servers typically do not monitor tool metadata in real time, these malicious commands can persist undetected, allowing attackers to steal data or maintain backdoor access [( Guo et al. , [2025a](#bib.bib10) )] .
+
+
+
+##### Server Code Leakage.
+
+
+Server code leakage occurs when attackers exploit MCP server responses that reveal debug information—e.g., file paths. By analyzing these hints and issuing crafted requests (e.g., GET /debug?file=server.py ) or enumerating directories via APIs, they can access sensitive source code and system files [( Guo et al. , [2025a](#bib.bib10) )] .
+
+
+
+##### File-Based Injection.
+
+
+File-based injection in MCP occurs when attackers embed malicious content in files processed by clients or agents. If the system trusts these files without validation, this can trigger unintended actions such as code execution, prompt injection, or data theft [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Endpoint Exposure.
+
+
+Endpoint exposure occurs when a locally installed MCP server opens an overly permissive HTTP endpoint—e.g., bound to 0.0.0.0 . This allows network-level attackers to access the server and potentially exploit powerful capabilities such as file access on the user’s system [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Adversarial Connection Parameters.
+
+
+Adversarial connection parameters occur when an attacker provides a malicious MCP server URL in the host configuration. When the host connects, all subsequent communication is routed through the attacker-controlled endpoint, enabling interception, manipulation, or exploitation of the interaction. MCP hosts often adopt a “configure once, run always” model, automatically relaunching any registered server at every system startup without further user consent. A malicious server can exploit this by inserting its launch command into the host’s configuration file, ensuring it executes in the background at every boot and transforming a one-time interaction into a persistent foothold [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Backdoor Attack.
+
+
+In MCP, backdoor attacks use tools and server resources as entry points for malicious logic [( Guo et al. , [2025a](#bib.bib10) )] . Hidden instructions or pre-embedded scripts [( Zhu et al. , [2025](#bib.bib73) )] can cause the LLM to execute unintended actions when a tool is invoked [( Yang et al. , [2024](#bib.bib74) )] , with triggers selectively activating the backdoor for covert compromise.
+
+
+
+##### DoS Against the Client.
+
+
+A client-side denial-of-service (DoS) is a resource exhaustion attack in which a server exploits the client by sending malicious or malformed protocol primitives. Unlike traditional DoS attacks, here the attacker is the provider and the victim is the consumer—e.g., Claude Desktop, an IDE, or an autonomous agent [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Cross-Origin Violation.
+
+
+A cross-origin violation occurs when an agent bridges isolated domains, allowing a malicious server to manipulate tools from a trusted one [( Gaire et al. , [2025](#bib.bib11) )] . For example, an adversarial “Weather” server could inject a hidden prompt that forces the LLM to exfiltrate private emails from a “Gmail” server [( Maloyan and Namiot , [2026](#bib.bib28) )] . This persists because MCP currently lacks a native same-origin policy to enforce data isolation between different providers [( Errico et al. , [2025](#bib.bib16) )] .
+
+
+
+##### Tool Squatting Amplification.
+
+
+Tool squatting amplification is a multi-stage attack in which an adversarial server registers a squatted tool—e.g., git_clone_secure —to intercept an LLM’s initial request and inject a malicious system prompt that overrides the agent’s core safety guardrails [( Maloyan and Namiot , [2026](#bib.bib28) )] . By combining name deception with recursive prompt injection, the attacker amplifies a single misdirected tool call into full, persistent control over the agent’s future reasoning and tool selections. For example, a squatted “File Search” tool might return a result that secretly instructs the LLM to BCC every drafted email to an attacker-controlled address [( Maloyan and Namiot , [2026](#bib.bib28) )] .
+
+
+
+##### Selection Inducement.
+
+
+Selection inducement occurs when an adversarial server manipulates tool or resource metadata—such as enticing descriptions, high priority values, or false “premium” claims—to bias an LLM’s selection logic. By exaggerating utility or freshness, the attacker ensures their malicious component is prioritized over legitimate ones, effectively hijacking the agent’s workflow. This exploit succeeds because current MCP implementations lack mechanisms to validate whether a server’s semantic claims match its underlying data [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Persistence via Host Auto-Launch.
+
+
+MCP hosts often use a “configure once, run always” model, automatically relaunching registered servers at every system startup without further user consent. A malicious server exploits this by inserting its launch command into the host’s configuration file, ensuring execution in the background on every boot and maintaining a persistent foothold across restarts [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Multi-Agent Collaboration / Collusion.
+
+
+A multi-agent coordination or collusion attack occurs when a chain of seemingly benign interactions across multiple agents collectively implements a complex exploit—such as privilege escalation or data exfiltration. These systemic failures arise from cascading misalignments or adversarial message passing, which can bypass single-point security filters because no individual agent’s action appears malicious in isolation [( Mahmud et al. , [2025](#bib.bib56) )] .
+
+
+
+##### Promotional / Deceptive Metadata.
+
+
+Attackers use deceptive names and high-value descriptions on public platforms to lure users into installing malicious MCP servers. Once integrated, this promotional metadata appears in the agent’s UI, tricking the user into engaging with unsafe tools or resources [( Zhao et al. , [2025b](#bib.bib14) )] .
+
+
+
+##### Function Dependency Injection.
+
+
+A malicious server forges the dependency chain of a target function by falsely claiming that certain additional functions must be called beforehand. As a result, the LLM is misled into invoking unnecessary functions, introducing potential risks [( Jing et al. , [2025](#bib.bib33) )] .
+
+
+
+##### Schema Inconsistency.
+
+
+A schema inconsistency attack occurs when the tool interface schema—e.g., JSON parameters, types, or constraints—presented to the agent differs from the server’s actual expected schema, causing the model to generate malformed or unintended calls. Attackers can exploit this mismatch to bypass validation, trigger hidden functionality, or coerce the agent into unsafe operations, because the agent relies on the incorrect schema as ground truth. This violates the integrity assumption that tool specifications are consistent and trustworthy across registration and execution stages [( Yang et al. , [2025b](#bib.bib38) )] .
+
+
+
+##### Function Return Injection.
+
+
+Attackers embed malicious instructions within a tool’s return payload, which can cause the system to perform unintended actions such as invoking other tools or running arbitrary code [( Zong et al. , [2025](#bib.bib37) )] .
+
+
+
+##### Configuration Drift.
+
+
+Configuration drift is a mismatch between client and server configurations that develops over time. When policies, permissions, or validations change on one side but not the other, inconsistencies emerge. These misalignments create persistent gaps that attackers can exploit to bypass security controls [( Jing et al. , [2025](#bib.bib33) )] .
+
+
+
+## References
+
+- AIM Intelligence (2025) AIM-Guard-MCP: AI-powered security guard for model context protocol Note: MCP security middleware providing prompt injection detection, credential scanning, URL validation, and contextual AI safety guards External Links: [Link](https://github.com/AIM-Intelligence/AIM-MCP) Cited by: [§2.3](#S2.SS3.p2.1) , [§4.5.12](#S4.SS5.SSS12.p2.1) .
+- Z. Anbiaee, M. Rabbani, M. Mirani, G. Piya, I. Opushnyev, A. Ghorbani, and S. Dadkhah (2026) Security threat modeling for emerging AI-agent protocols: a comparative analysis of MCP, A2A, Agora, and ANP . arXiv . External Links: 2602.11327 , [Document](https://dx.doi.org/10.48550/arXiv.2602.11327) , [Link](https://doi.org/10.48550/arXiv.2602.11327) Cited by: [Appendix A](#A1.SS0.SSS0.Px39.p1.1) .
+- Anthropic (2024) Introducing the model context protocol . Note: [https://www.anthropic.com/news/model-context-protocol](https://www.anthropic.com/news/model-context-protocol) Accessed: 2026-01-27 Cited by: [§1](#S1.p1.1) .
+- J. R. Asl, S. Narula, M. Ghasemigol, E. Blanco, and D. Takabi (2025) NEXUS: network exploration for eXploiting unsafe sequences in multi-turn LLM jailbreaks . In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing (EMNLP) , pp. 24278–24306 . Cited by: [Appendix A](#A1.SS0.SSS0.Px17.p1.1) .
+- C. Bühler, M. Biagiola, L. Di Grazia, and G. Salvaneschi (2025) Securing AI agent execution . arXiv . External Links: 2510.21236 , [Document](https://dx.doi.org/10.48550/arXiv.2510.21236) , [Link](https://doi.org/10.48550/arXiv.2510.21236) Cited by: [§2.3](#S2.SS3.p1.1) .
+- Cisco AI Defense (2025) MCP Scanner: security analysis for model context protocol artifacts . Note: [https://github.com/cisco-ai-defense/mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) Accessed: 2025 Cited by: [§2.3](#S2.SS3.p2.1) , [§4.5.10](#S4.SS5.SSS10.p1.1) .
+- eqtylab (2025) MCP Guardian: enterprise access control and governance for model context protocol . Note: [https://github.com/eqtylab/mcp-guardian](https://github.com/eqtylab/mcp-guardian) Accessed: 2025 Cited by: [§2.3](#S2.SS3.p2.1) , [§4.5.8](#S4.SS5.SSS8.p1.1) .
+- H. Errico, J. Ngiam, and S. Sojan (2025) Securing the model context protocol (MCP): risks, controls, and governance . arXiv . External Links: 2511.20920 , [Document](https://dx.doi.org/10.48550/arXiv.2511.20920) , [Link](https://doi.org/10.48550/arXiv.2511.20920) Cited by: [Appendix A](#A1.SS0.SSS0.Px1.p1.1) , [Appendix A](#A1.SS0.SSS0.Px50.p1.1) , [Appendix A](#A1.SS0.SSS0.Px7.p1.1) , [§1](#S1.p1.1) , [§2.2](#S2.SS2.p1.1) , [§2.3](#S2.SS3.p1.1) , [§3.5](#S3.SS5.p2.1) .
+- A. Eslami and J. Yu (2025) Security risks of agentic vehicles: a systematic analysis of cognitive and cross-layer threats . arXiv . External Links: 2512.17041 , [Document](https://dx.doi.org/10.48550/arXiv.2512.17041) , [Link](https://doi.org/10.48550/arXiv.2512.17041) Cited by: [Appendix A](#A1.SS0.SSS0.Px40.p1.1) .
+- J. Fang, Z. Yao, R. Wang, H. Ma, X. Wang, and T. Chua (2025) We should identify and mitigate third-party safety risks in MCP-powered agent systems . arXiv . External Links: 2506.13666 , [Document](https://dx.doi.org/10.48550/arXiv.2506.13666) , [Link](https://doi.org/10.48550/arXiv.2506.13666) Cited by: [§1](#S1.p4.1) , [§2.2](#S2.SS2.p2.1) , [§2.3](#S2.SS3.p1.1) .
+- S. Gaire, S. Gyawali, S. Mishra, S. Niroula, D. Thakur, and U. Yadav (2025) Systematization of knowledge: security and safety in the model context protocol ecosystem . arXiv . External Links: 2512.08290 , [Document](https://dx.doi.org/10.48550/arXiv.2512.08290) , [Link](https://doi.org/10.48550/arXiv.2512.08290) Cited by: [Appendix A](#A1.SS0.SSS0.Px50.p1.1) .
+- T. Gasmi, R. Guesmi, I. Belhadj, and J. Bennaceur (2025) Bridging AI and software security: a comparative vulnerability assessment of LLM agent deployment paradigms . arXiv . External Links: 2507.06323 , [Document](https://dx.doi.org/10.48550/arXiv.2507.06323) , [Link](https://doi.org/10.48550/arXiv.2507.06323) Cited by: [Appendix A](#A1.SS0.SSS0.Px13.p1.1) , [Appendix A](#A1.SS0.SSS0.Px20.p1.1) .
+- S. Ghosh, B. Simkin, K. Shiarlis, S. Nandi, D. Zhao, M. Fiedler, J. Bazinska, N. Pope, R. Prabhu, D. Rohrer, and M. Demoret (2025) A safety and security framework for real-world agentic systems . arXiv . External Links: 2511.21990 , [Document](https://dx.doi.org/10.48550/arXiv.2511.21990) , [Link](https://doi.org/10.48550/arXiv.2511.21990) Cited by: [Appendix A](#A1.SS0.SSS0.Px40.p1.1) .
+- I. Giurgiu and M. E. Nidd (2025) Supporting dynamic agentic workloads: how data and agents interact . arXiv . External Links: 2512.09548 , [Document](https://dx.doi.org/10.48550/arXiv.2512.09548) , [Link](https://doi.org/10.48550/arXiv.2512.09548) Cited by: [§1](#S1.p1.1) .
+- S. Gulyamov, S. Gulyamov, A. Rodionov, R. Khursanov, K. Mekhmonov, D. Babaev, and A. Rakhimjonov (2026) Prompt injection attacks in large language models and AI agent systems: a comprehensive review of vulnerabilities, attack vectors, and defense mechanisms . Information 17 ( 1 ), pp. 54 . External Links: [Document](https://dx.doi.org/10.3390/info17010054) Cited by: [Appendix A](#A1.SS0.SSS0.Px22.p1.1) .
+- Y. Guo, P. Liu, W. Ma, Z. Deng, X. Zhu, P. Di, X. Xiao, and S. Wen (2025a) Systematic analysis of MCP security . arXiv . External Links: 2508.12538 , [Document](https://dx.doi.org/10.48550/arXiv.2508.12538) , [Link](https://doi.org/10.48550/arXiv.2508.12538) Cited by: [Appendix A](#A1.SS0.SSS0.Px16.p1.1) , [Appendix A](#A1.SS0.SSS0.Px18.p1.1) , [Appendix A](#A1.SS0.SSS0.Px23.p1.1) , [Appendix A](#A1.SS0.SSS0.Px26.p1.1) , [Appendix A](#A1.SS0.SSS0.Px29.p1.1) , [Appendix A](#A1.SS0.SSS0.Px36.p1.1) , [Appendix A](#A1.SS0.SSS0.Px43.p1.1) , [Appendix A](#A1.SS0.SSS0.Px44.p1.1) , [Appendix A](#A1.SS0.SSS0.Px48.p1.1) , [§2.1](#S2.SS1.p2.1) , [§2.2](#S2.SS2.p2.1) , [§2.3](#S2.SS3.p1.1) , [§3.1.2](#S3.SS1.SSS2.p1.1) , [Table 1](#S3.T1.70.64.65.1.5.1.2) , [§3](#S3.p1.1) .
+- Z. Guo, B. Xu, C. Zhu, W. Hong, X. Wang, and Z. Mao (2025b) MCP-AgentBench: evaluating real-world language agent performance with MCP-mediated tools . arXiv . External Links: 2509.09734 , [Document](https://dx.doi.org/10.48550/arXiv.2509.09734) , [Link](https://doi.org/10.48550/arXiv.2509.09734) Cited by: [§2.1](#S2.SS1.p2.1) .
+- M. M. Hasan, H. Li, E. Fallahzadeh, G. K. Rajbahadur, B. Adams, and A. E. Hassan (2025) Model context protocol (MCP) at first glance: studying the security and maintainability of MCP servers . arXiv . External Links: 2506.13538 , [Document](https://dx.doi.org/10.48550/arXiv.2506.13538) , [Link](https://doi.org/10.48550/arXiv.2506.13538) Cited by: [Appendix A](#A1.SS0.SSS0.Px21.p1.1) , [§1](#S1.p2.1) , [§2.3](#S2.SS3.p1.1) , [§2.4](#S2.SS4.p4.1) , [§3.1.5](#S3.SS1.SSS5.p2.1) , [§3.1.6](#S3.SS1.SSS6.p1.1) , [§3](#S3.p1.1) .
+- M. Hatami, V. T. Pham, H. Lakadawala, and Y. Chen (2026) Securing AI agents in cyber-physical systems: a survey of environmental interactions, deepfake threats, and defenses . arXiv . External Links: 2601.20184 , [Document](https://dx.doi.org/10.48550/arXiv.2601.20184) , [Link](https://doi.org/10.48550/arXiv.2601.20184) Cited by: [§2.2](#S2.SS2.p1.1) .
+- X. Hou, Y. Zhao, S. Wang, and H. Wang (2025) Model context protocol (MCP): landscape, security threats, and future research directions . arXiv . External Links: 2503.23278 , [Document](https://dx.doi.org/10.48550/arXiv.2503.23278) , [Link](https://doi.org/10.48550/arXiv.2503.23278) Cited by: [Appendix A](#A1.SS0.SSS0.Px32.p1.1) , [§1](#S1.p1.1) , [§1](#S1.p2.1) , [§1](#S1.p5.1) , [§3.1.3](#S3.SS1.SSS3.p1.1) , [§3.5](#S3.SS5.p2.1) , [§3](#S3.p1.1) .
+- Invariant Labs (2025) MCP-Scan: model context protocol scanner . Note: [https://github.com/invariantlabs-ai/mcp-scan](https://github.com/invariantlabs-ai/mcp-scan) Accessed: 2025 Cited by: [§4.5.1](#S4.SS5.SSS1.p1.1) .
+- S. Jamshidi, K. W. Nafi, A. M. Dakhel, N. Shahabi, F. Khomh, and N. Ezzati-Jivan (2025) Securing the model context protocol: defending LLMs against tool poisoning and adversarial attacks . arXiv . External Links: 2512.06556 , [Document](https://dx.doi.org/10.48550/arXiv.2512.06556) , [Link](https://doi.org/10.48550/arXiv.2512.06556) Cited by: [§4.1](#S4.SS1.p1.1) .
+- H. Jing, H. Li, W. Hu, Q. Hu, H. Xu, T. Chu, P. Hu, and Y. Song (2025) MCIP: protecting MCP safety via model contextual integrity protocol . arXiv . External Links: 2505.14590 , [Document](https://dx.doi.org/10.48550/arXiv.2505.14590) , [Link](https://doi.org/10.48550/arXiv.2505.14590) Cited by: [Appendix A](#A1.SS0.SSS0.Px11.p1.1) , [Appendix A](#A1.SS0.SSS0.Px56.p1.1) , [Appendix A](#A1.SS0.SSS0.Px59.p1.1) , [§1](#S1.p4.1) , [§2.2](#S2.SS2.p2.1) , [§2.3](#S2.SS3.p1.1) , [§2.3](#S2.SS3.p2.1) , [§2.4](#S2.SS4.p4.1) , [§3.5](#S3.SS5.p3.1) , [Table 1](#S3.T1.70.64.65.1.7.1.2) , [§3](#S3.p1.1) , [§4.5.3](#S4.SS5.SSS3.p1.1) .
+- M. A. Jishan, M. W. Allvi, and M. A. K. Rifat (2024) Analyzing user prompt quality: insights from data . In 2024 International Conference on Decision Aid Sciences and Applications (DASA) , pp. 1–5 . Cited by: [§2.2](#S2.SS2.p1.1) .
+- D. Kang, X. Li, I. Stoica, C. Guestrin, M. Zaharia, and T. Hashimoto (2024) Exploiting programmatic behavior of LLMs: dual-use through standard security attacks . In 2024 IEEE Security and Privacy Workshops (SPW) , pp. 132–143 . External Links: [Document](https://dx.doi.org/10.1109/SPW63631.2024.00028) Cited by: [§3.1.2](#S3.SS1.SSS2.p1.1) .
+- Lasso Security (2025) MCP-Gateway: secure proxy and orchestration layer for model context protocol . Note: [https://github.com/lasso-security/mcp-gateway](https://github.com/lasso-security/mcp-gateway) Accessed: 2025 Cited by: [§2.3](#S2.SS3.p2.1) , [§4.5.5](#S4.SS5.SSS5.p1.1) .
+- Y. Lei, J. Xu, C. Liang, Z. Bi, X. Li, D. Zhang, J. Song, and Z. Yu (2025) A comprehensive survey on model context protocol: architecture, tool integration, and the future of AI interoperability . Preprint . Cited by: [§2.2](#S2.SS2.p1.1) .
+- E. Li, H. Du, and K. Huang (2025a) NetMCP: network-aware model context protocol platform for LLM capability extension . arXiv . External Links: 2510.13467 , [Document](https://dx.doi.org/10.48550/arXiv.2510.13467) , [Link](https://doi.org/10.48550/arXiv.2510.13467) Cited by: [Appendix A](#A1.SS0.SSS0.Px25.p1.1) , [§2.2](#S2.SS2.p1.1) .
+- M. Li, Y. Zhao, B. Yu, F. Song, H. Li, H. Yu, Z. Li, F. Huang, and Y. Li (2023) API-Bank: a comprehensive benchmark for tool-augmented LLMs . arXiv . External Links: 2304.08244 , [Document](https://dx.doi.org/10.48550/arXiv.2304.08244) , [Link](https://doi.org/10.48550/arXiv.2304.08244) Cited by: [§2.1](#S2.SS1.p1.1) .
+- R. Li, Z. Wang, Y. Yao, and X. Li (2025b) LeechHijack: covert computational resource exploitation in intelligent agent systems . arXiv . External Links: 2512.02321 , [Document](https://dx.doi.org/10.48550/arXiv.2512.02321) , [Link](https://doi.org/10.48550/arXiv.2512.02321) Cited by: [Appendix A](#A1.SS0.SSS0.Px34.p1.1) .
+- R. Li, Z. Wang, Y. Yao, and X. Li (2026) MCP-ITP: an automated framework for implicit tool poisoning in MCP . arXiv . External Links: 2601.07395 , [Document](https://dx.doi.org/10.48550/arXiv.2601.07395) , [Link](https://doi.org/10.48550/arXiv.2601.07395) Cited by: [Appendix A](#A1.SS0.SSS0.Px2.p1.1) .
+- A. Lotfi, C. Katsis, and E. Bertino (2025) Automated vulnerability validation and verification: a large language model approach . arXiv . External Links: 2509.24037 , [Document](https://dx.doi.org/10.48550/arXiv.2509.24037) , [Link](https://doi.org/10.48550/arXiv.2509.24037) Cited by: [Appendix A](#A1.SS0.SSS0.Px21.p1.1) .
+- S. Mahmud, D. B. Goldfajn, and S. Zilberstein (2025) Distributed multi-agent coordination using multi-modal foundation models . arXiv . External Links: 2501.14189 , [Document](https://dx.doi.org/10.48550/arXiv.2501.14189) , [Link](https://doi.org/10.48550/arXiv.2501.14189) Cited by: [Appendix A](#A1.SS0.SSS0.Px54.p1.1) .
+- N. Maloyan and D. Namiot (2026) Prompt injection attacks on agentic coding assistants: a systematic analysis of vulnerabilities in skills, tools, and protocol ecosystems . arXiv . External Links: 2601.17548 , [Document](https://dx.doi.org/10.48550/arXiv.2601.17548) , [Link](https://doi.org/10.48550/arXiv.2601.17548) Cited by: [Appendix A](#A1.SS0.SSS0.Px50.p1.1) , [Appendix A](#A1.SS0.SSS0.Px51.p1.1) , [§2.2](#S2.SS2.p1.1) .
+- MCP-Defender (2025) MCP-Defender: runtime protection for model context protocol . Note: [https://mcpdefender.com/](https://mcpdefender.com/) Accessed: 2025 Cited by: [§4.5.4](#S4.SS5.SSS4.p1.1) .
+- MCPScan.ai (2025) MCPScan.ai: enterprise model context protocol security platform . Note: [https://mcpscan.ai](https://mcpscan.ai) Accessed: 2025 Cited by: [§4.5.2](#S4.SS5.SSS2.p1.1) .
+- Model Context Protocol (2025) Model context protocol specification (version 2025-11-25) . Note: [https://modelcontextprotocol.io/specification/2025-11-25](https://modelcontextprotocol.io/specification/2025-11-25) Accessed: 2026-01-27 Cited by: [§1](#S1.p1.1) , [§1](#S1.p2.1) .
+- L. Ouyang, J. Wu, X. Jiang, D. Almeida, C. Wainwright, P. Mishkin, C. Zhang, S. Agarwal, K. Slama, A. Ray, and J. Schulman (2022) Training language models to follow instructions with human feedback . Advances in Neural Information Processing Systems 35 , pp. 27730–27744 . External Links: [Link](https://arxiv.org/abs/2203.02155) Cited by: [§3.1.1](#S3.SS1.SSS1.p1.1) .
+- OWASP Foundation (2024) OWASP top 10 for large language model applications . Note: [https://owasp.org/www-project-top-10-for-large-language-model-applications/](https://owasp.org/www-project-top-10-for-large-language-model-applications/) Accessed: 2026-01-27 Cited by: [Appendix A](#A1.SS0.SSS0.Px40.p1.1) .
+- OWASP Foundation (2025) AIVSS: scoring system for OWASP agentic AI core security risks . Technical report Open Worldwide Application Security Project (OWASP) . Note: v0.5 External Links: [Link](https://aivss.owasp.org/assets/publications/AIVSS%20Scoring%20System%20For%20OWASP%20Agentic%20AI%20Core%20Security%20Risks%20v0.5.pdf) Cited by: [Appendix A](#A1.SS0.SSS0.Px19.p1.1) , [Appendix A](#A1.SS0.SSS0.Px3.p1.1) , [Appendix A](#A1.SS0.SSS0.Px34.p1.1) .
+- B. Radosevich and J. Halloran (2025) MCP safety audit: LLMs with the model context protocol allow major security exploits . arXiv . External Links: 2504.03767 , [Document](https://dx.doi.org/10.48550/arXiv.2504.03767) , [Link](https://doi.org/10.48550/arXiv.2504.03767) Cited by: [Appendix A](#A1.SS0.SSS0.Px10.p1.1) , [Appendix A](#A1.SS0.SSS0.Px12.p1.1) , [Appendix A](#A1.SS0.SSS0.Px15.p1.1) , [Appendix A](#A1.SS0.SSS0.Px16.p1.1) , [Appendix A](#A1.SS0.SSS0.Px27.p1.1) , [Appendix A](#A1.SS0.SSS0.Px30.p1.1) .
+- S. R. Rayarao and N. Donikena (2025) Bridging AI and external systems: a comprehensive analysis of the model context protocol (MCP) . arXiv . Note: Preprint Cited by: [§2.2](#S2.SS2.p1.1) , [§3.1.4](#S3.SS1.SSS4.p1.1) .
+- Rise and Ignite (2025) MCP-Shield: security scanner for model context protocol servers . Note: [https://github.com/riseandignite/mcp-shield](https://github.com/riseandignite/mcp-shield) Accessed: 2025 Cited by: [§4.5.11](#S4.SS5.SSS11.p1.1) .
+- G. Shen, S. Cheng, Z. Zhang, G. Tao, K. Zhang, H. Guo, L. Yan, X. Jin, S. An, S. Ma, and X. Zhang (2025) BAIT: large language model backdoor scanning by inverting attack target . In 2025 IEEE Symposium on Security and Privacy (SP) , pp. 1676–1694 . External Links: [Link](https://ieeexplore.ieee.org/document/10503406) Cited by: [§3.1.1](#S3.SS1.SSS1.p1.1) .
+- M. L. Siddiq, T. H. Romel, N. Sekerak, B. Casey, and J. Santos (2026) An empirical study on remote code execution in machine learning model hosting ecosystems . arXiv . External Links: 2601.14163 , [Document](https://dx.doi.org/10.48550/arXiv.2601.14163) , [Link](https://doi.org/10.48550/arXiv.2601.14163) Cited by: [Appendix A](#A1.SS0.SSS0.Px15.p1.1) .
+- H. Song, Y. Shen, W. Luo, L. Guo, T. Chen, J. Wang, B. Li, X. Zhang, and J. Chen (2025) Beyond the protocol: unveiling attack vectors in the model context protocol ecosystem . arXiv . External Links: 2506.02040 , [Document](https://dx.doi.org/10.48550/arXiv.2506.02040) , [Link](https://doi.org/10.48550/arXiv.2506.02040) Cited by: [Appendix A](#A1.SS0.SSS0.Px10.p1.1) , [Appendix A](#A1.SS0.SSS0.Px12.p1.1) , [Appendix A](#A1.SS0.SSS0.Px28.p1.1) , [Appendix A](#A1.SS0.SSS0.Px7.p1.1) , [§2.3](#S2.SS3.p1.1) , [§2.4](#S2.SS4.p2.1) , [§3.5](#S3.SS5.p2.1) , [§3](#S3.p1.1) .
+- Stacklok (2025) ToolHive: simplify and secure model context protocol servers . Note: [https://docs.stacklok.com/toolhive/](https://docs.stacklok.com/toolhive/) Accessed: 2025 Cited by: [§3](#S3.p1.1) , [§4.5.6](#S4.SS5.SSS6.p1.1) .
+- M. Styer, K. Patlolla, M. Mohan, and S. Diaz (2025) Agent tools & interoperability with MCP . Note: [https://www.kaggle.com/whitepaper-agent-tools-and-interoperability-with-mcp](https://www.kaggle.com/whitepaper-agent-tools-and-interoperability-with-mcp) Accessed: Nov. 13, 2025 Cited by: [Appendix A](#A1.SS0.SSS0.Px6.p1.1) .
+- Z. Tan, R. Hao, J. Singer, Y. Tang, and C. Anagnostopoulos (2026) MCP-SandboxScan: WASM-based secure execution and runtime analysis for MCP tools . arXiv . External Links: 2601.01241 , [Document](https://dx.doi.org/10.48550/arXiv.2601.01241) , [Link](https://doi.org/10.48550/arXiv.2601.01241) Cited by: [§2.2](#S2.SS2.p1.1) , [§3.1.4](#S3.SS1.SSS4.p1.1) .
+- K. Thirumalaisamy, M. Konakalla, and D. K. Devamanoharan (2025) AI MCP servers in cybersecurity: emerging attack vectors and mitigation strategies . In AI MCP Servers in Cybersecurity: Emerging Attack Vectors and Mitigation Strategies , Bothell, Washington, USA . External Links: [Document](https://dx.doi.org/10.5281/zenodo.17931691) Cited by: [§2.2](#S2.SS2.p1.1) , [§2.3](#S2.SS3.p1.1) , [§3.1.4](#S3.SS1.SSS4.p1.1) .
+- H. Wang, C. Qian, M. Li, J. Qiu, B. Xue, M. Wang, H. Ji, A. Storkey, and K.-F. Wong (2025a) Position: agent should invoke external tools ONLY when epistemically necessary . arXiv . External Links: 2506.00886 , [Document](https://dx.doi.org/10.48550/arXiv.2506.00886) , [Link](https://doi.org/10.48550/arXiv.2506.00886) Cited by: [§1](#S1.p1.1) .
+- L. Wang, C. Ma, X. Feng, Z. Zhang, H. Yang, J. Zhang, Z. Chen, J. Tang, X. Chen, Y. Lin, and W. Zhao (2024) A survey on large language model based autonomous agents . Frontiers of Computer Science 18 ( 6 ), pp. 186345 . Cited by: [§2.1](#S2.SS1.p1.1) .
+- Z. Wang, Y. Gao, Y. Wang, S. Liu, H. Sun, H. Cheng, G. Shi, H. Du, and X. Li (2025b) MCPTox: a benchmark for tool poisoning attack on real-world MCP servers . arXiv . External Links: 2508.14925 , [Document](https://dx.doi.org/10.48550/arXiv.2508.14925) , [Link](https://doi.org/10.48550/arXiv.2508.14925) Cited by: [Appendix A](#A1.SS0.SSS0.Px1.p1.1) , [§1](#S1.p3.1) , [§2.2](#S2.SS2.p2.1) , [§2.4](#S2.SS4.p3.1) .
+- Z. Wang, J. Zhang, G. Shi, H. Cheng, Y. Yao, K. Guo, H. Du, and X. Li (2025c) MINDGUARD: tracking, detecting, and attributing MCP tool poisoning attack via decision dependence graph . arXiv . External Links: 2508.20412 , [Document](https://dx.doi.org/10.48550/arXiv.2508.20412) , [Link](https://doi.org/10.48550/arXiv.2508.20412) Cited by: [§2.3](#S2.SS3.p2.1) , [§4.4](#S4.SS4.p1.1) , [§4.5.9](#S4.SS5.SSS9.p1.1) .
+- Z. Wang, R. Zhang, Y. Liu, W. Fan, W. Jiang, Q. Zhao, H. Li, and G. Xu (2025d) MPMA: preference manipulation attack against model context protocol . arXiv . External Links: 2505.11154 , [Document](https://dx.doi.org/10.48550/arXiv.2505.11154) , [Link](https://doi.org/10.48550/arXiv.2505.11154) Cited by: [Appendix A](#A1.SS0.SSS0.Px5.p1.1) .
+- J. Wei, N. Haghtalab, J. Steinhardt, and J. Zou (2023) Jailbroken: how does LLM safety training fail? . arXiv . External Links: 2307.02483 , [Document](https://dx.doi.org/10.48550/arXiv.2307.02483) , [Link](https://doi.org/10.48550/arXiv.2307.02483) Cited by: [§3.1.2](#S3.SS1.SSS2.p1.1) .
+- Z. Wu, X. Liu, X. Zhang, L. Chen, F. Meng, L. Du, Y. Zhao, et al. (2025) MCPMark: a benchmark for stress-testing realistic and comprehensive MCP use . arXiv . External Links: 2509.24002 , [Document](https://dx.doi.org/10.48550/arXiv.2509.24002) , [Link](https://doi.org/10.48550/arXiv.2509.24002) Cited by: [§2.1](#S2.SS1.p2.1) , [§2.3](#S2.SS3.p1.1) .
+- W. Xing, Z. Qi, Y. Qin, Y. Li, C. Chang, J. Yu, C. Lin, Z. Xie, and M. Han (2025) MCP-Guard: a multi-stage defense-in-depth framework for securing model context protocol in agentic AI . arXiv . External Links: 2508.10991 , [Document](https://dx.doi.org/10.48550/arXiv.2508.10991) , [Link](https://doi.org/10.48550/arXiv.2508.10991) Cited by: [Appendix A](#A1.SS0.SSS0.Px1.p1.1) , [§1](#S1.p4.1) , [§2.3](#S2.SS3.p2.1) , [§3.1.3](#S3.SS1.SSS3.p1.1) , [§3.5](#S3.SS5.p3.1) , [§4.3](#S4.SS3.p1.1) , [§4.5.7](#S4.SS5.SSS7.p1.1) .
+- L. Yan, J. Mei, T. Zhou, L. Huang, J. Zhang, D. Liu, and J. Shao (2025) TradeTrap: are LLM-based trading agents truly reliable and faithful? . arXiv . External Links: 2512.02261 , [Document](https://dx.doi.org/10.48550/arXiv.2512.02261) , [Link](https://doi.org/10.48550/arXiv.2512.02261) Cited by: [Appendix A](#A1.SS0.SSS0.Px24.p1.1) .
+- K. Yang, G. Tao, X. Chen, and J. Xu (2025a) Alleviating the fear of losing alignment in LLM fine-tuning . In 2025 IEEE Symposium on Security and Privacy (SP) , pp. 2152–2170 . External Links: [Link](https://ieeexplore.ieee.org/document/10503431) Cited by: [§3.1.1](#S3.SS1.SSS1.p1.1) .
+- W. Yang, X. Bi, Y. Lin, S. Chen, J. Zhou, and X. Sun (2024) Watch out for your agents! investigating backdoor threats to LLM-based agents . Advances in Neural Information Processing Systems 37 , pp. 100938–100964 . Cited by: [Appendix A](#A1.SS0.SSS0.Px48.p1.1) .
+- Y. Yang, D. Wu, and Y. Chen (2025b) MCPSecBench: a systematic security benchmark and playground for testing model context protocols . arXiv . External Links: 2508.13220 , [Document](https://dx.doi.org/10.48550/arXiv.2508.13220) , [Link](https://doi.org/10.48550/arXiv.2508.13220) Cited by: [Appendix A](#A1.SS0.SSS0.Px20.p1.1) , [Appendix A](#A1.SS0.SSS0.Px21.p1.1) , [Appendix A](#A1.SS0.SSS0.Px31.p1.1) , [Appendix A](#A1.SS0.SSS0.Px57.p1.1) , [Appendix A](#A1.SS0.SSS0.Px8.p1.1) , [Appendix A](#A1.SS0.SSS0.Px9.p1.1) , [§1](#S1.p3.1) , [§1](#S1.p5.1) , [§2.4](#S2.SS4.p3.1) , [§3.1.4](#S3.SS1.SSS4.p1.1) , [§3.1.5](#S3.SS1.SSS5.p2.1) , [Table 1](#S3.T1.70.64.65.1.2.1.2) , [§3](#S3.p1.1) , [§3](#S3.p2.1) .
+- S. Yao et al. (2023) ReAct: synergizing reasoning and acting in language models . arXiv . External Links: 2210.03629 , [Document](https://dx.doi.org/10.48550/arXiv.2210.03629) , [Link](https://doi.org/10.48550/arXiv.2210.03629) Cited by: [§2.1](#S2.SS1.p1.1) .
+- C. Yu, Z. Cheng, H. Cui, Y. Gao, Z. Luo, Y. Wang, H. Zheng, and Y. Zhao (2025) A survey on agent workflow—status and future . In 2025 8th International Conference on Artificial Intelligence and Big Data (ICAIBD) , pp. 770–781 . Cited by: [Appendix A](#A1.SS0.SSS0.Px39.p1.1) .
+- D. Zhang, Z. Li, X. Luo, X. Liu, P. Li, and W. Xu (2025) MCP Security Bench (MSB): benchmarking attacks against model context protocol in LLM agents . arXiv . External Links: 2510.15994 , [Document](https://dx.doi.org/10.48550/arXiv.2510.15994) , [Link](https://doi.org/10.48550/arXiv.2510.15994) Cited by: [§1](#S1.p2.1) , [§1](#S1.p3.1) , [§2.4](#S2.SS4.p3.1) , [Table 1](#S3.T1.70.64.65.1.3.1.2) .
+- S. Zhao, Q. Hou, Z. Zhan, Y. Wang, Y. Xie, Y. Guo, L. Chen, S. Li, and Z. Xue (2025a) Mind your server: a systematic study of parasitic toolchain attacks on the MCP ecosystem . arXiv . External Links: 2509.06572 , [Document](https://dx.doi.org/10.48550/arXiv.2509.06572) , [Link](https://doi.org/10.48550/arXiv.2509.06572) Cited by: [Appendix A](#A1.SS0.SSS0.Px10.p1.1) , [Appendix A](#A1.SS0.SSS0.Px12.p1.1) , [Appendix A](#A1.SS0.SSS0.Px27.p1.1) , [Appendix A](#A1.SS0.SSS0.Px28.p1.1) , [Appendix A](#A1.SS0.SSS0.Px33.p1.1) .
+- W. Zhao, J. Liu, B. Ruan, S. Li, and Z. Liang (2025b) When MCP servers attack: taxonomy, feasibility, and mitigation . arXiv . External Links: 2509.24272 , [Document](https://dx.doi.org/10.48550/arXiv.2509.24272) , [Link](https://doi.org/10.48550/arXiv.2509.24272) Cited by: [Appendix A](#A1.SS0.SSS0.Px35.p1.1) , [Appendix A](#A1.SS0.SSS0.Px37.p1.1) , [Appendix A](#A1.SS0.SSS0.Px38.p1.1) , [Appendix A](#A1.SS0.SSS0.Px41.p1.1) , [Appendix A](#A1.SS0.SSS0.Px42.p1.1) , [Appendix A](#A1.SS0.SSS0.Px45.p1.1) , [Appendix A](#A1.SS0.SSS0.Px46.p1.1) , [Appendix A](#A1.SS0.SSS0.Px47.p1.1) , [Appendix A](#A1.SS0.SSS0.Px49.p1.1) , [Appendix A](#A1.SS0.SSS0.Px52.p1.1) , [Appendix A](#A1.SS0.SSS0.Px53.p1.1) , [Appendix A](#A1.SS0.SSS0.Px55.p1.1) , [§1](#S1.p3.1) , [§2.4](#S2.SS4.p2.1) , [Table 1](#S3.T1.70.64.65.1.6.1.2) , [§3](#S3.p1.1) , [§3](#S3.p2.1) .
+- P. Zhu, Z. Zhou, Y. Zhang, S. Yan, K. Wang, and S. Su (2025) DemonAgent: dynamically encrypted multi-backdoor implantation attack on LLM-based agent . arXiv . External Links: 2502.12575 , [Document](https://dx.doi.org/10.48550/arXiv.2502.12575) , [Link](https://doi.org/10.48550/arXiv.2502.12575) Cited by: [Appendix A](#A1.SS0.SSS0.Px48.p1.1) .
+- X. Zong, Z. Shen, L. Wang, Y. Lan, and C. Yang (2025) MCP-SafetyBench: a benchmark for safety evaluation of large language models with real-world MCP servers . arXiv . External Links: 2512.15163 , [Document](https://dx.doi.org/10.48550/arXiv.2512.15163) , [Link](https://doi.org/10.48550/arXiv.2512.15163) Cited by: [Appendix A](#A1.SS0.SSS0.Px14.p1.1) , [Appendix A](#A1.SS0.SSS0.Px16.p1.1) , [Appendix A](#A1.SS0.SSS0.Px4.p1.1) , [Appendix A](#A1.SS0.SSS0.Px5.p1.1) , [Appendix A](#A1.SS0.SSS0.Px58.p1.1) , [§1](#S1.p3.1) , [§2.1](#S2.SS1.p2.1) , [§2.2](#S2.SS2.p2.1) , [§2.3](#S2.SS3.p1.1) , [§2.4](#S2.SS4.p4.1) , [Table 1](#S3.T1.70.64.65.1.4.1.2) .
+
+
+Experimental support, please [view the build logs](./2604.07551v1/__stdout.txt) for errors. Generated by [L A T E xml ![[LOGO]](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==)
+](https://math.nist.gov/~BMiller/LaTeXML/) .
+
+
+## Instructions for reporting errors
+
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the methods listed below:
+
+- Click the "Report Issue" ( ) button, located in the page header.
+
+**Tip:** You can select the relevant text first, to include it in your report.
+
+Our team has already identified [the following issues](https://github.com/arXiv/html_feedback/issues) . We appreciate your time reviewing and reporting rendering errors we may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability should not be a barrier to accessing research. Thank you for your continued support in championing open access for all.
+
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a [list of packages that need conversion](https://github.com/brucemiller/LaTeXML/wiki/Porting-LaTeX-packages-for-LaTeXML) , and welcome [developer contributions](https://github.com/brucemiller/LaTeXML/issues) .
+
+
+
+BETA
+ [!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.](javascript:toggleReadingMode();)
