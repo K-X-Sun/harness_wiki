@@ -146,11 +146,12 @@ Read `$ARGUMENTS[0..]`. Detect dimension and topic:
 - `--all-dimensions`  → Search all four dimensions (Memory + Skills + Protocols + Harness)
 - `--limit=N`         → Max results per dimension (default: 60 for all modes)
 - `--since=YYYY-MM-DD` → Only include results created/published after this date (default: 2026-01-01)
+- `--ratio=A:G:O`     → Source distribution ratio Articles:GitHub:Other (default: 3:5:2)
 
 **Default behavior** (no flags specified):
 - Sources: Web + arXiv + GitHub (same as --all)
 - Limit: 60 per dimension
-- Source distribution: Articles:GitHub:Other = 3:4:3 (~18:24:18 results)
+- Source distribution: Articles:GitHub:Other = 3:5:2 (~18:30:12 results)
 - Date filter: created/published since 2026-01-01
 
 **Special handling for `--all-dimensions`**:
@@ -225,34 +226,52 @@ for query in all_queries:
 
 ### Source Distribution Strategy
 
-**Target ratio**: Articles : GitHub : Other = **3 : 4 : 3**
+**Default ratio**: Articles : GitHub : Other = **3 : 5 : 2** (30% : 50% : 20%)
 
-For default `--limit=60`:
+**User can customize with `--ratio=A:G:O`**
+
+For default `--limit=60` and `--ratio=3:5:2`:
 
 | Source Type | Target % | Target Count | Description |
 |-------------|----------|--------------|-------------|
 | **arXiv Papers** | 15% | ~9 | Academic papers from arXiv.org |
 | **Web Articles** | 15% | ~9 | Blog posts, technical articles |
-| **GitHub Repos** | 40% | ~24 | Open-source repositories |
-| **Web Other** | 30% | ~18 | Docs, news, guides, tutorials |
-| **Total** | 100% | **60** | Balanced mix |
+| **GitHub Repos** | 50% | ~30 | Open-source repositories |
+| **Web Other** | 20% | ~12 | Docs, news, guides, tutorials |
+| **Total** | 100% | **60** | Code-focused mix |
 
 **Execution strategy**:
 
 ```python
-total_limit = 60  # default, or user-specified via --limit
+# Parse --ratio flag
+import re
+ratio_match = re.search(r'--ratio=(\d+):(\d+):(\d+)', arguments)
+if ratio_match:
+    ratio_articles, ratio_github, ratio_other = map(int, ratio_match.groups())
+else:
+    ratio_articles, ratio_github, ratio_other = 3, 5, 2  # default
 
-# Calculate per-source sub-limits
-arxiv_limit = int(total_limit * 0.15)       # ~9
-web_article_limit = int(total_limit * 0.15) # ~9
-github_limit = int(total_limit * 0.40)      # ~24
-web_other_limit = int(total_limit * 0.30)   # ~18
+# Calculate percentages
+total_ratio = ratio_articles + ratio_github + ratio_other  # 3+5+2 = 10
+pct_articles = ratio_articles / total_ratio  # 3/10 = 0.30
+pct_github = ratio_github / total_ratio      # 5/10 = 0.50
+pct_other = ratio_other / total_ratio        # 2/10 = 0.20
+
+# Apply to limit
+total_limit = 60  # default or user-specified via --limit
+articles_limit = int(total_limit * pct_articles)  # ~18 (30%)
+github_limit = int(total_limit * pct_github)      # ~30 (50%)
+other_limit = int(total_limit * pct_other)        # ~12 (20%)
+
+# Split articles equally between arXiv and web
+arxiv_limit = articles_limit // 2           # ~9 (15%)
+web_article_limit = articles_limit // 2     # ~9 (15%)
 
 # Execute searches with priority scoring within each source
 arxiv_results = search_arxiv(queries, limit=arxiv_limit)
 github_results = search_github(queries, limit=github_limit)
 web_article_results = search_web(queries, type='article', limit=web_article_limit)
-web_other_results = search_web(queries, type='other', limit=web_other_limit)
+web_other_results = search_web(queries, type='other', limit=other_limit)
 
 # Combine and deduplicate
 all_results = arxiv_results + github_results + web_article_results + web_other_results
@@ -263,16 +282,25 @@ sorted_results = sort_by_priority(unique_results)
 final_results = sorted_results[:total_limit]
 ```
 
-**Override behavior**:
-- `--arxiv` flag: 100% arXiv papers (ignores ratio)
-- `--github` flag: 100% GitHub repos (ignores ratio)
-- Custom `--limit=N`: Ratio maintained, scales proportionally
+**Custom ratio examples**:
 
-**Example with --limit=30**:
-- arXiv: 30 × 0.15 = ~5 papers
-- GitHub: 30 × 0.40 = ~12 repos
-- Web articles: 30 × 0.15 = ~4 articles
-- Web other: 30 × 0.30 = ~9 other sources
+| Ratio Flag | Articles % | GitHub % | Other % | Use Case |
+|------------|------------|----------|---------|----------|
+| `--ratio=3:5:2` (default) | 30% | 50% | 20% | Code-focused (default) |
+| `--ratio=5:3:2` | 50% | 30% | 20% | Research-focused |
+| `--ratio=2:6:2` | 20% | 60% | 20% | Implementation-focused |
+| `--ratio=4:4:2` | 40% | 40% | 20% | Balanced mix |
+| `--ratio=1:8:1` | 10% | 80% | 10% | Pure code exploration |
+
+**Example with --limit=60 --ratio=5:3:2** (research-focused):
+- Articles: 60 × 0.50 = 30 (arXiv: 15, web: 15)
+- GitHub: 60 × 0.30 = 18 repos
+- Other: 60 × 0.20 = 12 sources
+
+**Override behavior**:
+- `--arxiv` flag: 100% arXiv papers (ignores --ratio)
+- `--github` flag: 100% GitHub repos (ignores --ratio)
+- Custom `--limit=N`: Ratio maintained, scales proportionally
 
 ---
 
