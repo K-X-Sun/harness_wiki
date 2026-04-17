@@ -36,6 +36,89 @@ Procedure for `/web-discovery <dimension> <topic>` focused on Memory, Skills, Pr
 
 ---
 
+## Special Mode: All-Dimensions Search
+
+When `--all-dimensions` flag is detected:
+
+### Execution Flow
+
+```
+User input: /web-discovery "AI coding agents" --all-dimensions --limit=30
+                                                ↓
+                          Parse and detect --all-dimensions flag
+                                                ↓
+                          ┌─────────────────────────────────────┐
+                          │ Execute 4 dimension searches        │
+                          ├─────────────────────────────────────┤
+                          │ 1. Memory dimension (15 queries)    │
+                          │    → Collect up to 30 results       │
+                          │ 2. Skills dimension (18 queries)    │
+                          │    → Collect up to 30 results       │
+                          │ 3. Protocols dimension (18 queries) │
+                          │    → Collect up to 30 results       │
+                          │ 4. Harness dimension (50 queries)   │
+                          │    → Collect up to 30 results       │
+                          └─────────────────────────────────────┘
+                                                ↓
+                          Deduplicate by repo full_name
+                          (total unique: ~80-100 repos)
+                                                ↓
+                          Calculate priority scores for all
+                          (temporal_tier - star_growth_rate/100)
+                                                ↓
+                          Sort by priority (lower = better)
+                                                ↓
+                          Download top 30 × 4 = 120 results
+                          (or use --limit=N to control)
+                                                ↓
+                          Save to raw/web/ with dimension tags
+```
+
+### Key Differences from Single-Dimension Mode
+
+| Aspect | Single Dimension | All-Dimensions Mode |
+|--------|------------------|---------------------|
+| Queries executed | 15-50 (one dimension) | 101 total (15+18+18+50) |
+| API calls | 45-150 | ~300 (101 queries × 3 sorts) |
+| Results collected | --limit=N | --limit=N per dimension → N×4 total |
+| Deduplication | Within dimension | Across all dimensions |
+| Priority scoring | Within dimension | Global across all dimensions |
+| Download location | `raw/web/` | `raw/web/` (with dimension tag) |
+
+### Implementation Notes
+
+1. **Limit behavior**: `--limit=30` means "30 per dimension", yielding ~120 total before dedup
+2. **Deduplication**: Cross-dimension dedup happens AFTER collecting from all dimensions
+3. **Priority scoring**: Calculated globally across all results, not per-dimension
+4. **Frontmatter**: Each file gets a `dimension` field (memory/skills/protocols/harness)
+5. **Execution time**: ~20-30 minutes (300 API calls at 30/min with auth token)
+
+### Example Execution
+
+```bash
+# User command
+/web-discovery "AI coding agents" --all-dimensions --limit=25
+
+# Internal execution
+Search memory dimension: 15 queries × 3 sorts → 45 calls → collect top 25
+Search skills dimension: 18 queries × 3 sorts → 54 calls → collect top 25
+Search protocols dimension: 18 queries × 3 sorts → 54 calls → collect top 25
+Search harness dimension: 50 queries × 3 sorts → 150 calls → collect top 25
+
+# Results before dedup: ~100 repos (25×4)
+# Results after dedup: ~75-85 unique repos
+# Apply global priority scoring
+# Download top 75-85 to raw/web/
+
+# Output files:
+raw/web/2026-04-17_github_anthropics-mem0.md (dimension: memory)
+raw/web/2026-04-17_github_modelcontextprotocol-servers.md (dimension: protocols)
+raw/web/2026-04-17_github_Yeachan-Heo-oh-my-claudecode.md (dimension: harness)
+...
+```
+
+---
+
 ## Steps
 
 ### 1. Parse search intent
@@ -53,13 +136,23 @@ Read `$ARGUMENTS[0..]`. Detect dimension and topic:
 - `skills` → Skills dimension queries
 - `protocols` → Protocols dimension queries
 - `harness` → Harness dimension queries
+- `--all-dimensions` flag present → Execute all four dimensions sequentially
 - (none) → Cross-cutting search
 
 **Flags**:
-- `--arxiv`    → arXiv only
-- `--github`   → GitHub only
-- `--all`      → Web + arXiv + GitHub (default)
-- `--limit=N`  → Max results (default: 10)
+- `--arxiv`           → arXiv only
+- `--github`          → GitHub only
+- `--all`             → Web + arXiv + GitHub (default)
+- `--all-dimensions`  → Search all four dimensions (Memory + Skills + Protocols + Harness)
+- `--limit=N`         → Max results per dimension (default: 10)
+
+**Special handling for `--all-dimensions`**:
+When `--all-dimensions` flag is present:
+1. Ignore any dimension keyword in arguments
+2. Execute searches for all four dimensions sequentially
+3. Apply `--limit=N` to EACH dimension (total results = N × 4)
+4. Collect results from all dimensions into a single priority-sorted list
+5. Save all results to `raw/web/` with dimension tag in frontmatter
 
 Strip flags. If topic is empty after removing dimension/flags, use dimension-specific default topic.
 

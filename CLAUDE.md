@@ -21,7 +21,12 @@ The goal is to maintain a structured, cross-referenced knowledge base tracking n
 Three layers:
 
 - `raw/` — **Immutable source documents. Source of truth. Never modify files here.** Papers, docs, repo READMEs, protocol specs. The LLM reads from raw/ but never writes to it.
-- `raw/assets/` — Downloaded images and attachments.
+  - `raw/memory/` — Memory dimension sources (full-text markdown)
+  - `raw/skills/` — Skills dimension sources (full-text markdown)
+  - `raw/protocols/` — Protocols dimension sources (full-text markdown)
+  - `raw/harness/` — Harness dimension sources (full-text markdown)
+  - `raw/web/` — Cross-cutting sources (no specific dimension)
+  - `raw/*/assets/` — Downloaded images and attachments per dimension
 - `wiki/` — LLM-maintained markdown pages. The LLM owns this layer entirely. You read it; the LLM writes it.
   - `wiki/index.md` — Content catalog. Update on every ingest, query (when filing), and lint.
   - `wiki/log.md` — Append-only chronological log. Records every ingest, query, and lint pass.
