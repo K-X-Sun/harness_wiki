@@ -140,11 +140,17 @@ Read `$ARGUMENTS[0..]`. Detect dimension and topic:
 - (none) → Cross-cutting search
 
 **Flags**:
-- `--arxiv`           → arXiv only
-- `--github`          → GitHub only
-- `--all`             → Web + arXiv + GitHub (default)
+- `--arxiv`           → arXiv only (overrides default --all)
+- `--github`          → GitHub only (overrides default --all)
+- `--all`             → Web + arXiv + GitHub **[DEFAULT - no flag needed]**
 - `--all-dimensions`  → Search all four dimensions (Memory + Skills + Protocols + Harness)
-- `--limit=N`         → Max results per dimension (default: 10)
+- `--limit=N`         → Max results per dimension (default: 50 for single dimension, 150 for --all-dimensions)
+- `--since=YYYY-MM-DD` → Only include results created/published after this date (default: 2026-01-01)
+
+**Default behavior** (no flags specified):
+- Sources: Web + arXiv + GitHub (same as --all)
+- Limit: 50 (single dimension) or 150 (--all-dimensions)
+- Date filter: created/published since 2026-01-01
 
 **Special handling for `--all-dimensions`**:
 When `--all-dimensions` flag is present:
@@ -156,13 +162,71 @@ When `--all-dimensions` flag is present:
 
 Strip flags. If topic is empty after removing dimension/flags, use dimension-specific default topic.
 
+### Date Filter Processing
+
+Extract `--since=YYYY-MM-DD` from arguments:
+
+```python
+# Parse --since flag
+import re
+since_match = re.search(r'--since=(\d{4}-\d{2}-\d{2})', arguments)
+if since_match:
+    since_date = since_match.group(1)
+else:
+    since_date = "2026-01-01"  # Default
+
+# Apply to GitHub queries
+# Replace all instances of "created:>YYYY-MM-DD" in queries with user-specified date
+queries = [q.replace("created:>2026-01-01", f"created:>{since_date}") 
+           for q in base_queries]
+queries = [q.replace("created:>2025-12-01", f"created:>{since_date}") 
+           for q in queries]
+
+# For arXiv queries (use in temporal tier calculation)
+# When calculating priority scores, use since_date as reference for temporal_tier:
+# - created after since_date + 45 days → tier 1 (very recent)
+# - created in same year as since_date → tier 2
+# - created year before since_date → tier 3
+# - older → tier 4
+```
+
+**Examples**:
+```bash
+# Default: 2026-01-01
+/web-discovery harness "orchestration"
+→ searches: created:>2026-01-01
+
+# Custom: 2025-06-01
+/web-discovery harness "orchestration" --since=2025-06-01
+→ searches: created:>2025-06-01
+
+# Recent 2 months only
+/web-discovery memory "episodic" --since=2026-02-15
+→ searches: created:>2026-02-15
+```
+
 ### 2. Build dimension-specific search queries
 
 Generate 15-20 targeted queries based on detected dimension.
 
+**IMPORTANT**: Replace all date filters in queries with user-specified `--since` date:
+- Default: `created:>2026-01-01`
+- User specifies `--since=2025-06-01`: Replace with `created:>2025-06-01`
+- User specifies `--since=2026-02-15`: Replace with `created:>2026-02-15`
+
+**Implementation**:
+```python
+# After parsing --since flag
+for query in all_queries:
+    query = query.replace("created:>2026-01-01", f"created:>{since_date}")
+    query = query.replace("created:>2025-12-01", f"created:>{since_date}")
+```
+
 ---
 
 #### 📦 **Memory Dimension Queries**
+
+**Note**: Dates shown below are placeholders. Replace with user's `--since` value before execution.
 
 **arXiv queries** (when --all, --arxiv, or no flag):
 1. `site:arxiv.org "LLM agent memory" architecture`
