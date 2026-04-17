@@ -144,12 +144,13 @@ Read `$ARGUMENTS[0..]`. Detect dimension and topic:
 - `--github`          → GitHub only (overrides default --all)
 - `--all`             → Web + arXiv + GitHub **[DEFAULT - no flag needed]**
 - `--all-dimensions`  → Search all four dimensions (Memory + Skills + Protocols + Harness)
-- `--limit=N`         → Max results per dimension (default: 50 for single dimension, 150 for --all-dimensions)
+- `--limit=N`         → Max results per dimension (default: 60 for all modes)
 - `--since=YYYY-MM-DD` → Only include results created/published after this date (default: 2026-01-01)
 
 **Default behavior** (no flags specified):
 - Sources: Web + arXiv + GitHub (same as --all)
-- Limit: 50 (single dimension) or 150 (--all-dimensions)
+- Limit: 60 per dimension
+- Source distribution: Articles:GitHub:Other = 3:4:3 (~18:24:18 results)
 - Date filter: created/published since 2026-01-01
 
 **Special handling for `--all-dimensions`**:
@@ -221,6 +222,57 @@ for query in all_queries:
     query = query.replace("created:>2026-01-01", f"created:>{since_date}")
     query = query.replace("created:>2025-12-01", f"created:>{since_date}")
 ```
+
+### Source Distribution Strategy
+
+**Target ratio**: Articles : GitHub : Other = **3 : 4 : 3**
+
+For default `--limit=60`:
+
+| Source Type | Target % | Target Count | Description |
+|-------------|----------|--------------|-------------|
+| **arXiv Papers** | 15% | ~9 | Academic papers from arXiv.org |
+| **Web Articles** | 15% | ~9 | Blog posts, technical articles |
+| **GitHub Repos** | 40% | ~24 | Open-source repositories |
+| **Web Other** | 30% | ~18 | Docs, news, guides, tutorials |
+| **Total** | 100% | **60** | Balanced mix |
+
+**Execution strategy**:
+
+```python
+total_limit = 60  # default, or user-specified via --limit
+
+# Calculate per-source sub-limits
+arxiv_limit = int(total_limit * 0.15)       # ~9
+web_article_limit = int(total_limit * 0.15) # ~9
+github_limit = int(total_limit * 0.40)      # ~24
+web_other_limit = int(total_limit * 0.30)   # ~18
+
+# Execute searches with priority scoring within each source
+arxiv_results = search_arxiv(queries, limit=arxiv_limit)
+github_results = search_github(queries, limit=github_limit)
+web_article_results = search_web(queries, type='article', limit=web_article_limit)
+web_other_results = search_web(queries, type='other', limit=web_other_limit)
+
+# Combine and deduplicate
+all_results = arxiv_results + github_results + web_article_results + web_other_results
+unique_results = deduplicate_by_url(all_results)
+
+# Final priority scoring (if needed to meet exact limit)
+sorted_results = sort_by_priority(unique_results)
+final_results = sorted_results[:total_limit]
+```
+
+**Override behavior**:
+- `--arxiv` flag: 100% arXiv papers (ignores ratio)
+- `--github` flag: 100% GitHub repos (ignores ratio)
+- Custom `--limit=N`: Ratio maintained, scales proportionally
+
+**Example with --limit=30**:
+- arXiv: 30 × 0.15 = ~5 papers
+- GitHub: 30 × 0.40 = ~12 repos
+- Web articles: 30 × 0.15 = ~4 articles
+- Web other: 30 × 0.30 = ~9 other sources
 
 ---
 
